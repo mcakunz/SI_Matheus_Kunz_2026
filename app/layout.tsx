@@ -1,5 +1,7 @@
-import { NuqsAdapter } from 'nuqs/adapters/next/app'
-
+import Sidebar from "./components/Sidebar"
+import ToasterProvider from "./providers/ToasterProvider"
+import "./globals.css"
+import { NuqsAdapter } from "nuqs/adapters/next/app"
 export default function RootLayout({
   children,
 }: {
@@ -8,7 +10,12 @@ export default function RootLayout({
   return (
     <html lang="pt-BR">
       <body>
-          {children}
+        <NuqsAdapter>
+          <ToasterProvider />
+          <Sidebar>
+            {children}
+          </Sidebar>
+        </NuqsAdapter>
       </body>
     </html>
   )
