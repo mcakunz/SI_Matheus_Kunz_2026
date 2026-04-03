@@ -8,6 +8,8 @@ import { ErrorLoadingData } from '@/app/components/ui/ErrorLoadingData'
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell, TableEmpty } from '@/app/components/ui/Table'
 import { createClient } from '@/lib/supabase/server'
 
+import PaisesClientTable from './PaisesClientTable'
+
 export const dynamic = 'force-dynamic'
 
 const paisesSearchParamsCache = createSearchParamsCache({
@@ -16,7 +18,7 @@ const paisesSearchParamsCache = createSearchParamsCache({
 
 async function PaisesTable({ termoBusca }: { termoBusca: string }) {
     const supabase = await createClient()
-    let query = supabase.from('paises').select('*').order('codPais', { ascending: true })
+    let query = supabase.from('tb_paises').select('*').order('id', { ascending: true })
 
     if (termoBusca) {
         query = query.ilike('pais', `%${termoBusca}%`)
@@ -26,32 +28,7 @@ async function PaisesTable({ termoBusca }: { termoBusca: string }) {
 
     if (error) return <ErrorLoadingData message={error.message} />
 
-    return (
-        <Table>
-            <TableHeader>
-                <TableHead>Código</TableHead>
-                <TableHead>País</TableHead>
-                <TableHead>Sigla</TableHead>
-                <TableHead>DDI</TableHead>
-                <TableHead>Moeda</TableHead>
-            </TableHeader>
-            <TableBody>
-                {paises?.length === 0 ? (
-                    <TableEmpty colSpan={5}>Nenhum país encontrado.</TableEmpty>
-                ) : (
-                    paises?.map((pais) => (
-                        <TableRow key={pais.codPais}>
-                            <TableCell>{pais.codPais}</TableCell>
-                            <TableCell>{pais.pais}</TableCell>
-                            <TableCell>{pais.sigla}</TableCell>
-                            <TableCell>{pais.ddi}</TableCell>
-                            <TableCell>{pais.moeda}</TableCell>
-                        </TableRow>
-                    ))
-                )}
-            </TableBody>
-        </Table>
-    )
+    return <PaisesClientTable paises={paises || []} />
 }
 
 export default async function PaisesPage({
