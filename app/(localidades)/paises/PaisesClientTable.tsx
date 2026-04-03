@@ -1,10 +1,38 @@
 "use client"
 
 import { useState } from "react"
-import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell, TableEmpty } from '@/app/components/ui/Table'
 import { Modal } from "@/app/components/ui/Modal"
 import { Button } from "@/app/components/ui/Button"
 import { alternarStatusPais, salvarPais } from "./actions"
+
+import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell, TableEmpty } from '@/app/components/ui/Table'
+import { GridColDef } from "@mui/x-data-grid"
+import { DataTable } from "./components/DataTable"
+
+const columns: GridColDef[] = [
+    { field: 'id', headerName: 'ID', width: 80 },
+    { field: 'pais', headerName: 'País', flex: 1, minWidth: 200 },
+    { field: 'codigo', headerName: 'Código', width: 120, renderCell: (params) => params.value || '-' },
+    { field: 'sigla', headerName: 'Sigla', width: 120, renderCell: (params) => params.value || '-' },
+    { field: 'nacionalidade', headerName: 'Nacionalidade', flex: 1, minWidth: 200, renderCell: (params) => params.value  || '-' },
+    {
+        field: 'ativo',
+        headerName: 'Status',
+        width: 150,
+        renderCell: (params) => {
+            const ativo = params.value as boolean
+            return (
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                    ativo
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : 'bg-rose-50 text-rose-700 border-rose-200'
+                }`}>
+                    {ativo ? 'Ativo' : 'Inativo'}
+                </span>
+            )
+        }
+    }
+]
 
 export default function PaisesClientTable({
     paises,
@@ -62,48 +90,19 @@ export default function PaisesClientTable({
                 </Button>
             </div>
 
-            <Table>
-                <TableHeader>
-                    <TableHead>ID</TableHead>
-                    <TableHead>País</TableHead>
-                    <TableHead>Código</TableHead>
-                    <TableHead>Sigla</TableHead>
-                    <TableHead>Nacionalidade</TableHead>
-                    <TableHead>Status</TableHead>
-                </TableHeader>
-                <TableBody>
-                    {paises.map((pais) => (
-                        <TableRow
-                            key={pais.id}
-                            onClick={() => setLinhaSelecionada(linhaSelecionada?.id === pais.id ? null : pais)}
-                            className={linhaSelecionada?.id === pais.id ? 'bg-emerald-100!' : ''}
-                        >
-                            <TableCell className="text-slate-400 font-mono text-xs">{pais.id}</TableCell>
-                            <TableCell className="font-medium text-slate-900">{pais.pais}</TableCell>
-                            <TableCell className="text-slate-500">{pais.codigo || '-'}</TableCell>
-                            <TableCell className="text-slate-500 font-medium">{pais.sigla || '-'}</TableCell>
-                            <TableCell className="text-slate-900">{pais.nacionalidade || '-'}</TableCell>
-                            <TableCell>
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                                    pais.ativo 
-                                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200' 
-                                    : 'bg-rose-50 text-rose-700 border-rose-200'
-                                }`}>
-                                    {pais.ativo ? 'Ativo' : 'Inativo'}
-                                </span>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                    {paises.length === 0 && <TableEmpty colSpan={6}>Nenhum país encontrado.</TableEmpty>}
-                </TableBody>
-            </Table>
+            <DataTable
+                data={paises}
+                columns={columns}
+                selectedRow={linhaSelecionada}
+                onRowSelect={setLinhaSelecionada} 
+            />
             
             <Modal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
                 title={linhaSelecionada ? "Editar País" : "Novo País"}
             >
-                <form onSubmit={handleSalvar} className="flex flex-col gap-4 text-black">
+                <form onSubmit={handleSalvar} className="flex flex-col gap-4 text-slate-900">
                     <input type="hidden" name="id" value={linhaSelecionada?.id || ''} />
 
                     <div>
