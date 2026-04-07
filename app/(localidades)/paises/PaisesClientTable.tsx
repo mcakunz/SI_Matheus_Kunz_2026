@@ -1,13 +1,14 @@
 "use client"
 
 import { useState } from "react"
-import { Modal } from "@/app/components/ui/Modal"
 import { Button } from "@/app/components/ui/Button"
-import { alternarStatusPais, salvarPais } from "./actions"
+import { alternarStatusPais, excluirPais } from "./actions"
 
-import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell, TableEmpty } from '@/app/components/ui/Table'
 import { GridColDef } from "@mui/x-data-grid"
 import { DataTable } from "./components/DataTable"
+import { PaisFormModal } from "./components/PaisFormModal"
+import toast from "react-hot-toast"
+import { set } from "zod"
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 80 },
@@ -34,58 +35,60 @@ const columns: GridColDef[] = [
     }
 ]
 
-export default function PaisesClientTable({
-    paises,
-}: { paises: any[] }) {
-    const [linhaSelecionada, setLinhaSelecionada] = useState<any | null>(null)
+export default function PaisesClientTable({ paises }: { paises: any[] }) {
+    const [paisSelecionado, setPaisSelecionado] = useState<any | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [loading, setLoading] = useState(false)
+    const [loadingStatus, setLoadingStatus] = useState(false)
 
-    const handleSalvar = async (e: React.FormEvent<HTMLFormElement>) => {
-        e.preventDefault()
-        setLoading(true)
-        const formData = new FormData(e.currentTarget)
+    const handleAlternarStatus = async () => {
+        if (!paisSelecionado) return
+        setLoadingStatus(true)
         try {
-            await salvarPais(formData)
-            setIsModalOpen(false)
-            setLinhaSelecionada(null)
+            await alternarStatusPais(paisSelecionado.id, paisSelecionado.ativo)
+            const novoStatus = paisSelecionado.ativo ? 'inativado' : 'ativado'
+            toast.success(`País ${novoStatus} com sucesso!`)
+            setPaisSelecionado(null)
         } catch (err: any) {
-            alert(err.message)
+            toast.error(err.message)
         } finally {
-            setLoading(false)
+            setLoadingStatus(false)
         }
     }
 
-    const handleAlternarStatus = async () => {
-        if (!linhaSelecionada) return
-        setLoading(true)
+    const handleExcluir = async () => {
+        if (!paisSelecionado) return
 
+        const confirmar = window.confirm(`Tem certeza que deseja excluir o país: ${paisSelecionado.pais}?`)
+        if (!confirmar) return
+
+        setLoadingStatus(true)
         try {
-            await alternarStatusPais(linhaSelecionada.id, linhaSelecionada.ativo)
-            setLinhaSelecionada(null)
+            await excluirPais(paisSelecionado.id)
+            toast.success(`País exlcuido com sucesso!`)
+            setPaisSelecionado(null)
         } catch (err: any) {
-            alert(err.message)
+            toast.error(err.message)
         } finally {
-            setLoading(false)
+            setLoadingStatus(false)
         }
     }
 
     return (
         <div className="flex flex-col gap-4"> 
             <div className="flex items-center gap-2">
-                <Button onClick={() => { setLinhaSelecionada(null); setIsModalOpen(true) }}>
+                <Button onClick={() => { setPaisSelecionado(null); setIsModalOpen(true) }}>
                     Adicionar
                 </Button>
 
-                <Button disabled={!linhaSelecionada} onClick={() => setIsModalOpen(true)}>
+                <Button disabled={!paisSelecionado} onClick={() => setIsModalOpen(true)}>
                     Editar
                 </Button>
 
-                <Button disabled={!linhaSelecionada || loading} onClick={handleAlternarStatus}>
-                    {linhaSelecionada?.ativo ? 'Desativar' : 'Ativar'}
+                <Button disabled={!paisSelecionado || loadingStatus} onClick={handleAlternarStatus}>
+                    {paisSelecionado?.ativo ? 'Desativar' : 'Ativar'}
                 </Button>
 
-                <Button disabled={!linhaSelecionada}>
+                <Button disabled={!paisSelecionado || loadingStatus} onClick={handleExcluir}>
                     Excluir
                 </Button>
             </div>
@@ -93,56 +96,16 @@ export default function PaisesClientTable({
             <DataTable
                 data={paises}
                 columns={columns}
-                selectedRow={linhaSelecionada}
-                onRowSelect={setLinhaSelecionada} 
+                selectedRow={paisSelecionado}
+                onRowSelect={setPaisSelecionado} 
             />
             
-            <Modal
+            <PaisFormModal 
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                title={linhaSelecionada ? "Editar País" : "Novo País"}
-            >
-                <form onSubmit={handleSalvar} className="flex flex-col gap-4 text-slate-900">
-                    <input type="hidden" name="id" value={linhaSelecionada?.id || ''} />
-
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Nome do País <span className="text-red-500">*</span></label>
-                        <input name="pais" required defaultValue={linhaSelecionada?.pais || ""} className="w-full p-2 border rounded" />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Código</label>
-                            <input name="codigo" maxLength={5} defaultValue={linhaSelecionada?.codigo || ""} className="w-full p-2 border rounded" />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium mb-1">Sigla</label>
-                            <input name="sigla" maxLength={5} defaultValue={linhaSelecionada?.sigla || ""} className="w-full p-2 border rounded uppercase" />
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Nacionalidade</label>
-                        <input name="nacionalidade" defaultValue={linhaSelecionada?.nacionalidade || ""} className="w-full p-2 border rounded" />
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium mb-1">Status</label>
-                        <select name="ativo" defaultValue={linhaSelecionada ? (linhaSelecionada.ativo ? 'true' : 'false') : 'true'} className="w-full p-2 border rounded bg-white">
-                            <option value="true">Ativo</option>
-                            <option value="false">Inativo</option>
-                        </select>
-                    </div>
-
-                    <Button 
-                        type="submit" 
-                        disabled={loading}
-                        className="mt-4 w-full h-10"
-                    >
-                        {loading ? "Salvando..." : "Salvar"}
-                    </Button>
-                </form>
-            </Modal>
+                paisSelecionado={paisSelecionado}
+                onSuccess={() => setPaisSelecionado(null)}
+            />
         </div>
     )
 }
