@@ -21,7 +21,7 @@ async function PaisesTable({ termoBusca }: { termoBusca: string }) {
     let query = supabase.from('tb_paises').select('*').order('id', { ascending: true })
 
     if (termoBusca) {
-        query = query.ilike('pais', `%${termoBusca}%`)
+        query = query.or(`pais.ilike.%${termoBusca}%,sigla.ilike.%${termoBusca}%,codigo.ilike.%${termoBusca}%`)
     }
 
     const { data: paises, error } = await query
