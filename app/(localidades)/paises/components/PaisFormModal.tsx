@@ -3,10 +3,14 @@
 import { useState } from "react"
 import { salvarPais } from "../actions"
 
+import toast from "react-hot-toast"
+
 import { Modal } from "@/app/components/ui/Modal"
 import { Button } from "@/app/components/ui/Button"
 import { RequiredSymbol } from "@/app/components/ui/RequiredSymbol"
-import toast from "react-hot-toast"
+import { FormInput } from "@/app/components/ui/FormInput"
+import { FormLabel } from "@/app/components/ui/FormLabel"
+import { FormSelect } from "@/app/components/ui/FormSelect"
 
 interface PaisFormModalProps {
     isOpen: boolean
@@ -49,38 +53,71 @@ export function PaisFormModal({
                     <input type="hidden" name="id" value={paisSelecionado?.id || ''} />
 
                     <div>
-                        <label className="block text-sm font-medium mb-1">Nome do País <RequiredSymbol/></label>
-                        <input name="pais" required defaultValue={paisSelecionado?.pais || ""} className="w-full p-2 border rounded outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" />
+                        <FormLabel required>Nome do País</FormLabel>
+                        <FormInput 
+                            name="pais" 
+                            required 
+                            defaultValue={paisSelecionado?.pais || ""} 
+                            placeholder="Digite o nome do país"
+                        />
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">Código BACEN<RequiredSymbol/></label>
-                            <input name="codigo" required maxLength={5} defaultValue={paisSelecionado?.codigo || ""} className="w-full p-2 border rounded outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" />
+                            <FormLabel required>Código BACEN</FormLabel>
+                            <FormInput 
+                                name="codigo" 
+                                required 
+                                maxLength={5} 
+                                defaultValue={paisSelecionado?.codigo || ""} 
+                                placeholder="Ex: 1058"
+                            />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Sigla <RequiredSymbol/></label>
-                            <input name="sigla" required maxLength={3} defaultValue={paisSelecionado?.sigla || ""} className="w-full p-2 border rounded uppercase outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" />
+                            <FormLabel required>Sigla</FormLabel>
+                            <FormInput 
+                                name="sigla" 
+                                required 
+                                maxLength={3} 
+                                defaultValue={paisSelecionado?.sigla || ""} 
+                                className="uppercase" 
+                                placeholder="Ex: BRA"
+                            />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1">Nacionalidade <RequiredSymbol/></label>
-                            <input name="nacionalidade" required defaultValue={paisSelecionado?.nacionalidade || ""} className="w-full p-2 border rounded outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" />
+                            <FormLabel required>Nacionalidade</FormLabel>
+                            <FormInput 
+                                name="nacionalidade" 
+                                required 
+                                defaultValue={paisSelecionado?.nacionalidade || ""} 
+                                placeholder="Ex: Brasileira"
+                            />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium mb-1">Moeda <RequiredSymbol/></label>
-                            <input name="moeda" required maxLength={3} placeholder="Ex: BRL" defaultValue={paisSelecionado?.moeda || ""} className="w-full p-2 border rounded outline-none transition-all focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20" />
+                            <FormLabel required>Moeda</FormLabel>
+                            <FormInput 
+                                name="moeda" 
+                                required 
+                                maxLength={3} 
+                                placeholder="Ex: BRL" 
+                                defaultValue={paisSelecionado?.moeda || ""} 
+                                className="uppercase"
+                            />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium mb-1">Status</label>
-                        <select name="ativo" defaultValue={paisSelecionado ? (paisSelecionado.ativo ? 'true' : 'false') : 'true'} className="w-full p-2 border rounded bg-white">
+                        <FormLabel>Status</FormLabel>
+                        <FormSelect 
+                            name="ativo" 
+                            defaultValue={paisSelecionado ? (paisSelecionado.ativo ? 'true' : 'false') : 'true'}
+                        >
                             <option value="true">Ativo</option>
                             <option value="false">Inativo</option>
-                        </select>
+                        </FormSelect>
                     </div>
 
                     <Button 

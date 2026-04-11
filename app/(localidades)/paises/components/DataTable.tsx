@@ -1,5 +1,5 @@
 "use client"
-import { DataGrid, GridColDef } from '@mui/x-data-grid'
+import { DataGrid, GridColDef, GridRowSelectionModel } from '@mui/x-data-grid'
 import { ptBR } from '@mui/x-data-grid/locales'
 
 interface DataTableProps {
@@ -32,40 +32,46 @@ export function DataTable({
                 rowSelectionModel={{
                     type: 'include',
                     ids: new Set(selectedRow ? [selectedRow.id] : [])
-                }}
-                onRowSelectionModelChange={(newSelection) => {
-                    if (!onRowSelect) return
+                } as GridRowSelectionModel}
 
-                    if (newSelection.ids.size === 0) {
+                onRowSelectionModelChange={(newSelection: GridRowSelectionModel) => {
+                    if (!onRowSelect) return
+                    const ids = newSelection.ids
+                    if (ids.size === 0) {
                         onRowSelect(null)
                     } else {
-                        const selectedId = Array.from(newSelection.ids)[0]
+                        const selectedId = Array.from(ids)[0]
                         const selectedData = data.find((row) => row.id === selectedId)
                         onRowSelect(selectedData || null)
                     }
                 }}
+
+                // Aplica classe CSS própria baseada no estado React — não depende do MUI
+                getCellClassName={(params) =>
+                    selectedRow?.id === params.row.id ? 'cell-selected' : ''
+                }
                 
                 disableMultipleRowSelection={true}
 
-                sx={{
-                    border: 'none',
-                    '& .MuiDataGrid-cell:focus': {
-                        outline: 'none',
-                    },
-                    '& .MuiDataGrid-row:hover': {
-                        backgroundColor: '#f8fafc',
-                    },
-                    '& .MuiDataGrid-row.Mui-selected': {
-                        backgroundColor: '#ecfdf5', 
-                    },
-                    '& .MuiDataGrid-row.Mui-selected:hover': {
-                        backgroundColor: '#d1fae5', 
-                    },
-                    '& .MuiDataGrid-columnHeaders': {
-                        backgroundColor: '#f8fafc', 
-                        borderBottom: '1px solid #e2e8f0'
-                    }
-                }}
+            sx={{
+                border: 'none',
+                '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
+                    outline: 'none',
+                },
+                '& .MuiDataGrid-row:hover': {
+                    backgroundColor: '#f8fafc',
+                },
+                '& .MuiDataGrid-columnHeaders': {
+                    backgroundColor: '#f8fafc',
+                    borderBottom: '1px solid #e2e8f0'
+                },
+                '& .MuiDataGrid-row.Mui-selected': {
+                    backgroundColor: '#d1fae5 !important',  
+                },
+                '& .MuiDataGrid-row.Mui-selected:hover': {
+                    backgroundColor: '#d1fae5 !important',  
+                },
+            }}
             />
         </div>
     )
