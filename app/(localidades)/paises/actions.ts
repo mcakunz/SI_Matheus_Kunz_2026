@@ -59,8 +59,9 @@ export async function excluirPais(id: number) {
 
     if (error) {
         if (error.code === '23503') {
-            throw new Error("Este país não pode ser excluído pois exitem estados vinuculados a ele.")
+            throw new Error("Este país não pode ser excluído pois exitem estados vinculados a ele.")
         }
+        // aqui
         throw new Error(error.message)
     }
     revalidatePath('/paises')

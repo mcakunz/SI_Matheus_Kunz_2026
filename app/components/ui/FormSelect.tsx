@@ -15,3 +15,4 @@ export const FormSelect = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTM
         )
     }
 )
+FormSelect.displayName = "FormSelect"

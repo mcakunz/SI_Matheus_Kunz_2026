@@ -11,11 +11,12 @@ import { RequiredSymbol } from "@/app/components/ui/RequiredSymbol"
 import { FormInput } from "@/app/components/ui/FormInput"
 import { FormLabel } from "@/app/components/ui/FormLabel"
 import { FormSelect } from "@/app/components/ui/FormSelect"
+import { Pais } from "@/lib/types"
 
 interface PaisFormModalProps {
     isOpen: boolean
     onClose: () => void
-    paisSelecionado: any | null
+    paisSelecionado: Pais | null
     onSuccess: () => void 
 }
 
@@ -119,6 +120,15 @@ export function PaisFormModal({
                             <option value="false">Inativo</option>
                         </FormSelect>
                     </div>
+                    
+                    {paisSelecionado && (
+                        <div className="mt-4 pt-4 border-t border-slate-200 text-xs text-slate-500 flex justify-between">
+                            <span>Cadastrado em: {new Date(paisSelecionado.data_cadastro).toLocaleDateString('pt-BR')}</span>
+                            {paisSelecionado.data_alteracao && (
+                                <span>Última alteração: {new Date(paisSelecionado.data_alteracao).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
+                            )}
+                        </div>
+                    )}
 
                     <Button 
                         type="submit" 

@@ -16,24 +16,24 @@ export type Database = {
     Tables: {
       tb_categorias: {
         Row: {
-          ativo: boolean | null
+          ativo: boolean
           categoria: string
           data_alteracao: string
-          data_criacao: string
+          data_cadastro: string
           id: number
         }
         Insert: {
-          ativo?: boolean | null
+          ativo?: boolean
           categoria: string
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           id?: number
         }
         Update: {
-          ativo?: boolean | null
+          ativo?: boolean
           categoria?: string
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           id?: number
         }
         Relationships: []
@@ -42,29 +42,29 @@ export type Database = {
         Row: {
           ativo: boolean
           cidade: string
-          codigo_ibge: string | null
+          codigo_ibge: string
+          data_alteracao: string
           data_cadastro: string
           estado_id: number
           id: number
-          ultima_modificacao: string
         }
         Insert: {
           ativo?: boolean
           cidade: string
-          codigo_ibge?: string | null
+          codigo_ibge: string
+          data_alteracao?: string
           data_cadastro?: string
           estado_id: number
           id?: number
-          ultima_modificacao?: string
         }
         Update: {
           ativo?: boolean
           cidade?: string
-          codigo_ibge?: string | null
+          codigo_ibge?: string
+          data_alteracao?: string
           data_cadastro?: string
           estado_id?: number
           id?: number
-          ultima_modificacao?: string
         }
         Relationships: [
           {
@@ -82,78 +82,78 @@ export type Database = {
           ativo: boolean
           bairro: string | null
           cep: string | null
-          cidade_id: number | null
+          cidade_id: number
           cliente: string
           complemento: string | null
-          condicao_pagamento_id: number | null
-          cpf_cpnj: string | null
+          condicao_pagamento_id: number
+          cpf_cpnj: string
           data_alteracao: string
-          data_criacao: string
+          data_cadastro: string
           data_nascimento: string | null
           email: string | null
           endereco: string | null
           estado_civil: string | null
           id: number
-          limite_credito: number | null
-          nacionalidade_id: number | null
+          limite_credito: number
+          nacionalidade_id: number
           numero: string | null
           observacao: string | null
           rg_inscricao_estadual: string | null
           sexo: string | null
           telefone: string | null
-          tipo: number | null
+          tipo: number
         }
         Insert: {
           apelido?: string | null
           ativo?: boolean
           bairro?: string | null
           cep?: string | null
-          cidade_id?: number | null
+          cidade_id: number
           cliente: string
           complemento?: string | null
-          condicao_pagamento_id?: number | null
-          cpf_cpnj?: string | null
+          condicao_pagamento_id: number
+          cpf_cpnj: string
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           data_nascimento?: string | null
           email?: string | null
           endereco?: string | null
           estado_civil?: string | null
           id?: number
-          limite_credito?: number | null
-          nacionalidade_id?: number | null
+          limite_credito?: number
+          nacionalidade_id: number
           numero?: string | null
           observacao?: string | null
           rg_inscricao_estadual?: string | null
           sexo?: string | null
           telefone?: string | null
-          tipo?: number | null
+          tipo: number
         }
         Update: {
           apelido?: string | null
           ativo?: boolean
           bairro?: string | null
           cep?: string | null
-          cidade_id?: number | null
+          cidade_id?: number
           cliente?: string
           complemento?: string | null
-          condicao_pagamento_id?: number | null
-          cpf_cpnj?: string | null
+          condicao_pagamento_id?: number
+          cpf_cpnj?: string
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           data_nascimento?: string | null
           email?: string | null
           endereco?: string | null
           estado_civil?: string | null
           id?: number
-          limite_credito?: number | null
-          nacionalidade_id?: number | null
+          limite_credito?: number
+          nacionalidade_id?: number
           numero?: string | null
           observacao?: string | null
           rg_inscricao_estadual?: string | null
           sexo?: string | null
           telefone?: string | null
-          tipo?: number | null
+          tipo?: number
         }
         Relationships: [
           {
@@ -181,57 +181,54 @@ export type Database = {
       }
       tb_condicoes_pagamento: {
         Row: {
-          ativo: boolean | null
-          condicao_pagamento: string | null
-          data_cadastro: string | null
-          dias_entre_parcelas: number | null
-          dias_primeira_parcela: number | null
+          ativo: boolean
+          condicao_pagamento: string
+          data_alteracao: string
+          data_cadastro: string
+          dias_entre_parcelas: number
+          dias_primeira_parcela: number
           id: number
-          numero_parcelas: number | null
-          parcelas: number
-          percentual_desconto: number | null
-          percentual_juros: number | null
-          percentual_multa: number | null
-          ultima_modificacao: string | null
+          numero_parcelas: number
+          percentual_desconto: number
+          percentual_juros: number
+          percentual_multa: number
         }
         Insert: {
-          ativo?: boolean | null
-          condicao_pagamento?: string | null
-          data_cadastro?: string | null
-          dias_entre_parcelas?: number | null
-          dias_primeira_parcela?: number | null
+          ativo?: boolean
+          condicao_pagamento: string
+          data_alteracao?: string
+          data_cadastro?: string
+          dias_entre_parcelas?: number
+          dias_primeira_parcela?: number
           id?: number
-          numero_parcelas?: number | null
-          parcelas?: number
-          percentual_desconto?: number | null
-          percentual_juros?: number | null
-          percentual_multa?: number | null
-          ultima_modificacao?: string | null
+          numero_parcelas?: number
+          percentual_desconto?: number
+          percentual_juros?: number
+          percentual_multa?: number
         }
         Update: {
-          ativo?: boolean | null
-          condicao_pagamento?: string | null
-          data_cadastro?: string | null
-          dias_entre_parcelas?: number | null
-          dias_primeira_parcela?: number | null
+          ativo?: boolean
+          condicao_pagamento?: string
+          data_alteracao?: string
+          data_cadastro?: string
+          dias_entre_parcelas?: number
+          dias_primeira_parcela?: number
           id?: number
-          numero_parcelas?: number | null
-          parcelas?: number
-          percentual_desconto?: number | null
-          percentual_juros?: number | null
-          percentual_multa?: number | null
-          ultima_modificacao?: string | null
+          numero_parcelas?: number
+          percentual_desconto?: number
+          percentual_juros?: number
+          percentual_multa?: number
         }
         Relationships: []
       }
       tb_contas_pagar: {
         Row: {
-          data_alteracao: string | null
-          data_criacao: string | null
+          data_alteracao: string
+          data_cadastro: string
           data_emissao: string
           data_pagamento: string | null
           data_vencimento: string
-          forma_pagamento_id: number | null
+          forma_pagamento_id: number
           fornecedor_id: number
           id: number
           nota_modelo: string
@@ -241,20 +238,20 @@ export type Database = {
           observacoes: string | null
           situacao: string
           total_parcelas: number
-          valor_desconto: number | null
-          valor_juros: number | null
-          valor_multa: number | null
+          valor_desconto: number
+          valor_juros: number
+          valor_multa: number
           valor_original: number
-          valor_pago: number | null
+          valor_pago: number
           valor_total: number
         }
         Insert: {
-          data_alteracao?: string | null
-          data_criacao?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           data_emissao: string
           data_pagamento?: string | null
           data_vencimento: string
-          forma_pagamento_id?: number | null
+          forma_pagamento_id: number
           fornecedor_id: number
           id?: number
           nota_modelo: string
@@ -264,20 +261,20 @@ export type Database = {
           observacoes?: string | null
           situacao?: string
           total_parcelas: number
-          valor_desconto?: number | null
-          valor_juros?: number | null
-          valor_multa?: number | null
+          valor_desconto?: number
+          valor_juros?: number
+          valor_multa?: number
           valor_original: number
-          valor_pago?: number | null
+          valor_pago?: number
           valor_total: number
         }
         Update: {
-          data_alteracao?: string | null
-          data_criacao?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           data_emissao?: string
           data_pagamento?: string | null
           data_vencimento?: string
-          forma_pagamento_id?: number | null
+          forma_pagamento_id?: number
           fornecedor_id?: number
           id?: number
           nota_modelo?: string
@@ -287,11 +284,11 @@ export type Database = {
           observacoes?: string | null
           situacao?: string
           total_parcelas?: number
-          valor_desconto?: number | null
-          valor_juros?: number | null
-          valor_multa?: number | null
+          valor_desconto?: number
+          valor_juros?: number
+          valor_multa?: number
           valor_original?: number
-          valor_pago?: number | null
+          valor_pago?: number
           valor_total?: number
         }
         Relationships: [
@@ -313,66 +310,66 @@ export type Database = {
       }
       tb_contas_pagar_avulsa: {
         Row: {
-          data_atualizacao: string | null
-          data_criacao: string | null
+          data_alteracao: string
+          data_cadastro: string
           data_emissao: string
           data_pagamento: string | null
           data_vencimento: string
-          desconto: number | null
-          forma_pagamento_id: number | null
+          desconto: number
+          forma_pagamento_id: number
           fornecedor_id: number
           id: number
-          juros: number | null
+          juros: number
           modelo: string | null
-          multa: number | null
+          multa: number
           num_parcela: number
           numero_nota: string | null
           observacao: string | null
           serie: string | null
           status: string
-          valor_pago: number | null
+          valor_pago: number
           valor_parcela: number
         }
         Insert: {
-          data_atualizacao?: string | null
-          data_criacao?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           data_emissao: string
           data_pagamento?: string | null
           data_vencimento: string
-          desconto?: number | null
-          forma_pagamento_id?: number | null
+          desconto?: number
+          forma_pagamento_id: number
           fornecedor_id: number
           id?: number
-          juros?: number | null
+          juros?: number
           modelo?: string | null
-          multa?: number | null
+          multa?: number
           num_parcela?: number
           numero_nota?: string | null
           observacao?: string | null
           serie?: string | null
           status?: string
-          valor_pago?: number | null
+          valor_pago?: number
           valor_parcela: number
         }
         Update: {
-          data_atualizacao?: string | null
-          data_criacao?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           data_emissao?: string
           data_pagamento?: string | null
           data_vencimento?: string
-          desconto?: number | null
-          forma_pagamento_id?: number | null
+          desconto?: number
+          forma_pagamento_id?: number
           fornecedor_id?: number
           id?: number
-          juros?: number | null
+          juros?: number
           modelo?: string | null
-          multa?: number | null
+          multa?: number
           num_parcela?: number
           numero_nota?: string | null
           observacao?: string | null
           serie?: string | null
           status?: string
-          valor_pago?: number | null
+          valor_pago?: number
           valor_parcela?: number
         }
         Relationships: [
@@ -395,12 +392,12 @@ export type Database = {
       tb_contas_receber: {
         Row: {
           cliente_id: number
-          data_alteracao: string | null
-          data_criacao: string | null
+          data_alteracao: string
+          data_cadastro: string
           data_emissao: string
           data_recebimento: string | null
           data_vencimento: string
-          forma_pagamento_id: number | null
+          forma_pagamento_id: number
           id: number
           nota_modelo: string
           nota_numero: string
@@ -409,21 +406,21 @@ export type Database = {
           observacoes: string | null
           situacao: string
           total_parcelas: number
-          valor_desconto: number | null
-          valor_juros: number | null
-          valor_multa: number | null
+          valor_desconto: number
+          valor_juros: number
+          valor_multa: number
           valor_original: number
-          valor_recebido: number | null
+          valor_recebido: number
           valor_total: number
         }
         Insert: {
           cliente_id: number
-          data_alteracao?: string | null
-          data_criacao?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           data_emissao: string
           data_recebimento?: string | null
           data_vencimento: string
-          forma_pagamento_id?: number | null
+          forma_pagamento_id: number
           id?: number
           nota_modelo: string
           nota_numero: string
@@ -432,21 +429,21 @@ export type Database = {
           observacoes?: string | null
           situacao?: string
           total_parcelas: number
-          valor_desconto?: number | null
-          valor_juros?: number | null
-          valor_multa?: number | null
+          valor_desconto?: number
+          valor_juros?: number
+          valor_multa?: number
           valor_original: number
-          valor_recebido?: number | null
+          valor_recebido?: number
           valor_total: number
         }
         Update: {
           cliente_id?: number
-          data_alteracao?: string | null
-          data_criacao?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           data_emissao?: string
           data_recebimento?: string | null
           data_vencimento?: string
-          forma_pagamento_id?: number | null
+          forma_pagamento_id?: number
           id?: number
           nota_modelo?: string
           nota_numero?: string
@@ -455,11 +452,11 @@ export type Database = {
           observacoes?: string | null
           situacao?: string
           total_parcelas?: number
-          valor_desconto?: number | null
-          valor_juros?: number | null
-          valor_multa?: number | null
+          valor_desconto?: number
+          valor_juros?: number
+          valor_multa?: number
           valor_original?: number
-          valor_recebido?: number | null
+          valor_recebido?: number
           valor_total?: number
         }
         Relationships: [
@@ -482,30 +479,30 @@ export type Database = {
       tb_estados: {
         Row: {
           ativo: boolean
+          data_alteracao: string
           data_cadastro: string
           estado: string
           id: number
-          pais_id: number | null
+          pais_id: number
           uf: string
-          ultima_modificacao: string
         }
         Insert: {
           ativo?: boolean
+          data_alteracao?: string
           data_cadastro?: string
           estado: string
           id?: number
-          pais_id?: number | null
+          pais_id: number
           uf: string
-          ultima_modificacao?: string
         }
         Update: {
           ativo?: boolean
+          data_alteracao?: string
           data_cadastro?: string
           estado?: string
           id?: number
-          pais_id?: number | null
+          pais_id?: number
           uf?: string
-          ultima_modificacao?: string
         }
         Relationships: [
           {
@@ -520,59 +517,59 @@ export type Database = {
       tb_formas_pagamento: {
         Row: {
           ativo: boolean
+          data_alteracao: string
           data_cadastro: string
           descricao: string
           forma_pagamento: string
           id: number
-          ultima_modificacao: string
         }
         Insert: {
           ativo?: boolean
+          data_alteracao?: string
           data_cadastro?: string
           descricao: string
           forma_pagamento: string
           id?: number
-          ultima_modificacao?: string
         }
         Update: {
           ativo?: boolean
+          data_alteracao?: string
           data_cadastro?: string
           descricao?: string
           forma_pagamento?: string
           id?: number
-          ultima_modificacao?: string
         }
         Relationships: []
       }
       tb_fornecedor_email: {
         Row: {
-          ativo: boolean | null
+          ativo: boolean
           data_alteracao: string
-          data_criacao: string
+          data_cadastro: string
           email: string
           fornecedor_id: number
           id: number
-          principal: boolean | null
+          principal: boolean
           tipo: string | null
         }
         Insert: {
-          ativo?: boolean | null
+          ativo?: boolean
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           email: string
           fornecedor_id: number
           id?: number
-          principal?: boolean | null
+          principal?: boolean
           tipo?: string | null
         }
         Update: {
-          ativo?: boolean | null
+          ativo?: boolean
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           email?: string
           fornecedor_id?: number
           id?: number
-          principal?: boolean | null
+          principal?: boolean
           tipo?: string | null
         }
         Relationships: [
@@ -587,32 +584,32 @@ export type Database = {
       }
       tb_fornecedor_telefone: {
         Row: {
-          ativo: boolean | null
+          ativo: boolean
           data_alteracao: string
-          data_criacao: string
+          data_cadastro: string
           fornecedor_id: number
           id: number
-          principal: boolean | null
+          principal: boolean
           telefone: string
           tipo: string | null
         }
         Insert: {
-          ativo?: boolean | null
+          ativo?: boolean
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           fornecedor_id: number
           id?: number
-          principal?: boolean | null
+          principal?: boolean
           telefone: string
           tipo?: string | null
         }
         Update: {
-          ativo?: boolean | null
+          ativo?: boolean
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           fornecedor_id?: number
           id?: number
-          principal?: boolean | null
+          principal?: boolean
           telefone?: string
           tipo?: string | null
         }
@@ -632,22 +629,22 @@ export type Database = {
           ativo: boolean
           bairro: string | null
           cep: string | null
-          cidade_id: number | null
+          cidade_id: number
           complemento: string | null
-          condicao_pagamento_id: number | null
-          cpf_cnpj: string | null
+          condicao_pagamento_id: number
+          cpf_cnpj: string
           data_alteracao: string
-          data_criacao: string
-          email: string
+          data_cadastro: string
+          email: string | null
           endereco: string | null
           fornecedor: string
           id: number
           limite_credito: number
-          nacionalidade_id: number | null
+          nacionalidade_id: number
           numero: string | null
           observacoes: string | null
           rg_inscricao_estadual: string | null
-          telefone: string
+          telefone: string | null
           tipo: number
           transportadora_id: number | null
         }
@@ -656,22 +653,22 @@ export type Database = {
           ativo?: boolean
           bairro?: string | null
           cep?: string | null
-          cidade_id?: number | null
+          cidade_id: number
           complemento?: string | null
-          condicao_pagamento_id?: number | null
-          cpf_cnpj?: string | null
+          condicao_pagamento_id: number
+          cpf_cnpj: string
           data_alteracao?: string
-          data_criacao?: string
-          email: string
+          data_cadastro?: string
+          email?: string | null
           endereco?: string | null
           fornecedor: string
           id?: number
           limite_credito?: number
-          nacionalidade_id?: number | null
+          nacionalidade_id: number
           numero?: string | null
           observacoes?: string | null
           rg_inscricao_estadual?: string | null
-          telefone: string
+          telefone?: string | null
           tipo: number
           transportadora_id?: number | null
         }
@@ -680,22 +677,22 @@ export type Database = {
           ativo?: boolean
           bairro?: string | null
           cep?: string | null
-          cidade_id?: number | null
+          cidade_id?: number
           complemento?: string | null
-          condicao_pagamento_id?: number | null
-          cpf_cnpj?: string | null
+          condicao_pagamento_id?: number
+          cpf_cnpj?: string
           data_alteracao?: string
-          data_criacao?: string
-          email?: string
+          data_cadastro?: string
+          email?: string | null
           endereco?: string | null
           fornecedor?: string
           id?: number
           limite_credito?: number
-          nacionalidade_id?: number | null
+          nacionalidade_id?: number
           numero?: string | null
           observacoes?: string | null
           rg_inscricao_estadual?: string | null
-          telefone?: string
+          telefone?: string | null
           tipo?: number
           transportadora_id?: number | null
         }
@@ -733,16 +730,16 @@ export type Database = {
       tb_funcionarios: {
         Row: {
           apelido: string | null
-          ativo: boolean | null
+          ativo: boolean
           bairro: string
           cep: string
           cidade_id: number
           cnh: string | null
           complemento: string | null
-          cpf_cpnj: string | null
+          cpf_cpnj: string
           data_admissao: string
           data_alteracao: string
-          data_criacao: string
+          data_cadastro: string
           data_demissao: string | null
           data_nascimento: string
           data_validade_cnh: string | null
@@ -754,25 +751,25 @@ export type Database = {
           id: number
           nacionalidade_id: number
           numero: string
-          observacao: string
+          observacao: string | null
           rg_inscricao_estadual: string | null
           salario: number
           sexo: number
           telefone: string
-          tipo: number | null
+          tipo: number
         }
         Insert: {
           apelido?: string | null
-          ativo?: boolean | null
+          ativo?: boolean
           bairro: string
           cep: string
           cidade_id: number
           cnh?: string | null
           complemento?: string | null
-          cpf_cpnj?: string | null
+          cpf_cpnj: string
           data_admissao: string
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           data_demissao?: string | null
           data_nascimento: string
           data_validade_cnh?: string | null
@@ -784,25 +781,25 @@ export type Database = {
           id?: number
           nacionalidade_id: number
           numero: string
-          observacao: string
+          observacao?: string | null
           rg_inscricao_estadual?: string | null
           salario: number
           sexo: number
           telefone: string
-          tipo?: number | null
+          tipo?: number
         }
         Update: {
           apelido?: string | null
-          ativo?: boolean | null
+          ativo?: boolean
           bairro?: string
           cep?: string
           cidade_id?: number
           cnh?: string | null
           complemento?: string | null
-          cpf_cpnj?: string | null
+          cpf_cpnj?: string
           data_admissao?: string
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           data_demissao?: string | null
           data_nascimento?: string
           data_validade_cnh?: string | null
@@ -814,12 +811,12 @@ export type Database = {
           id?: number
           nacionalidade_id?: number
           numero?: string
-          observacao?: string
+          observacao?: string | null
           rg_inscricao_estadual?: string | null
           salario?: number
           sexo?: number
           telefone?: string
-          tipo?: number | null
+          tipo?: number
         }
         Relationships: [
           {
@@ -847,77 +844,71 @@ export type Database = {
       }
       tb_funcoes_funcionario: {
         Row: {
-          ativo: boolean | null
+          ativo: boolean
           carga_horaria: number
-          data_alteracao: string | null
+          data_alteracao: string
           data_cadastro: string
-          data_criacao: string | null
           descricao: string | null
           funcao_funcionario: string
           id: number
           observacao: string | null
-          requer_cnh: boolean | null
-          salario_base: number | null
-          ultima_modificacao: string
+          requer_cnh: boolean
+          salario_base: number
         }
         Insert: {
-          ativo?: boolean | null
+          ativo?: boolean
           carga_horaria: number
-          data_alteracao?: string | null
+          data_alteracao?: string
           data_cadastro?: string
-          data_criacao?: string | null
           descricao?: string | null
           funcao_funcionario: string
           id?: number
           observacao?: string | null
-          requer_cnh?: boolean | null
-          salario_base?: number | null
-          ultima_modificacao?: string
+          requer_cnh?: boolean
+          salario_base?: number
         }
         Update: {
-          ativo?: boolean | null
+          ativo?: boolean
           carga_horaria?: number
-          data_alteracao?: string | null
+          data_alteracao?: string
           data_cadastro?: string
-          data_criacao?: string | null
           descricao?: string | null
           funcao_funcionario?: string
           id?: number
           observacao?: string | null
-          requer_cnh?: boolean | null
-          salario_base?: number | null
-          ultima_modificacao?: string
+          requer_cnh?: boolean
+          salario_base?: number
         }
         Relationships: []
       }
       tb_itens_nfe: {
         Row: {
+          data_alteracao: string
           data_cadastro: string
           id: number
           nfe_id: number
           produto_id: number
           quantidade: number
-          ultima_modificacao: string
           valor_total: number
           valor_unitario: number
         }
         Insert: {
+          data_alteracao?: string
           data_cadastro?: string
           id?: number
           nfe_id: number
           produto_id: number
           quantidade: number
-          ultima_modificacao?: string
           valor_total: number
           valor_unitario: number
         }
         Update: {
+          data_alteracao?: string
           data_cadastro?: string
           id?: number
           nfe_id?: number
           produto_id?: number
           quantidade?: number
-          ultima_modificacao?: string
           valor_total?: number
           valor_unitario?: number
         }
@@ -940,23 +931,23 @@ export type Database = {
       }
       tb_marcas: {
         Row: {
-          ativo: boolean | null
+          ativo: boolean
           data_alteracao: string
-          data_criacao: string
+          data_cadastro: string
           id: number
           marca: string
         }
         Insert: {
-          ativo?: boolean | null
+          ativo?: boolean
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           id?: number
           marca: string
         }
         Update: {
-          ativo?: boolean | null
+          ativo?: boolean
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           id?: number
           marca?: string
         }
@@ -964,58 +955,58 @@ export type Database = {
       }
       tb_modalidades_nfe: {
         Row: {
-          ativo: boolean | null
+          ativo: boolean
           codigo: string
+          data_alteracao: string
           data_cadastro: string
           descricao: string
           id: number
-          ultima_modificacao: string
         }
         Insert: {
-          ativo?: boolean | null
+          ativo?: boolean
           codigo: string
+          data_alteracao?: string
           data_cadastro?: string
           descricao: string
           id?: number
-          ultima_modificacao?: string
         }
         Update: {
-          ativo?: boolean | null
+          ativo?: boolean
           codigo?: string
+          data_alteracao?: string
           data_cadastro?: string
           descricao?: string
           id?: number
-          ultima_modificacao?: string
         }
         Relationships: []
       }
       tb_movimentacoes_nfe: {
         Row: {
+          data_alteracao: string
           data_cadastro: string
           data_movimentacao: string
           descricao: string | null
           id: number
           nfe_id: number
           status: string
-          ultima_modificacao: string
         }
         Insert: {
+          data_alteracao?: string
           data_cadastro?: string
-          data_movimentacao: string
+          data_movimentacao?: string
           descricao?: string | null
           id?: number
           nfe_id: number
           status: string
-          ultima_modificacao?: string
         }
         Update: {
+          data_alteracao?: string
           data_cadastro?: string
           data_movimentacao?: string
           descricao?: string | null
           id?: number
           nfe_id?: number
           status?: string
-          ultima_modificacao?: string
         }
         Relationships: [
           {
@@ -1029,53 +1020,53 @@ export type Database = {
       }
       tb_nfe: {
         Row: {
-          cancelada: boolean | null
+          cancelada: boolean
           chave_acesso: string | null
-          cliente_id: number | null
-          condicao_pagamento_id: number | null
+          cliente_id: number
+          condicao_pagamento_id: number
+          data_alteracao: string
           data_cadastro: string
           data_emissao: string
-          forma_pagamento_id: number | null
+          forma_pagamento_id: number
           id: number
-          modalidade_id: number | null
+          modalidade_id: number
           numero: string
           serie: string
           transportadora_id: number | null
-          ultima_modificacao: string
           valor_total: number
           veiculo_id: number | null
         }
         Insert: {
-          cancelada?: boolean | null
+          cancelada?: boolean
           chave_acesso?: string | null
-          cliente_id?: number | null
-          condicao_pagamento_id?: number | null
+          cliente_id: number
+          condicao_pagamento_id: number
+          data_alteracao?: string
           data_cadastro?: string
           data_emissao: string
-          forma_pagamento_id?: number | null
+          forma_pagamento_id: number
           id?: number
-          modalidade_id?: number | null
+          modalidade_id: number
           numero: string
           serie: string
           transportadora_id?: number | null
-          ultima_modificacao?: string
           valor_total: number
           veiculo_id?: number | null
         }
         Update: {
-          cancelada?: boolean | null
+          cancelada?: boolean
           chave_acesso?: string | null
-          cliente_id?: number | null
-          condicao_pagamento_id?: number | null
+          cliente_id?: number
+          condicao_pagamento_id?: number
+          data_alteracao?: string
           data_cadastro?: string
           data_emissao?: string
-          forma_pagamento_id?: number | null
+          forma_pagamento_id?: number
           id?: number
-          modalidade_id?: number | null
+          modalidade_id?: number
           numero?: string
           serie?: string
           transportadora_id?: number | null
-          ultima_modificacao?: string
           valor_total?: number
           veiculo_id?: number | null
         }
@@ -1126,10 +1117,10 @@ export type Database = {
       }
       tb_notas_entrada: {
         Row: {
-          condicao_pagamento_id: number | null
-          data_alteracao: string | null
+          condicao_pagamento_id: number
+          data_alteracao: string
+          data_cadastro: string
           data_chegada: string | null
-          data_criacao: string | null
           data_emissao: string
           fornecedor_id: number
           modelo: string
@@ -1138,7 +1129,7 @@ export type Database = {
           outras_despesas: number
           placa_veiculo: string | null
           serie: string
-          situacao: string | null
+          situacao: string
           tipo_frete: string
           transportadora_id: number | null
           valor_desconto: number
@@ -1148,10 +1139,10 @@ export type Database = {
           valor_total: number
         }
         Insert: {
-          condicao_pagamento_id?: number | null
-          data_alteracao?: string | null
+          condicao_pagamento_id: number
+          data_alteracao?: string
+          data_cadastro?: string
           data_chegada?: string | null
-          data_criacao?: string | null
           data_emissao?: string
           fornecedor_id: number
           modelo?: string
@@ -1160,7 +1151,7 @@ export type Database = {
           outras_despesas?: number
           placa_veiculo?: string | null
           serie?: string
-          situacao?: string | null
+          situacao?: string
           tipo_frete?: string
           transportadora_id?: number | null
           valor_desconto?: number
@@ -1170,10 +1161,10 @@ export type Database = {
           valor_total?: number
         }
         Update: {
-          condicao_pagamento_id?: number | null
-          data_alteracao?: string | null
+          condicao_pagamento_id?: number
+          data_alteracao?: string
+          data_cadastro?: string
           data_chegada?: string | null
-          data_criacao?: string | null
           data_emissao?: string
           fornecedor_id?: number
           modelo?: string
@@ -1182,7 +1173,7 @@ export type Database = {
           outras_despesas?: number
           placa_veiculo?: string | null
           serie?: string
-          situacao?: string | null
+          situacao?: string
           tipo_frete?: string
           transportadora_id?: number | null
           valor_desconto?: number
@@ -1218,9 +1209,9 @@ export type Database = {
       tb_notas_saida: {
         Row: {
           cliente_id: number
-          condicao_pagamento_id: number | null
-          data_alteracao: string | null
-          data_criacao: string | null
+          condicao_pagamento_id: number
+          data_alteracao: string
+          data_cadastro: string
           data_emissao: string
           data_saida: string | null
           modelo: string
@@ -1229,7 +1220,7 @@ export type Database = {
           outras_despesas: number
           placa_veiculo: string | null
           serie: string
-          situacao: string | null
+          situacao: string
           tipo_frete: string
           transportadora_id: number | null
           valor_desconto: number
@@ -1240,9 +1231,9 @@ export type Database = {
         }
         Insert: {
           cliente_id: number
-          condicao_pagamento_id?: number | null
-          data_alteracao?: string | null
-          data_criacao?: string | null
+          condicao_pagamento_id: number
+          data_alteracao?: string
+          data_cadastro?: string
           data_emissao?: string
           data_saida?: string | null
           modelo?: string
@@ -1251,7 +1242,7 @@ export type Database = {
           outras_despesas?: number
           placa_veiculo?: string | null
           serie?: string
-          situacao?: string | null
+          situacao?: string
           tipo_frete?: string
           transportadora_id?: number | null
           valor_desconto?: number
@@ -1262,9 +1253,9 @@ export type Database = {
         }
         Update: {
           cliente_id?: number
-          condicao_pagamento_id?: number | null
-          data_alteracao?: string | null
-          data_criacao?: string | null
+          condicao_pagamento_id?: number
+          data_alteracao?: string
+          data_cadastro?: string
           data_emissao?: string
           data_saida?: string | null
           modelo?: string
@@ -1273,7 +1264,7 @@ export type Database = {
           outras_despesas?: number
           placa_veiculo?: string | null
           serie?: string
-          situacao?: string | null
+          situacao?: string
           tipo_frete?: string
           transportadora_id?: number | null
           valor_desconto?: number
@@ -1309,69 +1300,69 @@ export type Database = {
       tb_paises: {
         Row: {
           ativo: boolean
-          codigo: string | null
+          codigo: string
+          data_alteracao: string
           data_cadastro: string
           id: number
-          moeda: string | null
-          nacionalidade: string | null
+          moeda: string
+          nacionalidade: string
           pais: string
-          sigla: string | null
-          ultima_modificacao: string
+          sigla: string
         }
         Insert: {
           ativo?: boolean
-          codigo?: string | null
+          codigo: string
+          data_alteracao?: string
           data_cadastro?: string
           id?: number
-          moeda?: string | null
-          nacionalidade?: string | null
+          moeda?: string
+          nacionalidade: string
           pais: string
-          sigla?: string | null
-          ultima_modificacao?: string
+          sigla: string
         }
         Update: {
           ativo?: boolean
-          codigo?: string | null
+          codigo?: string
+          data_alteracao?: string
           data_cadastro?: string
           id?: number
-          moeda?: string | null
-          nacionalidade?: string | null
+          moeda?: string
+          nacionalidade?: string
           pais?: string
-          sigla?: string | null
-          ultima_modificacao?: string
+          sigla?: string
         }
         Relationships: []
       }
       tb_parcelas_condicao_pagamento: {
         Row: {
           condicao_pagamento_id: number
-          data_cadastro: string | null
+          data_alteracao: string
+          data_cadastro: string
           dias: number
-          forma_pagamento_id: number | null
+          forma_pagamento_id: number
           id: number
           numero: number
           percentual: number
-          ultima_modificacao: string | null
         }
         Insert: {
           condicao_pagamento_id: number
-          data_cadastro?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           dias: number
-          forma_pagamento_id?: number | null
+          forma_pagamento_id: number
           id?: number
           numero: number
           percentual: number
-          ultima_modificacao?: string | null
         }
         Update: {
           condicao_pagamento_id?: number
-          data_cadastro?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           dias?: number
-          forma_pagamento_id?: number | null
+          forma_pagamento_id?: number
           id?: number
           numero?: number
           percentual?: number
-          ultima_modificacao?: string | null
         }
         Relationships: [
           {
@@ -1392,34 +1383,34 @@ export type Database = {
       }
       tb_produto_fornecedor: {
         Row: {
-          ativo: boolean | null
+          ativo: boolean
           codigo_prod: string | null
           custo: number | null
+          data_alteracao: string
           data_cadastro: string
           fornecedor_id: number
           id: number
           produto_id: number
-          ultima_modificacao: string
         }
         Insert: {
-          ativo?: boolean | null
+          ativo?: boolean
           codigo_prod?: string | null
           custo?: number | null
+          data_alteracao?: string
           data_cadastro?: string
           fornecedor_id: number
           id?: number
           produto_id: number
-          ultima_modificacao?: string
         }
         Update: {
-          ativo?: boolean | null
+          ativo?: boolean
           codigo_prod?: string | null
           custo?: number | null
+          data_alteracao?: string
           data_cadastro?: string
           fornecedor_id?: number
           id?: number
           produto_id?: number
-          ultima_modificacao?: string
         }
         Relationships: [
           {
@@ -1440,10 +1431,11 @@ export type Database = {
       }
       tb_produtos: {
         Row: {
-          ativo: boolean | null
-          categoria_id: number | null
+          ativo: boolean
+          categoria_id: number
           codigo_barras: string | null
-          data_criacao: string | null
+          data_alteracao: string
+          data_cadastro: string
           descricao: string | null
           id: number
           marca_id: number
@@ -1453,35 +1445,35 @@ export type Database = {
           quantidade: number
           quantidade_minima: number
           referencia: string | null
-          ultima_modificacao: string | null
           unidade_medida_id: number
           valor_compra: number
           valor_venda: number
         }
         Insert: {
-          ativo?: boolean | null
-          categoria_id?: number | null
+          ativo?: boolean
+          categoria_id: number
           codigo_barras?: string | null
-          data_criacao?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           descricao?: string | null
           id?: number
           marca_id: number
           observacoes?: string | null
-          percentual_lucro: number
+          percentual_lucro?: number
           produto: string
           quantidade?: number
           quantidade_minima?: number
           referencia?: string | null
-          ultima_modificacao?: string | null
           unidade_medida_id: number
           valor_compra: number
           valor_venda: number
         }
         Update: {
-          ativo?: boolean | null
-          categoria_id?: number | null
+          ativo?: boolean
+          categoria_id?: number
           codigo_barras?: string | null
-          data_criacao?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           descricao?: string | null
           id?: number
           marca_id?: number
@@ -1491,7 +1483,6 @@ export type Database = {
           quantidade?: number
           quantidade_minima?: number
           referencia?: string | null
-          ultima_modificacao?: string | null
           unidade_medida_id?: number
           valor_compra?: number
           valor_venda?: number
@@ -1523,58 +1514,58 @@ export type Database = {
       tb_produtos_nota_entrada: {
         Row: {
           custo_preco_final: number | null
-          data_alteracao: string | null
-          data_criacao: string | null
+          data_alteracao: string
+          data_cadastro: string
           fornecedor_id: number
           nota_modelo: string
           nota_numero: string
           nota_serie: string
-          percentual_desconto: number | null
+          percentual_desconto: number
           produto_id: number
           quantidade: number
-          rateio_frete: number | null
-          rateio_outras: number | null
-          rateio_seguro: number | null
+          rateio_frete: number
+          rateio_outras: number
+          rateio_seguro: number
           sequencia: number
-          valor_desconto: number | null
+          valor_desconto: number
           valor_total: number
           valor_unitario: number
         }
         Insert: {
           custo_preco_final?: number | null
-          data_alteracao?: string | null
-          data_criacao?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           fornecedor_id: number
           nota_modelo: string
           nota_numero: string
           nota_serie: string
-          percentual_desconto?: number | null
+          percentual_desconto?: number
           produto_id: number
           quantidade: number
-          rateio_frete?: number | null
-          rateio_outras?: number | null
-          rateio_seguro?: number | null
+          rateio_frete?: number
+          rateio_outras?: number
+          rateio_seguro?: number
           sequencia?: number
-          valor_desconto?: number | null
+          valor_desconto?: number
           valor_total: number
           valor_unitario: number
         }
         Update: {
           custo_preco_final?: number | null
-          data_alteracao?: string | null
-          data_criacao?: string | null
+          data_alteracao?: string
+          data_cadastro?: string
           fornecedor_id?: number
           nota_modelo?: string
           nota_numero?: string
           nota_serie?: string
-          percentual_desconto?: number | null
+          percentual_desconto?: number
           produto_id?: number
           quantidade?: number
-          rateio_frete?: number | null
-          rateio_outras?: number | null
-          rateio_seguro?: number | null
+          rateio_frete?: number
+          rateio_outras?: number
+          rateio_seguro?: number
           sequencia?: number
-          valor_desconto?: number | null
+          valor_desconto?: number
           valor_total?: number
           valor_unitario?: number
         }
@@ -1603,52 +1594,52 @@ export type Database = {
       tb_produtos_nota_saida: {
         Row: {
           cliente_id: number
-          custo_preco_final: number | null
+          custo_preco_final: number
           nota_modelo: string
           nota_numero: string
           nota_serie: string
-          percentual_desconto: number | null
+          percentual_desconto: number
           produto_id: number
           quantidade: number
-          rateio_frete: number | null
-          rateio_outras: number | null
-          rateio_seguro: number | null
+          rateio_frete: number
+          rateio_outras: number
+          rateio_seguro: number
           sequencia: number
-          valor_desconto: number | null
+          valor_desconto: number
           valor_total: number
           valor_unitario: number
         }
         Insert: {
           cliente_id: number
-          custo_preco_final?: number | null
+          custo_preco_final?: number
           nota_modelo: string
           nota_numero: string
           nota_serie: string
-          percentual_desconto?: number | null
+          percentual_desconto?: number
           produto_id: number
           quantidade: number
-          rateio_frete?: number | null
-          rateio_outras?: number | null
-          rateio_seguro?: number | null
+          rateio_frete?: number
+          rateio_outras?: number
+          rateio_seguro?: number
           sequencia: number
-          valor_desconto?: number | null
+          valor_desconto?: number
           valor_total: number
           valor_unitario: number
         }
         Update: {
           cliente_id?: number
-          custo_preco_final?: number | null
+          custo_preco_final?: number
           nota_modelo?: string
           nota_numero?: string
           nota_serie?: string
-          percentual_desconto?: number | null
+          percentual_desconto?: number
           produto_id?: number
           quantidade?: number
-          rateio_frete?: number | null
-          rateio_outras?: number | null
-          rateio_seguro?: number | null
+          rateio_frete?: number
+          rateio_outras?: number
+          rateio_seguro?: number
           sequencia?: number
-          valor_desconto?: number | null
+          valor_desconto?: number
           valor_total?: number
           valor_unitario?: number
         }
@@ -1671,34 +1662,34 @@ export type Database = {
       }
       tb_transp_itens: {
         Row: {
-          ativo: boolean | null
+          ativo: boolean
           codigo: string
           codigo_transp: string | null
+          data_alteracao: string
           data_cadastro: string
           descricao: string | null
           id: number
-          transportadora_id: number | null
-          ultima_modificacao: string
+          transportadora_id: number
         }
         Insert: {
-          ativo?: boolean | null
+          ativo?: boolean
           codigo: string
           codigo_transp?: string | null
+          data_alteracao?: string
           data_cadastro?: string
           descricao?: string | null
           id?: number
-          transportadora_id?: number | null
-          ultima_modificacao?: string
+          transportadora_id: number
         }
         Update: {
-          ativo?: boolean | null
+          ativo?: boolean
           codigo?: string
           codigo_transp?: string | null
+          data_alteracao?: string
           data_cadastro?: string
           descricao?: string | null
           id?: number
-          transportadora_id?: number | null
-          ultima_modificacao?: string
+          transportadora_id?: number
         }
         Relationships: [
           {
@@ -1794,13 +1785,14 @@ export type Database = {
       }
       tb_transportadoras: {
         Row: {
-          ativo: boolean | null
+          ativo: boolean
           bairro: string | null
           cep: string | null
-          cidade_id: number | null
-          cnpj: string | null
+          cidade_id: number
+          cnpj: string
           complemento: string | null
-          condicao_pagamento_id: number | null
+          condicao_pagamento_id: number
+          data_alteracao: string
           data_cadastro: string
           email: string | null
           endereco: string | null
@@ -1811,17 +1803,17 @@ export type Database = {
           razao_social: string
           rg_ie: string | null
           telefone: string | null
-          tipo: string | null
-          ultima_modificacao: string
+          tipo: string
         }
         Insert: {
-          ativo?: boolean | null
+          ativo?: boolean
           bairro?: string | null
           cep?: string | null
-          cidade_id?: number | null
-          cnpj?: string | null
+          cidade_id: number
+          cnpj: string
           complemento?: string | null
-          condicao_pagamento_id?: number | null
+          condicao_pagamento_id: number
+          data_alteracao?: string
           data_cadastro?: string
           email?: string | null
           endereco?: string | null
@@ -1832,17 +1824,17 @@ export type Database = {
           razao_social: string
           rg_ie?: string | null
           telefone?: string | null
-          tipo?: string | null
-          ultima_modificacao?: string
+          tipo?: string
         }
         Update: {
-          ativo?: boolean | null
+          ativo?: boolean
           bairro?: string | null
           cep?: string | null
-          cidade_id?: number | null
-          cnpj?: string | null
+          cidade_id?: number
+          cnpj?: string
           complemento?: string | null
-          condicao_pagamento_id?: number | null
+          condicao_pagamento_id?: number
+          data_alteracao?: string
           data_cadastro?: string
           email?: string | null
           endereco?: string | null
@@ -1853,8 +1845,7 @@ export type Database = {
           razao_social?: string
           rg_ie?: string | null
           telefone?: string | null
-          tipo?: string | null
-          ultima_modificacao?: string
+          tipo?: string
         }
         Relationships: [
           {
@@ -1875,23 +1866,23 @@ export type Database = {
       }
       tb_unidades_medida: {
         Row: {
-          ativo: boolean | null
+          ativo: boolean
           data_alteracao: string
-          data_criacao: string
+          data_cadastro: string
           id: number
           unidade_medida: string
         }
         Insert: {
-          ativo?: boolean | null
+          ativo?: boolean
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           id?: number
           unidade_medida: string
         }
         Update: {
-          ativo?: boolean | null
+          ativo?: boolean
           data_alteracao?: string
-          data_criacao?: string
+          data_cadastro?: string
           id?: number
           unidade_medida?: string
         }
@@ -1899,37 +1890,37 @@ export type Database = {
       }
       tb_veiculos: {
         Row: {
-          ano: number | null
-          ativo: boolean | null
+          ano: number
+          ativo: boolean
           capacidade: number | null
+          data_alteracao: string
           data_cadastro: string
           id: number
-          marca: string | null
-          modelo: string | null
+          marca: string
+          modelo: string
           placa: string
-          ultima_modificacao: string
         }
         Insert: {
-          ano?: number | null
-          ativo?: boolean | null
+          ano: number
+          ativo?: boolean
           capacidade?: number | null
+          data_alteracao?: string
           data_cadastro?: string
           id?: number
-          marca?: string | null
-          modelo?: string | null
+          marca: string
+          modelo: string
           placa: string
-          ultima_modificacao?: string
         }
         Update: {
-          ano?: number | null
-          ativo?: boolean | null
+          ano?: number
+          ativo?: boolean
           capacidade?: number | null
+          data_alteracao?: string
           data_cadastro?: string
           id?: number
-          marca?: string | null
-          modelo?: string | null
+          marca?: string
+          modelo?: string
           placa?: string
-          ultima_modificacao?: string
         }
         Relationships: []
       }

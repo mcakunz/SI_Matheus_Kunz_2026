@@ -46,7 +46,6 @@ export function DataTable({
                     }
                 }}
 
-                // Aplica classe CSS própria baseada no estado React — não depende do MUI
                 getCellClassName={(params) =>
                     selectedRow?.id === params.row.id ? 'cell-selected' : ''
                 }

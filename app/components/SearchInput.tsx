@@ -6,10 +6,10 @@ import { useDebouncedCallback } from 'use-debounce'
 
 export function SearchInput() {
   const [isPending, startTransition] = useTransition()
-  
-  const [urlQuery, setUrlQuery] = useQueryState('q', { 
+
+  const [urlQuery, setUrlQuery] = useQueryState('q', {
     shallow: false,
-    startTransition 
+    startTransition
   })
 
   const [inputValue, setInputValue] = useState(urlQuery || '')
@@ -23,13 +23,17 @@ export function SearchInput() {
       <input
         type="text"
         placeholder="Pesquisar..."
-        value={inputValue} 
+        value={inputValue}
         onChange={(e) => {
-          setInputValue(e.target.value) 
-          debouncedUrlUpdate(e.target.value) 
+          setInputValue(e.target.value)
+          debouncedUrlUpdate(e.target.value)
         }}
-        className="w-full max-w-sm p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 text-black"
+        className="w-full max-w-sm p-2 border border-slate-300 rounded-md shadow-sm outline-none
+          focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 text-slate-900 transition-all"
       />
+      {isPending && (
+        <span className="text-xs text-slate-400">Buscando...</span>
+      )}
     </div>
   )
 }

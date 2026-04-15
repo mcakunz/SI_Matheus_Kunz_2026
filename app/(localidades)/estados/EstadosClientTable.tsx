@@ -1,22 +1,28 @@
 "use client"
 
 import { useState } from "react"
-import { alternarStatusPais, excluirPais } from "./actions"
+import { alternarStatusEstado, excluirEstado } from "./actions"
 
 import { GridColDef } from "@mui/x-data-grid"
-import { DataTable } from "../../components/ui/DataTable"
-import { PaisFormModal } from "./components/PaisFormModal"
+import { DataTable } from "@/app/components/ui/DataTable"
+import { EstadoFormModal } from "./components/EstadoFormModal"
 import { ConfirmModal } from "@/app/components/ui/ConfirmModal"
 import { ActionToolbar } from "@/app/components/ui/ActionToolbar"
 import { StatusBadge } from "@/app/components/ui/StatusBadge"
 import toast from "react-hot-toast"
+import { Estado, EstadoComPais, Pais } from "@/lib/types"
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 80 },
-    { field: 'pais', headerName: 'País', flex: 1, minWidth: 200 },
-    { field: 'codigo', headerName: 'Código', width: 120, renderCell: (params) => params.value || '-' },
-    { field: 'sigla', headerName: 'Sigla', width: 120, renderCell: (params) => params.value || '-' },
-    { field: 'nacionalidade', headerName: 'Nacionalidade', flex: 1, minWidth: 200, renderCell: (params) => params.value || '-' },
+    { field: 'estado', headerName: 'Estado', flex: 1, minWidth: 200 },
+    { field: 'uf', headerName: 'UF', width: 100, renderCell: (params) => params.value || '-' },
+    {
+        field: 'pais',
+        headerName: 'País',
+        flex: 1,
+        minWidth: 200,
+        valueGetter: (value, row) => row.tb_paises?.pais || '-'
+    },
     {
         field: 'ativo',
         headerName: 'Status',
@@ -25,20 +31,20 @@ const columns: GridColDef[] = [
     }
 ]
 
-export default function PaisesClientTable({ paises }: { paises: any[] }) {
-    const [paisSelecionado, setPaisSelecionado] = useState<any | null>(null)
+export default function EstadosClientTable({ estados, listaPaises }: { estados: Estado[], listaPaises: Pais[] }) {
+    const [estadoSelecionado, setEstadoSelecionado] = useState<EstadoComPais | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [loadingStatus, setLoadingStatus] = useState(false)
 
     const handleAlternarStatus = async () => {
-        if (!paisSelecionado) return
+        if (!estadoSelecionado) return
         setLoadingStatus(true)
         try {
-            await alternarStatusPais(paisSelecionado.id, paisSelecionado.ativo)
-            const novoStatus = paisSelecionado.ativo ? 'inativado' : 'ativado'
-            toast.success(`País ${novoStatus} com sucesso!`)
-            setPaisSelecionado(null)
+            await alternarStatusEstado(estadoSelecionado.id, estadoSelecionado.ativo)
+            const novoStatus = estadoSelecionado.ativo ? 'inativado' : 'ativado'
+            toast.success(`Estado ${novoStatus} com sucesso!`)
+            setEstadoSelecionado(null)
         } catch (err: any) {
             toast.error(err.message)
         } finally {
@@ -47,16 +53,15 @@ export default function PaisesClientTable({ paises }: { paises: any[] }) {
     }
 
     const handleExcluir = async () => {
-        if (!paisSelecionado) return
+        if (!estadoSelecionado) return
         setLoadingStatus(true)
         try {
-            await excluirPais(paisSelecionado.id)
-            toast.success(`País excluído com sucesso!`)
-            setPaisSelecionado(null)
+            await excluirEstado(estadoSelecionado.id)
+            toast.success(`Estado excluído com sucesso!`)
+            setEstadoSelecionado(null)
             setIsDeleteModalOpen(false)
         } catch (err: any) {
             toast.error(err.message)
-            setIsDeleteModalOpen(false)
         } finally {
             setLoadingStatus(false)
         }
@@ -65,26 +70,27 @@ export default function PaisesClientTable({ paises }: { paises: any[] }) {
     return (
         <div className="flex flex-col gap-4">
             <ActionToolbar
-                selectedRow={paisSelecionado}
+                selectedRow={estadoSelecionado}
                 loading={loadingStatus}
-                onAdd={() => { setPaisSelecionado(null); setIsModalOpen(true) }}
+                onAdd={() => { setEstadoSelecionado(null); setIsModalOpen(true) }}
                 onEdit={() => setIsModalOpen(true)}
                 onToggleStatus={handleAlternarStatus}
                 onDelete={() => setIsDeleteModalOpen(true)}
             />
 
             <DataTable
-                data={paises}
+                data={estados}
                 columns={columns}
-                selectedRow={paisSelecionado}
-                onRowSelect={setPaisSelecionado}
+                selectedRow={estadoSelecionado}
+                onRowSelect={setEstadoSelecionado}
             />
 
-            <PaisFormModal
+            <EstadoFormModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                paisSelecionado={paisSelecionado}
-                onSuccess={() => setPaisSelecionado(null)}
+                estadoSelecionado={estadoSelecionado}
+                onSuccess={() => setEstadoSelecionado(null)}
+                listaPaises={listaPaises}
             />
 
             <ConfirmModal
@@ -92,8 +98,8 @@ export default function PaisesClientTable({ paises }: { paises: any[] }) {
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleExcluir}
                 loading={loadingStatus}
-                title="Excluir País"
-                message={`Tem certeza que deseja excluir o país ${paisSelecionado?.pais}? Esta ação não poderá ser desfeita.`}
+                title="Excluir Estado"
+                message={`Tem certeza que deseja excluir o estado ${estadoSelecionado?.estado}? Esta ação não poderá ser desfeita.`}
                 variant="danger"
                 confirmText="Excluir"
             />
