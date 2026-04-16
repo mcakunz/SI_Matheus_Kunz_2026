@@ -67,9 +67,6 @@ export function DataTable({
                 '& .MuiDataGrid-row.Mui-selected': {
                     backgroundColor: '#d1fae5 !important',  
                 },
-                '& .MuiDataGrid-row.Mui-selected:hover': {
-                    backgroundColor: '#d1fae5 !important',  
-                },
             }}
             />
         </div>

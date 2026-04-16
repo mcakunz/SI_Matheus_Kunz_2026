@@ -6,7 +6,7 @@ export const FormSelect = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTM
             <select
                 ref={ref}
                 className={`w-full p-2 border border-slate-300 rounded bg-white outline-none transition-all 
-                    focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-slate-50 ${className}`
+                    focus:border-slate-500 focus:ring-2 focus:ring-slate-500/20 disabled:bg-slate-50 ${className}`
                 }
                 {...props}
             >
