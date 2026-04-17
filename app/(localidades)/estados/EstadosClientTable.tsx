@@ -10,7 +10,7 @@ import { ConfirmModal } from "@/app/components/ui/ConfirmModal"
 import { ActionToolbar } from "@/app/components/ui/ActionToolbar"
 import { StatusBadge } from "@/app/components/ui/StatusBadge"
 import toast from "react-hot-toast"
-import { Estado, EstadoComPais, Pais } from "@/lib/types"
+import { EstadoComPais, EstadoSelect, PaisSelect } from "@/lib/types"
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 80 },
@@ -31,7 +31,7 @@ const columns: GridColDef[] = [
     }
 ]
 
-export default function EstadosClientTable({ estados, listaPaises }: { estados: Estado[], listaPaises: Pais[] }) {
+export default function EstadosClientTable({ estados, listaPaises }: { estados: EstadoSelect[], listaPaises: PaisSelect[] }) {
     const [estadoSelecionado, setEstadoSelecionado] = useState<EstadoComPais | null>(null)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)

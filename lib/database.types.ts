@@ -86,7 +86,7 @@ export type Database = {
           cliente: string
           complemento: string | null
           condicao_pagamento_id: number
-          cpf_cpnj: string
+          cpf_cnpj: string
           data_alteracao: string
           data_cadastro: string
           data_nascimento: string | null
@@ -95,13 +95,13 @@ export type Database = {
           estado_civil: string | null
           id: number
           limite_credito: number
-          nacionalidade_id: number
           numero: string | null
           observacao: string | null
+          pais_id: number
           rg_inscricao_estadual: string | null
           sexo: string | null
           telefone: string | null
-          tipo: number
+          tipo: string
         }
         Insert: {
           apelido?: string | null
@@ -112,7 +112,7 @@ export type Database = {
           cliente: string
           complemento?: string | null
           condicao_pagamento_id: number
-          cpf_cpnj: string
+          cpf_cnpj: string
           data_alteracao?: string
           data_cadastro?: string
           data_nascimento?: string | null
@@ -121,13 +121,13 @@ export type Database = {
           estado_civil?: string | null
           id?: number
           limite_credito?: number
-          nacionalidade_id: number
           numero?: string | null
           observacao?: string | null
+          pais_id: number
           rg_inscricao_estadual?: string | null
           sexo?: string | null
           telefone?: string | null
-          tipo: number
+          tipo: string
         }
         Update: {
           apelido?: string | null
@@ -138,7 +138,7 @@ export type Database = {
           cliente?: string
           complemento?: string | null
           condicao_pagamento_id?: number
-          cpf_cpnj?: string
+          cpf_cnpj?: string
           data_alteracao?: string
           data_cadastro?: string
           data_nascimento?: string | null
@@ -147,13 +147,13 @@ export type Database = {
           estado_civil?: string | null
           id?: number
           limite_credito?: number
-          nacionalidade_id?: number
           numero?: string | null
           observacao?: string | null
+          pais_id?: number
           rg_inscricao_estadual?: string | null
           sexo?: string | null
           telefone?: string | null
-          tipo?: number
+          tipo?: string
         }
         Relationships: [
           {
@@ -171,8 +171,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tb_clientes_nacionalidade_id_fkey"
-            columns: ["nacionalidade_id"]
+            foreignKeyName: "tb_clientes_pais_id_fkey"
+            columns: ["pais_id"]
             isOneToOne: false
             referencedRelation: "tb_paises"
             referencedColumns: ["id"]
@@ -326,7 +326,7 @@ export type Database = {
           numero_nota: string | null
           observacao: string | null
           serie: string | null
-          status: string
+          situacao: string
           valor_pago: number
           valor_parcela: number
         }
@@ -347,7 +347,7 @@ export type Database = {
           numero_nota?: string | null
           observacao?: string | null
           serie?: string | null
-          status?: string
+          situacao?: string
           valor_pago?: number
           valor_parcela: number
         }
@@ -368,7 +368,7 @@ export type Database = {
           numero_nota?: string | null
           observacao?: string | null
           serie?: string | null
-          status?: string
+          situacao?: string
           valor_pago?: number
           valor_parcela?: number
         }
@@ -640,12 +640,12 @@ export type Database = {
           fornecedor: string
           id: number
           limite_credito: number
-          nacionalidade_id: number
           numero: string | null
           observacoes: string | null
+          pais_id: number
           rg_inscricao_estadual: string | null
           telefone: string | null
-          tipo: number
+          tipo: string
           transportadora_id: number | null
         }
         Insert: {
@@ -664,12 +664,12 @@ export type Database = {
           fornecedor: string
           id?: number
           limite_credito?: number
-          nacionalidade_id: number
           numero?: string | null
           observacoes?: string | null
+          pais_id: number
           rg_inscricao_estadual?: string | null
           telefone?: string | null
-          tipo: number
+          tipo: string
           transportadora_id?: number | null
         }
         Update: {
@@ -688,12 +688,12 @@ export type Database = {
           fornecedor?: string
           id?: number
           limite_credito?: number
-          nacionalidade_id?: number
           numero?: string | null
           observacoes?: string | null
+          pais_id?: number
           rg_inscricao_estadual?: string | null
           telefone?: string | null
-          tipo?: number
+          tipo?: string
           transportadora_id?: number | null
         }
         Relationships: [
@@ -712,8 +712,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tb_fornecedores_nacionalidade_id_fkey"
-            columns: ["nacionalidade_id"]
+            foreignKeyName: "tb_fornecedores_pais_id_fkey"
+            columns: ["pais_id"]
             isOneToOne: false
             referencedRelation: "tb_paises"
             referencedColumns: ["id"]
@@ -736,7 +736,7 @@ export type Database = {
           cidade_id: number
           cnh: string | null
           complemento: string | null
-          cpf_cpnj: string
+          cpf_cnpj: string
           data_admissao: string
           data_alteracao: string
           data_cadastro: string
@@ -745,18 +745,18 @@ export type Database = {
           data_validade_cnh: string | null
           email: string
           endereco: string
-          estado_civil: number
+          estado_civil: string
           funcao_funcionario_id: number
           funcionario: string
           id: number
-          nacionalidade_id: number
           numero: string
           observacao: string | null
+          pais_id: number
           rg_inscricao_estadual: string | null
           salario: number
-          sexo: number
+          sexo: string
           telefone: string
-          tipo: number
+          tipo: string
         }
         Insert: {
           apelido?: string | null
@@ -766,7 +766,7 @@ export type Database = {
           cidade_id: number
           cnh?: string | null
           complemento?: string | null
-          cpf_cpnj: string
+          cpf_cnpj: string
           data_admissao: string
           data_alteracao?: string
           data_cadastro?: string
@@ -775,18 +775,18 @@ export type Database = {
           data_validade_cnh?: string | null
           email: string
           endereco: string
-          estado_civil: number
+          estado_civil: string
           funcao_funcionario_id: number
           funcionario: string
           id?: number
-          nacionalidade_id: number
           numero: string
           observacao?: string | null
+          pais_id: number
           rg_inscricao_estadual?: string | null
           salario: number
-          sexo: number
+          sexo: string
           telefone: string
-          tipo?: number
+          tipo?: string
         }
         Update: {
           apelido?: string | null
@@ -796,7 +796,7 @@ export type Database = {
           cidade_id?: number
           cnh?: string | null
           complemento?: string | null
-          cpf_cpnj?: string
+          cpf_cnpj?: string
           data_admissao?: string
           data_alteracao?: string
           data_cadastro?: string
@@ -805,18 +805,18 @@ export type Database = {
           data_validade_cnh?: string | null
           email?: string
           endereco?: string
-          estado_civil?: number
+          estado_civil?: string
           funcao_funcionario_id?: number
           funcionario?: string
           id?: number
-          nacionalidade_id?: number
           numero?: string
           observacao?: string | null
+          pais_id?: number
           rg_inscricao_estadual?: string | null
           salario?: number
-          sexo?: number
+          sexo?: string
           telefone?: string
-          tipo?: number
+          tipo?: string
         }
         Relationships: [
           {
@@ -834,8 +834,8 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "tb_funcionarios_nacionalidade_id_fkey"
-            columns: ["nacionalidade_id"]
+            foreignKeyName: "tb_funcionarios_pais_id_fkey"
+            columns: ["pais_id"]
             isOneToOne: false
             referencedRelation: "tb_paises"
             referencedColumns: ["id"]
@@ -925,6 +925,47 @@ export type Database = {
             columns: ["produto_id"]
             isOneToOne: false
             referencedRelation: "tb_produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tb_log_acesso: {
+        Row: {
+          data_acesso: string
+          id: number
+          ip_origem: string | null
+          login_tentado: string | null
+          observacao: string | null
+          sucesso: boolean
+          user_agent: string | null
+          usuario_id: number | null
+        }
+        Insert: {
+          data_acesso?: string
+          id?: number
+          ip_origem?: string | null
+          login_tentado?: string | null
+          observacao?: string | null
+          sucesso: boolean
+          user_agent?: string | null
+          usuario_id?: number | null
+        }
+        Update: {
+          data_acesso?: string
+          id?: number
+          ip_origem?: string | null
+          login_tentado?: string | null
+          observacao?: string | null
+          sucesso?: boolean
+          user_agent?: string | null
+          usuario_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tb_log_acesso_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "tb_usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -1122,6 +1163,7 @@ export type Database = {
           data_cadastro: string
           data_chegada: string | null
           data_emissao: string
+          forma_pagamento_id: number
           fornecedor_id: number
           modelo: string
           numero: string
@@ -1144,6 +1186,7 @@ export type Database = {
           data_cadastro?: string
           data_chegada?: string | null
           data_emissao?: string
+          forma_pagamento_id: number
           fornecedor_id: number
           modelo?: string
           numero: string
@@ -1166,6 +1209,7 @@ export type Database = {
           data_cadastro?: string
           data_chegada?: string | null
           data_emissao?: string
+          forma_pagamento_id?: number
           fornecedor_id?: number
           modelo?: string
           numero?: string
@@ -1188,6 +1232,13 @@ export type Database = {
             columns: ["condicao_pagamento_id"]
             isOneToOne: false
             referencedRelation: "tb_condicoes_pagamento"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tb_notas_entrada_forma_pagamento_id_fkey"
+            columns: ["forma_pagamento_id"]
+            isOneToOne: false
+            referencedRelation: "tb_formas_pagamento"
             referencedColumns: ["id"]
           },
           {
@@ -1214,6 +1265,7 @@ export type Database = {
           data_cadastro: string
           data_emissao: string
           data_saida: string | null
+          forma_pagamento_id: number
           modelo: string
           numero: string
           observacoes: string | null
@@ -1236,6 +1288,7 @@ export type Database = {
           data_cadastro?: string
           data_emissao?: string
           data_saida?: string | null
+          forma_pagamento_id: number
           modelo?: string
           numero: string
           observacoes?: string | null
@@ -1258,6 +1311,7 @@ export type Database = {
           data_cadastro?: string
           data_emissao?: string
           data_saida?: string | null
+          forma_pagamento_id?: number
           modelo?: string
           numero?: string
           observacoes?: string | null
@@ -1289,6 +1343,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tb_notas_saida_forma_pagamento_id_fkey"
+            columns: ["forma_pagamento_id"]
+            isOneToOne: false
+            referencedRelation: "tb_formas_pagamento"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tb_notas_saida_transportadora_id_fkey"
             columns: ["transportadora_id"]
             isOneToOne: false
@@ -1315,7 +1376,7 @@ export type Database = {
           data_alteracao?: string
           data_cadastro?: string
           id?: number
-          moeda?: string
+          moeda: string
           nacionalidade: string
           pais: string
           sigla: string
@@ -1380,6 +1441,93 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      tb_perfil_permissoes: {
+        Row: {
+          data_cadastro: string
+          perfil_id: number
+          permissao_id: number
+        }
+        Insert: {
+          data_cadastro?: string
+          perfil_id: number
+          permissao_id: number
+        }
+        Update: {
+          data_cadastro?: string
+          perfil_id?: number
+          permissao_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tb_perfil_permissoes_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "tb_perfis_usuario"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tb_perfil_permissoes_permissao_id_fkey"
+            columns: ["permissao_id"]
+            isOneToOne: false
+            referencedRelation: "tb_permissoes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tb_perfis_usuario: {
+        Row: {
+          ativo: boolean
+          data_alteracao: string
+          data_cadastro: string
+          descricao: string | null
+          id: number
+          perfil: string
+        }
+        Insert: {
+          ativo?: boolean
+          data_alteracao?: string
+          data_cadastro?: string
+          descricao?: string | null
+          id?: number
+          perfil: string
+        }
+        Update: {
+          ativo?: boolean
+          data_alteracao?: string
+          data_cadastro?: string
+          descricao?: string | null
+          id?: number
+          perfil?: string
+        }
+        Relationships: []
+      }
+      tb_permissoes: {
+        Row: {
+          acao: string
+          data_alteracao: string
+          data_cadastro: string
+          descricao: string | null
+          id: number
+          recurso: string
+        }
+        Insert: {
+          acao: string
+          data_alteracao?: string
+          data_cadastro?: string
+          descricao?: string | null
+          id?: number
+          recurso: string
+        }
+        Update: {
+          acao?: string
+          data_alteracao?: string
+          data_cadastro?: string
+          descricao?: string | null
+          id?: number
+          recurso?: string
+        }
+        Relationships: []
       }
       tb_produto_fornecedor: {
         Row: {
@@ -1571,7 +1719,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "tb_produtos_nota_entrada_nota_numero_nota_modelo_nota_seri_fkey"
+            foreignKeyName: "tb_produtos_nota_entrada_nota_fkey"
             columns: [
               "nota_numero",
               "nota_modelo",
@@ -1595,6 +1743,8 @@ export type Database = {
         Row: {
           cliente_id: number
           custo_preco_final: number
+          data_alteracao: string
+          data_cadastro: string
           nota_modelo: string
           nota_numero: string
           nota_serie: string
@@ -1612,6 +1762,8 @@ export type Database = {
         Insert: {
           cliente_id: number
           custo_preco_final?: number
+          data_alteracao?: string
+          data_cadastro?: string
           nota_modelo: string
           nota_numero: string
           nota_serie: string
@@ -1629,6 +1781,8 @@ export type Database = {
         Update: {
           cliente_id?: number
           custo_preco_final?: number
+          data_alteracao?: string
+          data_cadastro?: string
           nota_modelo?: string
           nota_numero?: string
           nota_serie?: string
@@ -1645,7 +1799,7 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "tb_produtos_nota_saida_nota_numero_nota_modelo_nota_serie__fkey"
+            foreignKeyName: "tb_produtos_nota_saida_nota_fkey"
             columns: ["nota_numero", "nota_modelo", "nota_serie", "cliente_id"]
             isOneToOne: false
             referencedRelation: "tb_notas_saida"
@@ -1656,6 +1810,47 @@ export type Database = {
             columns: ["produto_id"]
             isOneToOne: false
             referencedRelation: "tb_produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tb_refresh_tokens: {
+        Row: {
+          data_cadastro: string
+          expiracao: string
+          id: number
+          ip_origem: string | null
+          revogado: boolean
+          token: string
+          user_agent: string | null
+          usuario_id: number
+        }
+        Insert: {
+          data_cadastro?: string
+          expiracao: string
+          id?: number
+          ip_origem?: string | null
+          revogado?: boolean
+          token: string
+          user_agent?: string | null
+          usuario_id: number
+        }
+        Update: {
+          data_cadastro?: string
+          expiracao?: string
+          id?: number
+          ip_origem?: string | null
+          revogado?: boolean
+          token?: string
+          user_agent?: string | null
+          usuario_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tb_refresh_tokens_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "tb_usuarios"
             referencedColumns: ["id"]
           },
         ]
@@ -1887,6 +2082,117 @@ export type Database = {
           unidade_medida?: string
         }
         Relationships: []
+      }
+      tb_usuarios: {
+        Row: {
+          ativo: boolean
+          data_alteracao: string
+          data_cadastro: string
+          email: string
+          expiracao_token: string | null
+          foto_perfil: string | null
+          funcionario_id: number | null
+          id: number
+          nome: string
+          observacao: string | null
+          perfil_id: number
+          senha_hash: string
+          situacao: string
+          tentativas_login: number
+          token_reset_senha: string | null
+          ultimo_login: string | null
+          usuario: string
+        }
+        Insert: {
+          ativo?: boolean
+          data_alteracao?: string
+          data_cadastro?: string
+          email: string
+          expiracao_token?: string | null
+          foto_perfil?: string | null
+          funcionario_id?: number | null
+          id?: number
+          nome: string
+          observacao?: string | null
+          perfil_id: number
+          senha_hash: string
+          situacao?: string
+          tentativas_login?: number
+          token_reset_senha?: string | null
+          ultimo_login?: string | null
+          usuario: string
+        }
+        Update: {
+          ativo?: boolean
+          data_alteracao?: string
+          data_cadastro?: string
+          email?: string
+          expiracao_token?: string | null
+          foto_perfil?: string | null
+          funcionario_id?: number | null
+          id?: number
+          nome?: string
+          observacao?: string | null
+          perfil_id?: number
+          senha_hash?: string
+          situacao?: string
+          tentativas_login?: number
+          token_reset_senha?: string | null
+          ultimo_login?: string | null
+          usuario?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tb_usuarios_funcionario_id_fkey"
+            columns: ["funcionario_id"]
+            isOneToOne: false
+            referencedRelation: "tb_funcionarios"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tb_usuarios_perfil_id_fkey"
+            columns: ["perfil_id"]
+            isOneToOne: false
+            referencedRelation: "tb_perfis_usuario"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tb_usuarios_permissoes: {
+        Row: {
+          data_cadastro: string
+          permissao_id: number
+          tipo: string
+          usuario_id: number
+        }
+        Insert: {
+          data_cadastro?: string
+          permissao_id: number
+          tipo?: string
+          usuario_id: number
+        }
+        Update: {
+          data_cadastro?: string
+          permissao_id?: number
+          tipo?: string
+          usuario_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tb_usuarios_permissoes_permissao_id_fkey"
+            columns: ["permissao_id"]
+            isOneToOne: false
+            referencedRelation: "tb_permissoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tb_usuarios_permissoes_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "tb_usuarios"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       tb_veiculos: {
         Row: {
