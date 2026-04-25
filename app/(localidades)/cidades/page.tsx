@@ -6,7 +6,7 @@ import { PageTitle } from '@/app/components/ui/PageTitle'
 import { LoadingSpinner } from '@/app/components/ui/LoadingSpinner' 
 import { ErrorLoadingData } from '@/app/components/ui/ErrorLoadingData'
 import { createClient } from '@/lib/supabase/server'
-import CidadesClientTable from './CidadesClientTable'
+import CidadesClientTable from './components/CidadesClientTable'
 
 
 

@@ -1,11 +1,13 @@
-import { boolean } from "zod"
+import Link from "next/link"
 import { Button } from "./Button"
 
 interface ActionToolbarProps {
-    selectedRow: { ativo: boolean } | null
+    selectedRow: { ativo: boolean; id?: number } | null
     loading?: boolean
-    onAdd: () => void
-    onEdit: () => void
+    onAddHref?: string
+    onEditHref?: string
+    onAdd?: () => void
+    onEdit?: () => void
     onToggleStatus: () => void
     onDelete: () => void
 }
@@ -13,19 +15,33 @@ interface ActionToolbarProps {
 export function ActionToolbar({
     selectedRow,
     loading = false,
+    onAddHref,
+    onEditHref,
     onAdd,
-    onEdit, 
+    onEdit,
     onToggleStatus,
     onDelete,
 }: ActionToolbarProps) {
+    const addButton = onAddHref ? (
+        <Link href={onAddHref}>
+            <Button>Adicionar</Button>
+        </Link>
+    ) : (
+        <Button onClick={onAdd}>Adicionar</Button>
+    )
+
+    const editButton = onEditHref && selectedRow ? (
+        <Link href={onEditHref}>
+            <Button disabled={!selectedRow}>Editar</Button>
+        </Link>
+    ) : (
+        <Button disabled={!selectedRow} onClick={onEdit}>Editar</Button>
+    )
+
     return (
         <div className="flex items-center gap-2">
-            <Button onClick={onAdd}>
-                Adicionar
-            </Button>
-            <Button disabled={!selectedRow} onClick={onEdit}>
-                Editar
-            </Button>
+            {addButton}
+            {editButton}
             <Button disabled={!selectedRow || loading} onClick={onToggleStatus}>
                 {selectedRow?.ativo ? 'Desativar' : 'Ativar'}
             </Button>

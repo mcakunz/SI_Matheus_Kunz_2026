@@ -7,7 +7,6 @@ import toast from "react-hot-toast"
 
 import { Modal } from "@/app/components/ui/Modal"
 import { Button } from "@/app/components/ui/Button"
-import { RequiredSymbol } from "@/app/components/ui/RequiredSymbol"
 import { FormInput } from "@/app/components/ui/FormInput"
 import { FormLabel } from "@/app/components/ui/FormLabel"
 import { FormSelect } from "@/app/components/ui/FormSelect"

@@ -99,24 +99,6 @@ const ROUTE_GROUPS: RouteGroup[] = [
             { label: "Condições de Pagamento", href: "/condicoes-pagamento" },
         ],
     },
-    {
-        label: "RH",
-        icon: HiOutlineUserGroup,
-        matchPaths: ["/funcionarios", "/funcoes"],
-        subRoutes: [
-            { label: "Funcionários", href: "/funcionarios" },
-            { label: "Funções", href: "/funcoes" },
-        ],
-    },
-    {
-        label: "Logística",
-        icon: HiOutlineTruck,
-        matchPaths: ["/transportadoras", "/veiculos"],
-        subRoutes: [
-            { label: "Transportadoras", href: "/transportadoras" },
-            { label: "Veículos", href: "/veiculos" },
-        ],
-    },
 ]
 
 function SidebarGroup({ group, pathname }: { group: RouteGroup; pathname: string }) {

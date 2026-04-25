@@ -5,10 +5,9 @@ import { SearchInput } from '@/app/components/SearchInput'
 import { PageTitle } from '@/app/components/ui/PageTitle' 
 import { LoadingSpinner } from '@/app/components/ui/LoadingSpinner' 
 import { ErrorLoadingData } from '@/app/components/ui/ErrorLoadingData'
-import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell, TableEmpty } from '@/app/components/ui/Table'
 import { createClient } from '@/lib/supabase/server'
 
-import PaisesClientTable from './PaisesClientTable'
+import PaisesClientTable from './components/PaisesClientTable'
 
 export const dynamic = 'force-dynamic'
 
