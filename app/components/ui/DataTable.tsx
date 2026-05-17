@@ -16,7 +16,7 @@ export function DataTable({
     onRowSelect,
 } : DataTableProps) {
     return(
-        <div className='bg-white border border-slate-200 rounded-lg shadow-sm overflow-hidden w-full' style={{ height: 500 }}>
+        <div className='bg-slate-50 border border-slate-200 rounded-lg shadow-sm overflow-hidden w-full h-[calc(100vh-180px)] min-h-[400px]'>
             <DataGrid
                 rows={data}
                 columns={columns}
@@ -52,22 +52,32 @@ export function DataTable({
                 
                 disableMultipleRowSelection={true}
 
-            sx={{
-                border: 'none',
-                '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
-                    outline: 'none',
-                },
-                '& .MuiDataGrid-row:hover': {
-                    backgroundColor: '#f8fafc',
-                },
-                '& .MuiDataGrid-columnHeaders': {
-                    backgroundColor: '#f8fafc',
-                    borderBottom: '1px solid #e2e8f0'
-                },
-                '& .MuiDataGrid-row.Mui-selected': {
-                    backgroundColor: '#d1fae5 !important',  
-                },
-            }}
+                sx={{
+                    border: 'none',
+                    '& .MuiDataGrid-main': {
+                        backgroundColor: '#f8fafc', 
+                    },
+                    '& .MuiDataGrid-columnHeaders': {
+                        backgroundColor: '#f1f5f9', 
+                        borderBottom: '1px solid #e2e8f0'
+                    },
+                    '& .MuiDataGrid-row': {
+                        backgroundColor: 'transparent',
+                    },
+                    '& .MuiDataGrid-row:hover': {
+                        backgroundColor: '#f1f5f9', 
+                    },
+                    '& .MuiDataGrid-footerContainer': {
+                        backgroundColor: '#f1f5f9',
+                        borderTop: '1px solid #e2e8f0',
+                    },
+                    '& .MuiDataGrid-row.Mui-selected': {
+                        backgroundColor: '#d1fae5 !important',
+                    },
+                    '& .MuiDataGrid-cell:focus, & .MuiDataGrid-cell:focus-within': {
+                        outline: 'none',
+                    },
+                }}
             />
         </div>
     )

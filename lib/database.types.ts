@@ -85,7 +85,7 @@ export type Database = {
           cidade_id: number
           cliente: string
           complemento: string | null
-          condicao_pagamento_id: number
+          condicao_pagamento_id: number | null
           cpf_cnpj: string
           data_alteracao: string
           data_cadastro: string
@@ -111,7 +111,7 @@ export type Database = {
           cidade_id: number
           cliente: string
           complemento?: string | null
-          condicao_pagamento_id: number
+          condicao_pagamento_id?: number | null
           cpf_cnpj: string
           data_alteracao?: string
           data_cadastro?: string
@@ -137,7 +137,7 @@ export type Database = {
           cidade_id?: number
           cliente?: string
           complemento?: string | null
-          condicao_pagamento_id?: number
+          condicao_pagamento_id?: number | null
           cpf_cnpj?: string
           data_alteracao?: string
           data_cadastro?: string

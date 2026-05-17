@@ -11,7 +11,11 @@ const clienteSchema = z.object({
     tipo:                   z.enum(['F', 'J'], { message: "Tipo de pessoa inválido."}),
     cidade_id:              z.coerce.number().positive("Selecione uma cidade válida."),
     pais_id:                z.coerce.number().positive("Selecione um país válido."),
-    condicao_pagamento_id:  z.coerce.number().positive("Selecione uma condição de pagamento."),
+    //condicao_pagamento_id:  z.coerce.number().positive("Selecione uma condição de pagamento."),
+    condicao_pagamento_id: z.preprocess(
+    (val) => (val === '' || val === null || val === undefined ? undefined : Number(val)),
+    z.number().positive().optional()
+),
     limite_credito:         z.coerce.number().min(0, "O limite de crédito não pode ser negativo."),
     ativo:                  z.boolean(),
 
@@ -27,7 +31,6 @@ const clienteSchema = z.object({
     bairro:                 z.string().max(50).nullable().optional(),
     data_nascimento:        z.string().nullable().optional(),
     sexo:                   z.enum(['M', 'F', 'O']).nullable().optional(),
-    estado_civil:           z.enum(['SOLTEIRO','CASADO','DIVORCIADO','VIUVO','UNIAO_ESTAVEL','OUTRO']).nullable().optional(),
     observacao:             z.string().max(255).nullable().optional(),
 })
 
@@ -60,8 +63,6 @@ export async function salvarCliente(formData: FormData) {
         bairro:                 nullableString(formData.get('bairro')),
         data_nascimento:        nullableString(formData.get('data_nascimento')),
         sexo:                   nullableString(formData.get('sexo')) as 'M' | 'F' | 'O' | null,
-        estado_civil:           nullableString(formData.get('estado_civil')) as
-                                    'SOLTEIRO'|'CASADO'|'DIVORCIADO'|'VIUVO'|'UNIAO_ESTAVEL'|'OUTRO'|null,
         observacao:             nullableString(formData.get('observacao')),
     }
 

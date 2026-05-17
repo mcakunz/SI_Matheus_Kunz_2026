@@ -13,7 +13,7 @@ export const FormLabel = ({
 }: FormLabelProps) => {
     return (
         <label 
-            className={`block text-sm font-medium mb-1 text-slate-700 ${className}`} 
+            className={`block text-sm font-medium mb-1 text-slate-700 whitespace-nowrap ${className}`} 
             {...props}
         >
             {children} {required && <RequiredSymbol />}

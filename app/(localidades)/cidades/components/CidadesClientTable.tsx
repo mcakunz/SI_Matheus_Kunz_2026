@@ -5,7 +5,6 @@ import { alternarStatusCidade, excluirCidade } from "../actions"
 
 import { GridColDef } from "@mui/x-data-grid"
 import { DataTable } from "@/app/components/ui/DataTable"
-import { CidadeFormModal } from "./CidadeFormModal" 
 import { ConfirmModal } from "@/app/components/ui/ConfirmModal"
 import { ActionToolbar } from "@/app/components/ui/ActionToolbar"
 import { StatusBadge } from "@/app/components/ui/StatusBadge"
@@ -26,7 +25,7 @@ const columns: GridColDef[] = [
         headerName: 'Estado',
         flex: 1,
         minWidth: 200,
-        valueGetter: (value, row) => row.tb_estados?.estado || '-'
+        valueGetter: (_value, row) => row.tb_estados?.estado || '-'
     },
     {
         field: 'ativo',
@@ -44,7 +43,6 @@ export default function CidadesClientTable({
     listaEstados: EstadoSelect[] 
 }) {
     const [cidadeSelecionada, setCidadeSelecionada] = useState<CidadeComEstado | null>(null)
-    const [isModalOpen, setIsModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [loadingStatus, setLoadingStatus] = useState(false)
 
@@ -53,8 +51,7 @@ export default function CidadesClientTable({
         setLoadingStatus(true)
         try {
             await alternarStatusCidade(cidadeSelecionada.id, cidadeSelecionada.ativo)
-            const novoStatus = cidadeSelecionada.ativo ? 'inativada' : 'ativada'
-            toast.success(`Cidade ${novoStatus} com sucesso!`)
+            toast.success(`Cidade ${cidadeSelecionada.ativo ? 'inativada' : 'ativada'} com sucesso!`)
             setCidadeSelecionada(null)
         } catch (err: any) {
             toast.error(err.message)
@@ -73,6 +70,7 @@ export default function CidadesClientTable({
             setIsDeleteModalOpen(false)
         } catch (err: any) {
             toast.error(err.message)
+            setIsDeleteModalOpen(false)
         } finally {
             setLoadingStatus(false)
         }
@@ -83,8 +81,8 @@ export default function CidadesClientTable({
             <ActionToolbar
                 selectedRow={cidadeSelecionada}
                 loading={loadingStatus}
-                onAdd={() => { setCidadeSelecionada(null); setIsModalOpen(true) }}
-                onEdit={() => setIsModalOpen(true)}
+                onAddHref="/cidades/novo"
+                onEditHref={cidadeSelecionada ? `/cidades/${cidadeSelecionada.id}` : undefined}
                 onToggleStatus={handleAlternarStatus}
                 onDelete={() => setIsDeleteModalOpen(true)}
             />
@@ -96,21 +94,13 @@ export default function CidadesClientTable({
                 onRowSelect={setCidadeSelecionada}
             />
 
-            <CidadeFormModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                cidadeSelecionada={cidadeSelecionada}
-                onSuccess={() => setCidadeSelecionada(null)}
-                listaEstados={listaEstados} 
-            />
-
             <ConfirmModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleExcluir}
                 loading={loadingStatus}
                 title="Excluir Cidade"
-                message={`Tem certeza que deseja excluir a cidade ${cidadeSelecionada?.cidade}? Esta ação não poderá ser desfeita.`}
+                message={`Tem certeza que deseja excluir a cidade "${cidadeSelecionada?.cidade}"? Esta ação não poderá ser desfeita.`}
                 variant="danger"
                 confirmText="Excluir"
             />

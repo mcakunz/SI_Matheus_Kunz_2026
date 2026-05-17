@@ -42,7 +42,7 @@ export default async function ClientesPage({
     const { q: termoBusca } = await searchParamsCache.parse(searchParams)
 
     return (
-        <div className="p-8 max-w-6xl mx-auto">
+        <div className="p-6 mx-auto">
             <PageTitle>Gerenciar Clientes</PageTitle>
             <SearchInput />
             <Suspense key={termoBusca} fallback={<LoadingSpinner />}>

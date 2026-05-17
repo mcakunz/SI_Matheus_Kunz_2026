@@ -51,7 +51,7 @@ export default async function CidadesPage({
     const { q: termoBusca } = await cidadesSearchParamsCache.parse(searchParams)
 
     return (
-        <div className='p-8 max-w-4xl mx-auto'>
+        <div className='p-6 mx-auto'>
             <PageTitle>Gerenciar Cidades</PageTitle>
 
             <SearchInput />

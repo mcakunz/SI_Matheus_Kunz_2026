@@ -5,12 +5,11 @@ import { alternarStatusEstado, excluirEstado } from "../actions"
 
 import { GridColDef } from "@mui/x-data-grid"
 import { DataTable } from "@/app/components/ui/DataTable"
-import { EstadoFormModal } from "./EstadoFormModal"
 import { ConfirmModal } from "@/app/components/ui/ConfirmModal"
 import { ActionToolbar } from "@/app/components/ui/ActionToolbar"
 import { StatusBadge } from "@/app/components/ui/StatusBadge"
 import toast from "react-hot-toast"
-import { EstadoComPais, EstadoSelect, PaisSelect } from "@/lib/types"
+import { EstadoComPais } from "@/lib/types"
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 80 },
@@ -21,7 +20,7 @@ const columns: GridColDef[] = [
         headerName: 'País',
         flex: 1,
         minWidth: 200,
-        valueGetter: (value, row) => row.tb_paises?.pais || '-'
+        valueGetter: (_value: any, row: any) => row.tb_paises?.pais || '-'
     },
     {
         field: 'ativo',
@@ -31,9 +30,8 @@ const columns: GridColDef[] = [
     }
 ]
 
-export default function EstadosClientTable({ estados, listaPaises }: { estados: EstadoSelect[], listaPaises: PaisSelect[] }) {
+export default function EstadosClientTable({ estados }: { estados: EstadoComPais[] }) {
     const [estadoSelecionado, setEstadoSelecionado] = useState<EstadoComPais | null>(null)
-    const [isModalOpen, setIsModalOpen] = useState(false)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [loadingStatus, setLoadingStatus] = useState(false)
 
@@ -42,8 +40,7 @@ export default function EstadosClientTable({ estados, listaPaises }: { estados: 
         setLoadingStatus(true)
         try {
             await alternarStatusEstado(estadoSelecionado.id, estadoSelecionado.ativo)
-            const novoStatus = estadoSelecionado.ativo ? 'inativado' : 'ativado'
-            toast.success(`Estado ${novoStatus} com sucesso!`)
+            toast.success(`Estado ${estadoSelecionado.ativo ? 'inativado' : 'ativado'} com sucesso!`)
             setEstadoSelecionado(null)
         } catch (err: any) {
             toast.error(err.message)
@@ -57,7 +54,7 @@ export default function EstadosClientTable({ estados, listaPaises }: { estados: 
         setLoadingStatus(true)
         try {
             await excluirEstado(estadoSelecionado.id)
-            toast.success(`Estado excluído com sucesso!`)
+            toast.success("Estado excluído com sucesso!")
             setEstadoSelecionado(null)
             setIsDeleteModalOpen(false)
         } catch (err: any) {
@@ -72,8 +69,8 @@ export default function EstadosClientTable({ estados, listaPaises }: { estados: 
             <ActionToolbar
                 selectedRow={estadoSelecionado}
                 loading={loadingStatus}
-                onAdd={() => { setEstadoSelecionado(null); setIsModalOpen(true) }}
-                onEdit={() => setIsModalOpen(true)}
+                onAddHref="/estados/novo"
+                onEditHref={estadoSelecionado ? `/estados/${estadoSelecionado.id}` : undefined}
                 onToggleStatus={handleAlternarStatus}
                 onDelete={() => setIsDeleteModalOpen(true)}
             />
@@ -85,21 +82,13 @@ export default function EstadosClientTable({ estados, listaPaises }: { estados: 
                 onRowSelect={setEstadoSelecionado}
             />
 
-            <EstadoFormModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                estadoSelecionado={estadoSelecionado}
-                onSuccess={() => setEstadoSelecionado(null)}
-                listaPaises={listaPaises}
-            />
-
             <ConfirmModal
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleExcluir}
                 loading={loadingStatus}
                 title="Excluir Estado"
-                message={`Tem certeza que deseja excluir o estado ${estadoSelecionado?.estado}? Esta ação não poderá ser desfeita.`}
+                message={`Tem certeza que deseja excluir "${estadoSelecionado?.estado}"? Esta ação não poderá ser desfeita.`}
                 variant="danger"
                 confirmText="Excluir"
             />

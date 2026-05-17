@@ -186,11 +186,10 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
     return (
         <div className="flex h-screen w-full bg-slate-100 overflow-hidden">
             <aside className="hidden md:flex flex-col bg-slate-900 h-full w-60 shrink-0 border-r border-slate-800">
-
                 <div className="px-4 py-5 border-b border-slate-800">
                     <div className="flex items-center gap-2.5">
                         <div className="w-7 h-7 rounded-md bg-emerald-500 flex items-center justify-center shrink-0">
-                            <HiOutlineOfficeBuilding size={16} className="text-white" />
+                            <HiOutlineOfficeBuilding size={22} className="text-white" />
                         </div>
                         <div>
                             <p className="text-white text-sm font-semibold leading-tight">Prática</p>
@@ -212,7 +211,7 @@ const Sidebar: React.FC<SidebarProps> = ({ children }) => {
                 </div>
             </aside>
 
-            <main className="flex-1 h-full overflow-y-auto p-6 text-black">
+            <main className="flex-1 h-full overflow-y-auto text-black">
                 {children}
             </main>
         </div>

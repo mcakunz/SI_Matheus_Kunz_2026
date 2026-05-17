@@ -42,6 +42,33 @@ export async function salvarPais(formData: FormData) {
     revalidatePath('/paises')
 }
 
+export async function salvarPaisComRetorno(formData: FormData) {
+    const supabase = await createClient()
+ 
+    const dados = {
+        pais:          formData.get('pais') as string,
+        codigo:        formData.get('codigo') as string,
+        sigla:         formData.get('sigla') as string,
+        moeda:         formData.get('moeda') as string,
+        nacionalidade: formData.get('nacionalidade') as string,
+        ativo:         formData.get('ativo') === 'true',
+    }
+ 
+    const validacao = paisSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+ 
+    const { data, error } = await supabase
+        .from('tb_paises')
+        .insert([validacao.data])
+        .select('id, pais')
+        .single()
+ 
+    if (error) throw new Error(error.message)
+ 
+    revalidatePath('/paises')
+    return data as { id: number; pais: string }
+}
+
 export async function alternarStatusPais(id: number, statusAtual: boolean) {
     const supabase = await createClient()
     const { error } = await supabase
@@ -61,7 +88,6 @@ export async function excluirPais(id: number) {
         if (error.code === '23503') {
             throw new Error("Este país não pode ser excluído pois exitem estados vinculados a ele.")
         }
-        // aqui
         throw new Error(error.message)
     }
     revalidatePath('/paises')

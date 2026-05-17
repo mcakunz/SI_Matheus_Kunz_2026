@@ -22,7 +22,7 @@ export default async function NovoClientePage() {
     if (errCondicoes) return <ErrorLoadingData message={errCondicoes.message} />
 
     return (
-        <div className="p-8 max-w-3xl mx-auto">
+        <div className="p-6 mx-auto">
             <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
                 <Link href="/clientes" className="flex items-center gap-1 hover:text-slate-800 transition-colors">
                     <HiChevronLeft size={16} />
@@ -32,9 +32,9 @@ export default async function NovoClientePage() {
                 <span className="text-slate-800 font-medium">Novo Cliente</span>
             </div>
 
-            <h1 className="text-2xl font-bold text-slate-800 mb-8">Novo Cliente</h1>
 
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8">
+            <h1 className="text-2xl font-bold text-slate-800 mb-8">Novo Cliente</h1>
                 <ClienteForm
                     listaCidades={cidades || []}
                     listaPaises={paises || []}
