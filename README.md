@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Prática Profissional — ERP
 
-## Getting Started
+Sistema de gestão ERP desenvolvido com **Next.js**, **React**, **MUI DataGrid** e **Supabase**.
 
-First, run the development server:
+---
+
+## Pré-requisitos
+
+- **[Node.js](https://nodejs.org/)** v20.9 ou superior
+- **[Git](https://git-scm.com)**
+
+---
+
+## Passo 1 — Clonar e instalar
+
+```bash
+git clone https://github.com/mcakunz/SI_Matheus_Kunz_2026
+cd pratica-profissional
+npm install
+```
+
+---
+
+## Passo 2 — Configurar as variáveis de ambiente
+
+Na raiz do projeto, crie um arquivo chamado **`.env.local`** com as credenciais abaixo:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL=<URL_FORNECIDA>
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<CHAVE_FORNECIDA>
+```
+
+## Passo 3 — Rodar o projeto
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse em: **http://localhost:3000**
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Inspecionar o banco de dados
 
-## Learn More
+Há duas formas de visualizar e consultar os dados diretamente:
 
-To learn more about Next.js, take a look at the following resources:
+### Via Supabase Studio (navegador, sem instalar nada)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Após aceitar o convite recebido por e-mail, acesse:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+https://supabase.com/dashboard
+```
 
-## Deploy on Vercel
+Selecione o projeto **Prática Profissional** — todas as tabelas, dados e o editor SQL estarão disponíveis.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Via DBeaver, DataGrip ou outro cliente SQL
+
+<img width="1607" height="805" alt="image" src="https://github.com/user-attachments/assets/6e056593-c9f4-4166-8c83-7076d9cb5a5a" />
+
+
+As credenciais de conexão direta ao banco estão no painel do Supabase:
+
+**Project Settings → Database → Connection string**
+
+Ou use os campos abaixo (também disponíveis no painel):
+
+| Campo | Valor |
+|---|---|
+| Host | `<HOST_DO_PROJETO>.supabase.co` |
+| Porta | `5432` |
+| Database | `postgres` |
+| Usuário | `postgres` |
+| Senha | *( ******)* |
+
+> No DBeaver: Nova conexão → PostgreSQL → preencha os campos acima → **Testar conexão**.
