@@ -2,36 +2,36 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { Search, ExternalLink, X, ChevronDown, Plus } from "lucide-react"
-import { PaisSelect } from "@/lib/types"
-import { usePaisCadastrado } from "@/lib/hooks/usePaisCadastrado"
+import { EstadoSelect } from "@/lib/types"
+import { useEstadoCadastrado } from "@/lib/hooks/useEstadoCadastrado"
 
-interface PaisLookupProps {
-    paises: PaisSelect[]
+interface EstadoLookupProps {
+    estados: EstadoSelect[]
     value: string
     onChange: (id: string) => void
-    onPaisCreated?: (pais: PaisSelect) => void
+    onEstadoCreated?: (estado: EstadoSelect) => void
     required?: boolean
     error?: string
 }
 
-export function PaisLookup({ paises, value, onChange, onPaisCreated, required, error }: PaisLookupProps) {
+export function EstadoLookup({ estados, value, onChange, onEstadoCreated, required, error }: EstadoLookupProps) {
     const [aberto, setAberto] = useState(false)
     const [busca, setBusca] = useState('')
     const inputRef = useRef<HTMLInputElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
 
-    const paisAtual = paises.find(p => String(p.id) === value)
+    const estadoAtual = estados.find(e => String(e.id) === value)
 
     const filtrados = busca.trim()
-        ? paises.filter(p => p.pais.toLowerCase().includes(busca.toLowerCase()))
-        : paises
+        ? estados.filter(e => e.estado.toLowerCase().includes(busca.toLowerCase()))
+        : estados
 
-    const handlePaisCadastrado = useCallback((novoPais: PaisSelect) => {
-        onPaisCreated?.(novoPais)
-        onChange(String(novoPais.id))
-    }, [onPaisCreated, onChange])
+    const handleEstadoCadastrado = useCallback((novoEstado: EstadoSelect) => {
+        onEstadoCreated?.(novoEstado)
+        onChange(String(novoEstado.id))
+    }, [onEstadoCreated, onChange])
 
-    usePaisCadastrado(handlePaisCadastrado)
+    useEstadoCadastrado(handleEstadoCadastrado)
 
     useEffect(() => {
         function onClickOutside(e: MouseEvent) {
@@ -50,8 +50,8 @@ export function PaisLookup({ paises, value, onChange, onPaisCreated, required, e
         setTimeout(() => inputRef.current?.focus(), 50)
     }
 
-    const selecionar = (pais: PaisSelect) => {
-        onChange(String(pais.id))
+    const selecionar = (estado: EstadoSelect) => {
+        onChange(String(estado.id))
         setAberto(false)
         setBusca('')
     }
@@ -63,10 +63,10 @@ export function PaisLookup({ paises, value, onChange, onPaisCreated, required, e
         setAberto(false)
     }
 
-    const abrirCadastroPais = (e: React.MouseEvent) => {
+    const abrirCadastroEstado = (e: React.MouseEvent) => {
         e.stopPropagation()
         setAberto(false)
-        window.open('/paises/novo?origem=lookup', '_blank')
+        window.open('/estados/novo?origem=lookup', '_blank')
     }
 
     return (
@@ -83,18 +83,18 @@ export function PaisLookup({ paises, value, onChange, onPaisCreated, required, e
             >
                 <Search size={15} className="text-slate-400 shrink-0" />
 
-                {paisAtual
-                    ? <span className="flex-1 text-sm text-slate-800 truncate">{paisAtual.pais}</span>
-                    : <span className="flex-1 text-sm text-slate-400">Selecionar país...</span>
+                {estadoAtual
+                    ? <span className="flex-1 text-sm text-slate-800 truncate">{estadoAtual.estado}</span>
+                    : <span className="flex-1 text-sm text-slate-400">Selecionar estado...</span>
                 }
 
                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                    {paisAtual && (
+                    {estadoAtual && (
                         <a
-                            href={`/paises/${paisAtual.id}`}
+                            href={`/estados/${estadoAtual.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            title={`Editar ${paisAtual.pais}`}
+                            title={`Editar ${estadoAtual.estado}`}
                             className="p-0.5 text-slate-400 hover:text-emerald-600 transition-colors"
                         >
                             <ExternalLink size={13} />
@@ -102,13 +102,13 @@ export function PaisLookup({ paises, value, onChange, onPaisCreated, required, e
                     )}
                     <button
                         type="button"
-                        onClick={abrirCadastroPais}
-                        title="Cadastrar novo país"
+                        onClick={abrirCadastroEstado}
+                        title="Cadastrar novo estado"
                         className="p-0.5 text-slate-400 hover:text-emerald-600 transition-colors"
                     >
                         <Plus size={14} />
                     </button>
-                    {paisAtual && (
+                    {estadoAtual && (
                         <button type="button" onClick={limpar} className="p-0.5 text-slate-400 hover:text-slate-700 transition-colors">
                             <X size={13} />
                         </button>
@@ -127,7 +127,7 @@ export function PaisLookup({ paises, value, onChange, onPaisCreated, required, e
                                 type="text"
                                 value={busca}
                                 onChange={e => setBusca(e.target.value)}
-                                placeholder="Pesquisar país..."
+                                placeholder="Pesquisar estado..."
                                 className="flex-1 text-sm bg-transparent outline-none text-slate-800 placeholder:text-slate-400"
                             />
                             {busca && (
@@ -141,33 +141,33 @@ export function PaisLookup({ paises, value, onChange, onPaisCreated, required, e
                     <ul className="max-h-52 overflow-y-auto">
                         {filtrados.length === 0 ? (
                             <li className="px-3 py-5 text-center">
-                                <p className="text-sm text-slate-400">Nenhum país encontrado.</p>
+                                <p className="text-sm text-slate-400">Nenhum estado encontrado.</p>
                                 <button
                                     type="button"
-                                    onClick={abrirCadastroPais}
+                                    onClick={abrirCadastroEstado}
                                     className="mt-2 inline-flex items-center gap-1 text-xs text-emerald-600 hover:underline font-medium"
                                 >
                                 </button>
                             </li>
                         ) : (
-                            filtrados.map(pais => (
-                                <li key={pais.id}>
+                            filtrados.map(estado => (
+                                <li key={estado.id}>
                                     <button
                                         type="button"
-                                        onClick={() => selecionar(pais)}
+                                        onClick={() => selecionar(estado)}
                                         className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between group transition-colors
-                                            ${String(pais.id) === value
+                                            ${String(estado.id) === value
                                                 ? 'bg-emerald-50 text-emerald-700 font-medium'
                                                 : 'text-slate-700 hover:bg-slate-50'
                                             }`}
                                     >
-                                        <span>{pais.pais}</span>
+                                        <span>{estado.estado}</span>
                                         <a
-                                            href={`/paises/${pais.id}`}
+                                            href={`/estados/${estado.id}`}
                                             target="_blank"
                                             rel="noopener noreferrer"
                                             onClick={e => e.stopPropagation()}
-                                            title="Editar este país"
+                                            title="Editar este estado"
                                             className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-emerald-600 transition-all"
                                         >
                                             <ExternalLink size={12} />
@@ -181,11 +181,11 @@ export function PaisLookup({ paises, value, onChange, onPaisCreated, required, e
                     <div className="px-2 py-1.5 border-t border-slate-100 bg-slate-50">
                         <button
                             type="button"
-                            onClick={abrirCadastroPais}
+                            onClick={abrirCadastroEstado}
                             className="w-full flex items-center justify-center gap-1.5 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
                         >
                             <Plus size={13} />
-                            Cadastrar novo país
+                            Cadastrar novo estado
                         </button>
                     </div>
                 </div>

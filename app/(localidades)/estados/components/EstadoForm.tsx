@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { salvarEstado } from "../actions"
+import { salvarEstado, salvarEstadoComRetorno } from "../actions"
+import { emitirEstadoCadastrado } from "@/lib/hooks/useEstadoCadastrado"
 import toast from "react-hot-toast"
 
 import { Button } from "@/app/components/ui/Button"
@@ -32,6 +33,9 @@ interface EstadoFormProps {
 export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+
+    const abertoPorLookup = window.location.search.includes('origem=lookup')
+
     
     const [listaPaises, setListaPaises] = useState<PaisSelect[]>(listaPaisesIniciais)
 
@@ -57,9 +61,15 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
         })
 
         try {
+            if (abertoPorLookup && !estado?.id) {
+                const resultado = await salvarEstadoComRetorno(formData)
+                toast.success("Estado cadastrado com sucesso!")
+                emitirEstadoCadastrado({ id: resultado.id, estado: resultado.estado })
+            } else {
             await salvarEstado(formData)
             toast.success(estado ? "Estado atualizado com sucesso!" : "Estado cadastrado com sucesso!")
             router.push("/estados")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {

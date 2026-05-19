@@ -39,6 +39,31 @@ export async function salvarEstado(formData: FormData) {
 
 }
 
+export async function salvarEstadoComRetorno(formData: FormData) {
+    const supabase = await createClient()
+
+    const dados = {
+        ativo:   formData.get('ativo') === 'true',
+        estado:  formData.get('estado') as string,
+        uf:      formData.get('uf') as string,
+        pais_id: formData.get('pais_id'),
+    }
+
+    const validacao = estadoSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+
+    const { data, error } = await supabase
+        .from('tb_estados')
+        .insert([validacao.data])
+        .select('id, estado')
+        .single()
+
+    if (error) throw new Error(error.message)
+
+    revalidatePath('/estados')
+    return data as { id: number; estado: string }
+}
+
 export async function alternarStatusEstado(id: number, statusAtual: boolean) {
     const supabase = await createClient()
     

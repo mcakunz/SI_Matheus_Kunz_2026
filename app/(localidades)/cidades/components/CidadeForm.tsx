@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarCidade } from "../actions"
@@ -14,12 +14,13 @@ import { FormLabel } from "@/app/components/ui/FormLabel"
 import { FormSelect } from "@/app/components/ui/FormSelect"
 import { CidadeComEstado, EstadoSelect } from "@/lib/types"
 import { FormSwitch } from "@/components/ui/FormSwitch"
+import { EstadoLookup } from "@/components/ui/EstadoLookup"
 
 const schema = z.object({
-    cidade: z.string().min(2, "O nome da cidade deve ter no mínimo 2 caracteres.").max(100),
+    cidade:      z.string().min(2, "O nome da cidade deve ter no mínimo 2 caracteres.").max(100),
     codigo_ibge: z.string().length(7, "O código IBGE deve ter exatos 7 dígitos."),
-    estado_id: z.string().min(1, "Selecione um estado."),
-    ativo: z.boolean(),
+    estado_id:   z.string().min(1, "Selecione um estado."),
+    ativo:       z.boolean(),
 })
 
 type FormData = z.infer<typeof schema>
@@ -29,17 +30,18 @@ interface CidadeFormProps {
     listaEstados: EstadoSelect[]
 }
 
-export function CidadeForm({ cidade, listaEstados }: CidadeFormProps) {
+export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: CidadeFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    const [listaEstados, setListaEstados] = useState<EstadoSelect[]>(listaEstadosIniciais)
 
-    const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
-            cidade: cidade?.cidade ?? '',
-            codigo_ibge: cidade?.codigo_ibge ?? '',
-            estado_id: cidade?.estado_id?.toString() ?? '',
-            ativo: cidade ? cidade.ativo : true,
+            cidade:      cidade?.cidade               ?? '',
+            codigo_ibge: cidade?.codigo_ibge          ?? '',
+            estado_id:   cidade?.estado_id?.toString() ?? '',
+            ativo:       cidade ? cidade.ativo : true,
         }
     })
 
@@ -63,6 +65,12 @@ export function CidadeForm({ cidade, listaEstados }: CidadeFormProps) {
         } finally {
             setLoading(false)
         }
+    }
+
+    const handleEstadoCriado = (novoEstado: EstadoSelect) => {
+        setListaEstados(prev => 
+            [...prev, novoEstado].sort((a, b) => a.estado.localeCompare(b.estado, 'pt-BR'))
+        )
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -111,15 +119,20 @@ export function CidadeForm({ cidade, listaEstados }: CidadeFormProps) {
 
                 <div className="md:col-span-2">
                     <FormLabel required>Estado</FormLabel>
-                    <FormSelect {...register('estado_id')}>
-                        <option value="">Selecione um estado...</option>
-                        {listaEstados.map((e) => (
-                            <option key={e.id} value={e.id}>
-                                {e.estado}
-                            </option>
-                        ))}
-                    </FormSelect>
-                    <Erro campo="estado_id" />
+                    <Controller 
+                        name="estado_id"
+                        control={control}
+                        render={({ field }) => (
+                            <EstadoLookup 
+                                estados={listaEstados}
+                                value={field.value}
+                                onChange={field.onChange}
+                                onEstadoCreated={handleEstadoCriado}
+                                required
+                                error={errors.estado_id?.message}
+                            />
+                        )}
+                    />
                 </div>
             </div>
 

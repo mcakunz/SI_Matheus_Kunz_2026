@@ -18,7 +18,6 @@ export default async function EstadoPage({ params }: EstadoPageProps) {
     const supabase = await createClient()
     let estado = null
 
-    // Busca países ativos para o select
     const { data: paises, error: errPaises } = await supabase
         .from('tb_paises')
         .select('id, pais')
@@ -42,7 +41,6 @@ export default async function EstadoPage({ params }: EstadoPageProps) {
 
     return (
         <div className="p-6 mx-auto">
-            {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
                 <Link href="/estados" className="flex items-center gap-1 hover:text-slate-800 transition-colors">
                     <HiChevronLeft size={16} />
