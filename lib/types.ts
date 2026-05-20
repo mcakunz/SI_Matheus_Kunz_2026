@@ -1,26 +1,84 @@
-import { Database } from "./database.types";
-
-export type Pais = Database['public']['Tables']['tb_paises']['Row']
-export type Estado = Database['public']['Tables']['tb_estados']['Row']
-export type Cidade = Database['public']['Tables']['tb_cidades']['Row']
-export type Cliente = Database['public']['Tables']['tb_clientes']['Row']
-export type CondicaoPagamento = Database['public']['Tables']['tb_condicoes_pagamento']['Row']
-
-export type EstadoComPais = Estado & {
-    tb_paises: Pick<Pais, 'pais'> | null
+export interface Pais {
+    id:             number
+    pais:           string
+    codigo:         string
+    sigla:          string
+    moeda:          string
+    nacionalidade:  string
+    ativo:          boolean
+    dataCadastro:   string
+    dataAlteracao:  string | null
 }
 
-export type CidadeComEstado = Cidade & {
-    tb_estados: Pick<Estado, 'estado'> | null
+export interface Estado {
+    id:             number
+    estado:         string
+    uf:             string
+    paisId:         number
+    ativo:          boolean
+    dataCadastro:   string
+    dataAlteracao:  string | null
 }
 
-export type ClienteCompleto = Cliente & {
-    tb_cidades:                Pick<Cidade, 'cidade'> | null
-    tb_paises:                  Pick<Pais, 'pais'> | null
-    tb_condicoes_pagamento:      Pick<CondicaoPagamento, 'condicao_pagamento'> | null
+export interface Cidade {
+    id:             number
+    cidade:         string
+    codigoIbge:     string
+    estadoId:       number
+    ativo:          boolean
+    dataCadastro:   string
+    dataAlteracao:  string | null
 }
 
-export type PaisSelect =    Pick<Pais, 'id' | 'pais'>
-export type EstadoSelect =  Pick<Estado, 'id' | 'estado'>
-export type CidadeSelect =  Pick<Cidade, 'id' | 'cidade'>
-export type CondicaoPagamentoSelect = Pick<CondicaoPagamento, 'id' | 'condicao_pagamento'>
+export interface CondicaoPagamento {
+    id:                 number
+    condicaoPagamento:  string
+    ativo:              boolean
+    dataCadastro:       string
+    dataAlteracao:      string | null
+}
+
+export interface Cliente {
+    id:                    number
+    cliente:               string
+    apelido:               string | null
+    cpfCnpj:               string
+    rgInscricaoEstadual:   string | null
+    email:                 string | null
+    telefone:              string | null
+    cep:                   string | null
+    endereco:              string | null
+    numero:                string | null
+    complemento:           string | null
+    bairro:                string | null
+    cidadeId:              number
+    paisId:                number
+    condicaoPagamentoId:   number | null
+    limiteCredito:         number
+    dataNascimento:        string | null
+    tipo:                  'F' | 'J'
+    sexo:                  'M' | 'F' | 'O' | null
+    observacao:            string | null
+    ativo:                 boolean
+    dataCadastro:          string
+    dataAlteracao:         string | null
+}
+
+export interface EstadoComPais extends Estado {
+    pais: string | null
+}
+
+export interface CidadeComEstado extends Cidade {
+    estado: string | null
+}
+
+export interface ClienteCompleto extends Cliente {
+    cidade:            string | null   
+    pais:              string | null   
+    condicaoPagamento: string | null   
+}
+
+export type PaisSelect              = Pick<Pais,             'id' | 'pais'>
+export type EstadoSelect            = Pick<Estado,           'id' | 'estado'>
+export type CidadeSelect            = Pick<Cidade,           'id' | 'cidade'>
+export type CondicaoPagamentoSelect = Pick<CondicaoPagamento,'id' | 'condicaoPagamento'>

@@ -1,53 +1,46 @@
-import { createSearchParamsCache, parseAsString, type SearchParams } from 'nuqs/server'
-import { Suspense } from 'react'
+import Link from "next/link"
+import { HiChevronLeft } from "react-icons/hi"
 
-import { SearchInput } from '@/app/components/SearchInput'
-import { PageTitle } from '@/app/components/ui/PageTitle'
-import { LoadingSpinner } from '@/app/components/ui/LoadingSpinner'
-import { ErrorLoadingData } from '@/app/components/ui/ErrorLoadingData'
-import { createClient } from '@/lib/supabase/server'
-import ClientesClientTable from './components/ClientesClientTable'
+import { pool } from "@/lib/db"
+import { CidadeSelect, PaisSelect, CondicaoPagamentoSelect } from "@/lib/types"
+import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ClienteForm } from "./components/ClienteForm"
+export default async function NovoClientePage() {
+    try {
+        const [cidadesResult, paisesResult, condicoesResult] = await Promise.all([
+            pool.query<CidadeSelect>(
+                `SELECT id, cidade FROM tb_cidades WHERE ativo = true ORDER BY cidade ASC`
+            ),
+            pool.query<PaisSelect>(
+                `SELECT id, pais FROM tb_paises WHERE ativo = true ORDER BY pais ASC`
+            ),
+            pool.query<CondicaoPagamentoSelect>(
+                `SELECT id, "condicaoPagamento" FROM tb_condicoes_pagamento WHERE ativo = true ORDER BY "condicaoPagamento" ASC`
+            ),
+        ])
 
-export const dynamic = 'force-dynamic'
+        return (
+            <div className="p-6 mx-auto">
+                <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
+                    <Link href="/clientes" className="flex items-center gap-1 hover:text-slate-800 transition-colors">
+                        <HiChevronLeft size={16} />
+                        Clientes
+                    </Link>
+                    <span>/</span>
+                    <span className="text-slate-800 font-medium">Novo Cliente</span>
+                </div>
 
-const searchParamsCache = createSearchParamsCache({
-    q: parseAsString.withDefault(''),
-})
-
-async function ClientesTable({ termoBusca }: { termoBusca: string }) {
-    const supabase = await createClient()
-
-    let query = supabase
-        .from('tb_clientes')
-        .select('*, tb_cidades(cidade), tb_paises(pais), tb_condicoes_pagamento(condicao_pagamento)')
-        .order('cliente', { ascending: true })
-
-    if (termoBusca) {
-        query = query.or(
-            `cliente.ilike.%${termoBusca}%,cpf_cnpj.ilike.%${termoBusca}%,email.ilike.%${termoBusca}%`
+                <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8">
+                    <h1 className="text-2xl font-bold text-slate-800 mb-8">Novo Cliente</h1>
+                    <ClienteForm
+                        listaCidades={cidadesResult.rows}
+                        listaPaises={paisesResult.rows}
+                        listaCondicoes={condicoesResult.rows}
+                    />
+                </div>
+            </div>
         )
+    } catch (error: any) {
+        return <ErrorLoadingData message={error.message} />
     }
-
-    const { data: clientes, error } = await query
-    if (error) return <ErrorLoadingData message={error.message} />
-
-    return <ClientesClientTable clientes={clientes || []} />
-}
-
-export default async function ClientesPage({
-    searchParams,
-}: {
-    searchParams: Promise<SearchParams>
-}) {
-    const { q: termoBusca } = await searchParamsCache.parse(searchParams)
-
-    return (
-        <div className="p-6 mx-auto">
-            <PageTitle>Gerenciar Clientes</PageTitle>
-            <SearchInput />
-            <Suspense key={termoBusca} fallback={<LoadingSpinner />}>
-                <ClientesTable termoBusca={termoBusca} />
-            </Suspense>
-        </div>
-    )
 }

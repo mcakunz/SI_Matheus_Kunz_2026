@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { HiChevronLeft } from "react-icons/hi"
-import { createClient } from "@/lib/supabase/server"
+import { pool } from "@/lib/db"
+import { CidadeComEstado, EstadoSelect } from "@/lib/types"
 import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
 import { CidadeForm } from "../components/CidadeForm"
 
@@ -15,58 +16,59 @@ export default async function CidadePage({ params }: CidadePageProps) {
 
     if (!isNovo && isNaN(Number(id))) return notFound()
 
-    const supabase = await createClient()
-    let cidade = null
+    try {
+        const estadosResult = await pool.query<EstadoSelect>(
+            `SELECT id, estado FROM tb_estados WHERE ativo = true ORDER BY estado ASC`
+        )
 
-    const { data: estados, error: errEstados } = await supabase
-        .from('tb_estados')
-        .select('id, estado')
-        .eq('ativo', true)
-        .order('estado', { ascending: true })
+        let cidade: CidadeComEstado | null = null
 
-    if (errEstados) return <ErrorLoadingData message={errEstados.message} />
+        if (!isNovo) {
+            const result = await pool.query<CidadeComEstado>(
+                `SELECT c.*, e.estado
+                   FROM tb_cidades c
+                   LEFT JOIN tb_estados e ON e.id = c."estadoId"
+                  WHERE c.id = $1`,
+                [Number(id)]
+            )
 
-    if (!isNovo) {
-        const { data, error } = await supabase
-            .from('tb_cidades')
-            .select('*, tb_estados(estado)')
-            .eq('id', Number(id))
-            .single()
+            if (!result.rows[0]) return notFound()
+            cidade = result.rows[0]
+        }
 
-        if (error || !data) return notFound()
-        cidade = data
-    }
+        const titulo = isNovo ? "Nova Cidade" : cidade!.cidade
 
-    const titulo = isNovo ? "Nova Cidade" : cidade!.cidade
-
-    return (
-        <div className="p-6 mx-auto">
-            <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
-                <Link href="/cidades" className="flex items-center gap-1 hover:text-slate-800 transition-colors">
-                    <HiChevronLeft size={16} />
-                    Cidades
-                </Link>
-                <span>/</span>
-                <span className="text-slate-800 font-medium">
-                    {isNovo ? "Nova Cidade" : "Editar Cidade"}
-                </span>
-            </div>
-
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8">
-                <div className="mb-8">
-                    <h1 className="text-2xl font-bold text-slate-800">{titulo}</h1>
-                    {!isNovo && cidade && (
-                        <p className="text-sm text-slate-400 mt-1">
-                            ID #{cidade.id} · IBGE: {cidade.codigo_ibge} · {cidade.tb_estados?.estado}
-                        </p>
-                    )}
+        return (
+            <div className="p-6 mx-auto">
+                <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
+                    <Link href="/cidades" className="flex items-center gap-1 hover:text-slate-800 transition-colors">
+                        <HiChevronLeft size={16} />
+                        Cidades
+                    </Link>
+                    <span>/</span>
+                    <span className="text-slate-800 font-medium">
+                        {isNovo ? "Nova Cidade" : "Editar Cidade"}
+                    </span>
                 </div>
 
-                <CidadeForm 
-                    cidade={cidade} 
-                    listaEstados={estados || []} 
-                />
+                <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8">
+                    <div className="mb-8">
+                        <h1 className="text-2xl font-bold text-slate-800">{titulo}</h1>
+                        {!isNovo && cidade && (
+                            <p className="text-sm text-slate-400 mt-1">
+                                ID #{cidade.id} · IBGE: {cidade.codigoIbge} · {cidade.estado}
+                            </p>
+                        )}
+                    </div>
+
+                    <CidadeForm
+                        cidade={cidade}
+                        listaEstados={estadosResult.rows}
+                    />
+                </div>
             </div>
-        </div>
-    )
+        )
+    } catch (error: any) {
+        return <ErrorLoadingData message={error.message} />
+    }
 }

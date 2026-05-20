@@ -1,94 +1,110 @@
 "use server"
 
-import { createClient } from "@/lib/supabase/server"
+import { query, queryOne } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
 const paisSchema = z.object({
-    pais: z.string().min(2, "O nome do país deve ter no mínimo 2 caracteres.").max(100, "O nome do país é muito longo."),
-    codigo: z.string().min(1, "O código é obrigatório.").max(5, "O código não pode passar de 5 caracteres."),
-    sigla: z.string().length(3, "A sigla deve ter exatamente 3 caracteres.").toUpperCase(),
-    moeda: z.string().length(3, "A moeda deve ter 3 caracteres."),
-    nacionalidade: z.string().min(2, "A nacionalidade é obrigatória.").max(100),
-    ativo: z.boolean()
+    pais:           z.string().min(2, "O nome do país deve ter no mínimo 2 caracteres.").max(100, "O nome do país é muito longo."),
+    codigo:         z.string().min(1, "O código é obrigatório.").max(5, "O código não pode passar de 5 caracteres."),
+    sigla:          z.string().length(3, "A sigla deve ter exatamente 3 caracteres.").toUpperCase(),
+    moeda:          z.string().length(3, "A moeda deve ter 3 caracteres."),
+    nacionalidade:  z.string().min(2, "A nacionalidade é obrigatória.").max(100),
+    ativo:          z.boolean()
 })
 
 export async function salvarPais(formData: FormData) {
-    const supabase = await createClient()
-
     const dados = {
-        pais: formData.get('pais') as string,
-        codigo: formData.get('codigo') as string,
-        sigla: formData.get('sigla') as string,
-        moeda: formData.get('moeda') as string, 
-        nacionalidade: formData.get('nacionalidade') as string,
-        ativo: formData.get('ativo') === 'true',
+        pais:           formData.get('pais') as string,
+        codigo:         formData.get('codigo') as string,
+        sigla:          formData.get('sigla') as string,
+        moeda:          formData.get('moeda') as string,
+        nacionalidade:  formData.get('nacionalidade') as string,
+        ativo:          formData.get('ativo') === 'true',
     }
 
     const validacao = paisSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
 
-    if (!validacao.success){
-        throw new Error(validacao.error.issues[0].message)
-    }
-
+    const { pais, codigo, sigla, moeda, nacionalidade, ativo } = validacao.data
     const id = formData.get('id')
 
-    const { error } = id
-        ? await supabase.from('tb_paises').update(validacao.data).eq('id', Number(id))
-        : await supabase.from('tb_paises').insert([validacao.data])
-
-    if (error) throw new Error(error.message)
+    try {
+        if (id) {
+            await query(
+                `UPDATE tb_paises
+                    SET pais = $1, codigo = $2, sigla = $3, moeda = $4,
+                        nacionalidade = $5, ativo = $6, data_alteracao = NOW()
+                  WHERE id = $7`,
+                [pais, codigo, sigla, moeda, nacionalidade, ativo, Number(id)]
+            )
+        } else {
+            await query(
+                `INSERT INTO tb_paises (pais, codigo, sigla, moeda, nacionalidade, ativo)
+                 VALUES ($1, $2, $3, $4, $5, $6)`,
+                [pais, codigo, sigla, moeda, nacionalidade, ativo]
+            )
+        }
+    } catch (error: any) {
+        throw new Error(error.message)
+    }
 
     revalidatePath('/paises')
 }
 
 export async function salvarPaisComRetorno(formData: FormData) {
-    const supabase = await createClient()
- 
     const dados = {
-        pais:          formData.get('pais') as string,
-        codigo:        formData.get('codigo') as string,
-        sigla:         formData.get('sigla') as string,
-        moeda:         formData.get('moeda') as string,
-        nacionalidade: formData.get('nacionalidade') as string,
-        ativo:         formData.get('ativo') === 'true',
+        pais:           formData.get('pais') as string,
+        codigo:         formData.get('codigo') as string,
+        sigla:          formData.get('sigla') as string,
+        moeda:          formData.get('moeda') as string,
+        nacionalidade:  formData.get('nacionalidade') as string,
+        ativo:          formData.get('ativo') === 'true',
     }
- 
+
     const validacao = paisSchema.safeParse(dados)
     if (!validacao.success) throw new Error(validacao.error.issues[0].message)
- 
-    const { data, error } = await supabase
-        .from('tb_paises')
-        .insert([validacao.data])
-        .select('id, pais')
-        .single()
- 
-    if (error) throw new Error(error.message)
- 
-    revalidatePath('/paises')
-    return data as { id: number; pais: string }
+
+    const { pais, codigo, sigla, moeda, nacionalidade, ativo } = validacao.data
+
+    try {
+        const inserted = await queryOne<{ id: number; pais: string }>(
+            `INSERT INTO tb_paises (pais, codigo, sigla, moeda, nacionalidade, ativo)
+             VALUES ($1, $2, $3, $4, $5, $6)
+             RETURNING id, pais`,
+            [pais, codigo, sigla, moeda, nacionalidade, ativo]
+        )
+
+        revalidatePath('/paises')
+        return inserted!
+    } catch (error: any) {
+        throw new Error(error.message)
+    }
 }
 
 export async function alternarStatusPais(id: number, statusAtual: boolean) {
-    const supabase = await createClient()
-    const { error } = await supabase
-        .from('tb_paises')
-        .update({ ativo: !statusAtual })
-        .eq('id', id)
-    
-    if (error) throw new Error(error.message)
+    try {
+        await query(
+            `UPDATE tb_paises SET ativo = $1, data_alteracao = NOW() WHERE id = $2`,
+            [!statusAtual, id]
+        )
+    } catch (error: any) {
+        throw new Error(error.message)
+    }
+
     revalidatePath('/paises')
 }
 
 export async function excluirPais(id: number) {
-    const supabase = await createClient()
-    const { error } = await supabase.from('tb_paises').delete().eq('id', id)    
-
-    if (error) {
+    try {
+        await query(`DELETE FROM tb_paises WHERE id = $1`, [id])
+    } catch (error: any) {
+        // Código 23503 = foreign_key_violation no PostgreSQL
         if (error.code === '23503') {
-            throw new Error("Este país não pode ser excluído pois exitem estados vinculados a ele.")
+            throw new Error("Este país não pode ser excluído pois existem estados vinculados a ele.")
         }
         throw new Error(error.message)
     }
+
     revalidatePath('/paises')
 }

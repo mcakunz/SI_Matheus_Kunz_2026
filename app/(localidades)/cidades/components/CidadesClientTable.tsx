@@ -14,18 +14,18 @@ import { CidadeComEstado, EstadoSelect } from "@/lib/types"
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 80 },
     { field: 'cidade', headerName: 'Cidade', flex: 1, minWidth: 200 },
-    { 
-        field: 'codigo_ibge', 
-        headerName: 'Cód. IBGE', 
-        width: 120, 
-        renderCell: (params) => params.value || '-' 
+    {
+        field: 'codigoIbge',
+        headerName: 'Cód. IBGE',
+        width: 120,
+        renderCell: (params) => params.value || '-'
     },
     {
         field: 'estado',
         headerName: 'Estado',
         flex: 1,
         minWidth: 200,
-        valueGetter: (_value, row) => row.tb_estados?.estado || '-'
+        valueGetter: (_value: any, row: any) => row.estado || '-'
     },
     {
         field: 'ativo',
@@ -35,12 +35,12 @@ const columns: GridColDef[] = [
     }
 ]
 
-export default function CidadesClientTable({ 
-    cidades, 
-    listaEstados 
-}: { 
-    cidades: CidadeComEstado[], 
-    listaEstados: EstadoSelect[] 
+export default function CidadesClientTable({
+    cidades,
+    listaEstados
+}: {
+    cidades: CidadeComEstado[]
+    listaEstados: EstadoSelect[]
 }) {
     const [cidadeSelecionada, setCidadeSelecionada] = useState<CidadeComEstado | null>(null)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)

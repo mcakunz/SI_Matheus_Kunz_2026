@@ -157,11 +157,11 @@ export function PaisForm({ pais }: PaisFormProps) {
 
             {pais && (
                 <div className="pt-4 border-t border-slate-100 text-xs text-slate-400 flex justify-between">
-                    <span>Cadastrado: {new Date(pais.data_cadastro).toLocaleDateString('pt-BR')}</span>
-                    {pais.data_alteracao && (
+                    <span>Cadastrado: {new Date(pais.dataCadastro).toLocaleDateString('pt-BR')}</span>
+                    {pais.dataAlteracao && (
                         <span>
                             Alterado:{" "}
-                            {new Date(pais.data_alteracao).toLocaleDateString('pt-BR', {
+                            {new Date(pais.dataAlteracao).toLocaleDateString('pt-BR', {
                                 day: '2-digit', month: '2-digit', year: 'numeric',
                                 hour: '2-digit', minute: '2-digit',
                             })}
