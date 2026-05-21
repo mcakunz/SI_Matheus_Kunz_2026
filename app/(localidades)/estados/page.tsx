@@ -5,7 +5,8 @@ import { SearchInput } from '@/app/components/SearchInput'
 import { PageTitle } from '@/app/components/ui/PageTitle'
 import { LoadingSpinner } from '@/app/components/ui/LoadingSpinner'
 import { ErrorLoadingData } from '@/app/components/ui/ErrorLoadingData'
-import { createClient } from '@/lib/supabase/server'
+import { pool } from '@/lib/db'
+import { EstadoComPais, PaisSelect } from '@/lib/types'
 import EstadosClientTable from './components/EstadosClientTable'
 
 export const dynamic = 'force-dynamic'
@@ -15,21 +16,39 @@ const searchParamsCache = createSearchParamsCache({
 })
 
 async function EstadosTable({ termoBusca }: { termoBusca: string }) {
-    const supabase = await createClient()
+    try {
+        const [estadosResult, paisesResult] = await Promise.all([
+            termoBusca
+                ? pool.query<EstadoComPais>(
+                    `SELECT e.*, p.pais
+                       FROM tb_estados e
+                       LEFT JOIN tb_paises p ON p.id = e."paisId"
+                      WHERE e.estado ILIKE $1
+                         OR e.uf     ILIKE $1
+                      ORDER BY e.estado ASC`,
+                    [`%${termoBusca}%`]
+                )
+                : pool.query<EstadoComPais>(
+                    `SELECT e.*, p.pais
+                       FROM tb_estados e
+                       LEFT JOIN tb_paises p ON p.id = e."paisId"
+                      ORDER BY e.estado ASC`
+                ),
 
-    let query = supabase
-        .from('tb_estados')
-        .select('*, tb_paises(pais)')
-        .order('estado', { ascending: true })
+            pool.query<PaisSelect>(
+                `SELECT id, pais FROM tb_paises WHERE ativo = true ORDER BY pais ASC`
+            )
+        ])
 
-    if (termoBusca) {
-        query = query.or(`estado.ilike.%${termoBusca}%,uf.ilike.%${termoBusca}%`)
+        return (
+            <EstadosClientTable
+                estados={estadosResult.rows}
+                listaPaises={paisesResult.rows}
+            />
+        )
+    } catch (error: any) {
+        return <ErrorLoadingData message={error.message} />
     }
-
-    const { data: estados, error } = await query
-    if (error) return <ErrorLoadingData message={error.message} />
-
-    return <EstadosClientTable estados={estados || []} />
 }
 
 export default async function EstadosPage({

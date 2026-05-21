@@ -9,7 +9,7 @@ import { ConfirmModal } from "@/app/components/ui/ConfirmModal"
 import { ActionToolbar } from "@/app/components/ui/ActionToolbar"
 import { StatusBadge } from "@/app/components/ui/StatusBadge"
 import toast from "react-hot-toast"
-import { EstadoComPais } from "@/lib/types"
+import { EstadoComPais, PaisSelect } from "@/lib/types"
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 80 },
@@ -20,7 +20,7 @@ const columns: GridColDef[] = [
         headerName: 'País',
         flex: 1,
         minWidth: 200,
-        valueGetter: (_value: any, row: any) => row.tb_paises?.pais || '-'
+        valueGetter: (_value: any, row: any) => row.pais || '-'
     },
     {
         field: 'ativo',
@@ -30,7 +30,13 @@ const columns: GridColDef[] = [
     }
 ]
 
-export default function EstadosClientTable({ estados }: { estados: EstadoComPais[] }) {
+export default function EstadosClientTable({
+    estados,
+    listaPaises
+}: {
+    estados: EstadoComPais[]
+    listaPaises?: PaisSelect[]
+}) {
     const [estadoSelecionado, setEstadoSelecionado] = useState<EstadoComPais | null>(null)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [loadingStatus, setLoadingStatus] = useState(false)

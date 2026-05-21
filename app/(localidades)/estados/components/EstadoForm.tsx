@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -32,20 +32,19 @@ interface EstadoFormProps {
 
 export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoFormProps) {
     const router = useRouter()
+    const searchParams = useSearchParams()
     const [loading, setLoading] = useState(false)
-
-    const abertoPorLookup = window.location.search.includes('origem=lookup')
-
-    
     const [listaPaises, setListaPaises] = useState<PaisSelect[]>(listaPaisesIniciais)
+
+    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             estado:  estado?.estado              ?? '',
             uf:      estado?.uf                  ?? '',
-            pais_id: estado?.pais_id?.toString() ?? '',
-            ativo:   estado ? estado.ativo       : true,
+            pais_id: estado?.paisId?.toString()  ?? '',
+            ativo:   estado ? estado.ativo        : true,
         }
     })
 
@@ -66,9 +65,9 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
                 toast.success("Estado cadastrado com sucesso!")
                 emitirEstadoCadastrado({ id: resultado.id, estado: resultado.estado })
             } else {
-            await salvarEstado(formData)
-            toast.success(estado ? "Estado atualizado com sucesso!" : "Estado cadastrado com sucesso!")
-            router.push("/estados")
+                await salvarEstado(formData)
+                toast.success(estado ? "Estado atualizado com sucesso!" : "Estado cadastrado com sucesso!")
+                router.push("/estados")
             }
         } catch (err: any) {
             toast.error(err.message)
@@ -145,11 +144,11 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
 
             {estado && (
                 <div className="pt-4 border-t border-slate-100 text-xs text-slate-400 flex justify-between">
-                    <span>Cadastrado: {new Date(estado.data_cadastro).toLocaleDateString('pt-BR')}</span>
-                    {estado.data_alteracao && (
+                    <span>Cadastrado: {new Date(estado.dataCadastro).toLocaleDateString('pt-BR')}</span>
+                    {estado.dataAlteracao && (
                         <span>
                             Alterado:{" "}
-                            {new Date(estado.data_alteracao).toLocaleDateString('pt-BR', {
+                            {new Date(estado.dataAlteracao).toLocaleDateString('pt-BR', {
                                 day: '2-digit', month: '2-digit', year: 'numeric',
                                 hour: '2-digit', minute: '2-digit',
                             })}

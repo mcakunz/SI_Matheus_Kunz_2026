@@ -1,7 +1,8 @@
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { HiChevronLeft } from "react-icons/hi"
-import { createClient } from "@/lib/supabase/server"
+import { queryOne } from "@/lib/db"
+import { Pais } from "@/lib/types"
 import { PaisForm } from "../components/PaisForm"
 
 interface PaisPageProps {
@@ -14,18 +15,15 @@ export default async function PaisPage({ params }: PaisPageProps) {
 
     if (!isNovo && isNaN(Number(id))) return notFound()
 
-    const supabase = await createClient()
-    let pais = null
+    let pais: Pais | null = null
 
     if (!isNovo) {
-        const { data, error } = await supabase
-            .from('tb_paises')
-            .select('*')
-            .eq('id', Number(id))
-            .single()
+        pais = await queryOne<Pais>(
+            `SELECT * FROM tb_paises WHERE id = $1`,
+            [Number(id)]
+        )
 
-        if (error || !data) return notFound()
-        pais = data
+        if (!pais) return notFound()
     }
 
     const titulo = isNovo ? "Novo País" : pais!.pais

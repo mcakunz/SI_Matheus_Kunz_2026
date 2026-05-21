@@ -5,7 +5,8 @@ import { SearchInput } from '@/app/components/SearchInput'
 import { PageTitle } from '@/app/components/ui/PageTitle'
 import { LoadingSpinner } from '@/app/components/ui/LoadingSpinner'
 import { ErrorLoadingData } from '@/app/components/ui/ErrorLoadingData'
-import { createClient } from '@/lib/supabase/server'
+import { query } from '@/lib/db'
+import { Pais } from '@/lib/types'
 import PaisesClientTable from './components/PaisesClientTable'
 
 export const dynamic = 'force-dynamic'
@@ -15,23 +16,24 @@ const searchParamsCache = createSearchParamsCache({
 })
 
 async function PaisesTable({ termoBusca }: { termoBusca: string }) {
-    const supabase = await createClient()
+    try {
+        const paises = termoBusca
+            ? await query<Pais>(
+                `SELECT * FROM tb_paises
+                  WHERE pais          ILIKE $1
+                     OR nacionalidade ILIKE $1
+                     OR sigla         ILIKE $1
+                  ORDER BY pais ASC`,
+                [`%${termoBusca}%`]
+            )
+            : await query<Pais>(
+                `SELECT * FROM tb_paises ORDER BY pais ASC`
+            )
 
-    let query = supabase
-        .from('tb_paises')
-        .select('*')
-        .order('pais', { ascending: true })
-
-    if (termoBusca) {
-        query = query.or(
-            `pais.ilike.%${termoBusca}%,nacionalidade.ilike.%${termoBusca}%,sigla.ilike.%${termoBusca}%`
-        )
+        return <PaisesClientTable paises={paises} />
+    } catch (error: any) {
+        return <ErrorLoadingData message={error.message} />
     }
-
-    const { data: paises, error } = await query
-    if (error) return <ErrorLoadingData message={error.message} />
-
-    return <PaisesClientTable paises={paises || []} />
 }
 
 export default async function PaisesPage({

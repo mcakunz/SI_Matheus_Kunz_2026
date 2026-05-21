@@ -14,7 +14,7 @@ import { ClienteCompleto } from "@/lib/types"
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'cliente', headerName: 'Nome / Razão Social', flex: 1, minWidth: 200 },
-    { field: 'cpf_cnpj', headerName: 'CPF / CNPJ', width: 150 },
+    { field: 'cpfCnpj', headerName: 'CPF / CNPJ', width: 150 },
     {
         field: 'tipo', headerName: 'Tipo', width: 90,
         renderCell: (params) => (
@@ -30,8 +30,10 @@ const columns: GridColDef[] = [
     { field: 'email', headerName: 'E-mail', flex: 1, minWidth: 180, renderCell: (params) => params.value || '-' },
     { field: 'telefone', headerName: 'Telefone', width: 140, renderCell: (params) => params.value || '-' },
     {
-        field: 'cidade', headerName: 'Cidade', width: 160,
-        valueGetter: (_value: any, row: any) => row.tb_cidades?.cidade || '-'
+        field: 'cidade',
+        headerName: 'Cidade',
+        width: 160,
+        valueGetter: (_value: any, row: any) => row.cidade || '-'
     },
     {
         field: 'ativo', headerName: 'Status', width: 110,
@@ -80,7 +82,7 @@ export default function ClientesClientTable({ clientes }: { clientes: ClienteCom
                 selectedRow={clienteSelecionado}
                 loading={loadingStatus}
                 onAddHref="/clientes/novo"
-                onEditHref={clienteSelecionado ? `/clientes/${clienteSelecionado.id}/editar` : undefined}
+                onEditHref={clienteSelecionado ? `/clientes/${clienteSelecionado.id}` : undefined}
                 onToggleStatus={handleAlternarStatus}
                 onDelete={() => setIsDeleteModalOpen(true)}
             />

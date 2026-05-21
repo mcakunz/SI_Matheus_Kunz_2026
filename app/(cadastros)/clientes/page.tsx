@@ -1,53 +1,36 @@
-import { createSearchParamsCache, parseAsString, type SearchParams } from 'nuqs/server'
-import { Suspense } from 'react'
+import { pool } from "@/lib/db"
+import { ClienteCompleto } from "@/lib/types"
+import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import ClientesClientTable from "./components/ClientesClientTable"
 
-import { SearchInput } from '@/app/components/SearchInput'
-import { PageTitle } from '@/app/components/ui/PageTitle'
-import { LoadingSpinner } from '@/app/components/ui/LoadingSpinner'
-import { ErrorLoadingData } from '@/app/components/ui/ErrorLoadingData'
-import { createClient } from '@/lib/supabase/server'
-import ClientesClientTable from './components/ClientesClientTable'
-
-export const dynamic = 'force-dynamic'
-
-const searchParamsCache = createSearchParamsCache({
-    q: parseAsString.withDefault(''),
-})
-
-async function ClientesTable({ termoBusca }: { termoBusca: string }) {
-    const supabase = await createClient()
-
-    let query = supabase
-        .from('tb_clientes')
-        .select('*, tb_cidades(cidade), tb_paises(pais), tb_condicoes_pagamento(condicao_pagamento)')
-        .order('cliente', { ascending: true })
-
-    if (termoBusca) {
-        query = query.or(
-            `cliente.ilike.%${termoBusca}%,cpf_cnpj.ilike.%${termoBusca}%,email.ilike.%${termoBusca}%`
+export default async function ClientesPage() {
+    try {
+        const result = await pool.query<ClienteCompleto>(
+            `SELECT
+                c.*,
+                ci.cidade,
+                p.pais,
+                cp."condicaoPagamento"
+             FROM tb_clientes c
+             LEFT JOIN tb_cidades ci           ON ci.id = c."cidadeId"
+             LEFT JOIN tb_paises p             ON p.id  = c."paisId"
+             LEFT JOIN tb_condicoes_pagamento cp ON cp.id = c."condicaoPagamentoId"
+             ORDER BY c.cliente ASC`
         )
+
+        return (
+            <div className="p-6">
+                <div className="mb-6">
+                    <h1 className="text-2xl font-bold text-slate-800">Clientes</h1>
+                    <p className="text-sm text-slate-500 mt-1">Gerencie os clientes cadastrados no sistema.</p>
+                </div>
+
+                <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-4">
+                    <ClientesClientTable clientes={result.rows} />
+                </div>
+            </div>
+        )
+    } catch (error: any) {
+        return <ErrorLoadingData message={error.message} />
     }
-
-    const { data: clientes, error } = await query
-    if (error) return <ErrorLoadingData message={error.message} />
-
-    return <ClientesClientTable clientes={clientes || []} />
-}
-
-export default async function ClientesPage({
-    searchParams,
-}: {
-    searchParams: Promise<SearchParams>
-}) {
-    const { q: termoBusca } = await searchParamsCache.parse(searchParams)
-
-    return (
-        <div className="p-6 mx-auto">
-            <PageTitle>Gerenciar Clientes</PageTitle>
-            <SearchInput />
-            <Suspense key={termoBusca} fallback={<LoadingSpinner />}>
-                <ClientesTable termoBusca={termoBusca} />
-            </Suspense>
-        </div>
-    )
 }

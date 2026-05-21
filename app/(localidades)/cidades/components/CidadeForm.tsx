@@ -11,7 +11,6 @@ import toast from "react-hot-toast"
 import { Button } from "@/app/components/ui/Button"
 import { FormInput } from "@/app/components/ui/FormInput"
 import { FormLabel } from "@/app/components/ui/FormLabel"
-import { FormSelect } from "@/app/components/ui/FormSelect"
 import { CidadeComEstado, EstadoSelect } from "@/lib/types"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { EstadoLookup } from "@/components/ui/EstadoLookup"
@@ -38,10 +37,10 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
     const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
-            cidade:      cidade?.cidade               ?? '',
-            codigo_ibge: cidade?.codigo_ibge          ?? '',
-            estado_id:   cidade?.estado_id?.toString() ?? '',
-            ativo:       cidade ? cidade.ativo : true,
+            cidade:      cidade?.cidade                ?? '',
+            codigo_ibge: cidade?.codigoIbge            ?? '',
+            estado_id:   cidade?.estadoId?.toString()  ?? '',
+            ativo:       cidade ? cidade.ativo          : true,
         }
     })
 
@@ -68,7 +67,7 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
     }
 
     const handleEstadoCriado = (novoEstado: EstadoSelect) => {
-        setListaEstados(prev => 
+        setListaEstados(prev =>
             [...prev, novoEstado].sort((a, b) => a.estado.localeCompare(b.estado, 'pt-BR'))
         )
     }
@@ -119,11 +118,11 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
 
                 <div className="md:col-span-2">
                     <FormLabel required>Estado</FormLabel>
-                    <Controller 
+                    <Controller
                         name="estado_id"
                         control={control}
                         render={({ field }) => (
-                            <EstadoLookup 
+                            <EstadoLookup
                                 estados={listaEstados}
                                 value={field.value}
                                 onChange={field.onChange}
@@ -138,11 +137,11 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
 
             {cidade && (
                 <div className="pt-4 border-t border-slate-100 text-xs text-slate-400 flex justify-between">
-                    <span>Cadastrado: {new Date(cidade.data_cadastro).toLocaleDateString('pt-BR')}</span>
-                    {cidade.data_alteracao && (
+                    <span>Cadastrado: {new Date(cidade.dataCadastro).toLocaleDateString('pt-BR')}</span>
+                    {cidade.dataAlteracao && (
                         <span>
                             Alterado:{" "}
-                            {new Date(cidade.data_alteracao).toLocaleDateString('pt-BR', {
+                            {new Date(cidade.dataAlteracao).toLocaleDateString('pt-BR', {
                                 day: '2-digit', month: '2-digit', year: 'numeric',
                                 hour: '2-digit', minute: '2-digit',
                             })}
