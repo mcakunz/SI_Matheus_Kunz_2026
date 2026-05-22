@@ -1,5 +1,6 @@
 "use server"
 
+import { DBErrorLabels } from "@/components/errors"
 import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
@@ -10,6 +11,14 @@ const estadoSchema = z.object({
     uf:     z.string().length(2, "A UF deve ter exatamente 2 caracteres.").toUpperCase(),
     paisId: z.coerce.number().positive("Selecione um país válido.")
 })
+
+const ESTADO_DB_ERROR_LABELS: DBErrorLabels = {
+    unique: {
+        uf:     "esta UF para o país selecionado",
+        estado: "este nome de estado para o país selecionado",
+    },
+    foreignKey: "Este estado não pode ser excluído pois existem cidades vinculadas a ele.",
+}
 
 export async function salvarEstado(formData: FormData) {
     const dados = {
@@ -50,8 +59,8 @@ export async function salvarEstado(formData: FormData) {
 export async function salvarEstadoComRetorno(formData: FormData) {
     const dados = {
         ativo:  formData.get('ativo') === 'true',
-        estado: formData.get('estado') as string,
-        uf:     formData.get('uf') as string,
+        estado: (formData.get('estado') as string).trim(),
+        uf:     (formData.get('uf') as string).trim().toUpperCase(),
         paisId: formData.get('pais_id'),
     }
 

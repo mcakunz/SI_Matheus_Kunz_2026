@@ -1,5 +1,6 @@
 "use server"
 
+import { DBErrorLabels } from "@/components/errors"
 import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
@@ -61,10 +62,17 @@ function nullableString(value: FormDataEntryValue | null): string | null {
     return (value as string).trim()
 }
 
+const CLIENTE_DB_ERROR_LABELS: DBErrorLabels = {
+    unique: {
+        cpfCnpj: "este CPF/CNPJ",
+    },
+    foreignKey: "Este cliente não pode ser excluído pois possui notas fiscais ou contas vinculadas.",
+}
+
 export async function salvarCliente(formData: FormData) {
     const dados = {
-        cliente:             (formData.get('cliente') as string)?.trim() ?? '',
-        cpfCnpj:             ((formData.get('cpfCnpj') as string) ?? '').replace(/\D/g, ''),
+        cliente:             (formData.get('cliente') as string).trim(),
+        cpfCnpj:             (formData.get('cpfCnpj') as string).replace(/\D/g, ''),
         tipo:                formData.get('tipo') as string,
         cidadeId:            formData.get('cidadeId'),
         paisId:              formData.get('paisId'),
@@ -74,9 +82,9 @@ export async function salvarCliente(formData: FormData) {
 
         apelido:             nullableString(formData.get('apelido')),
         rgInscricaoEstadual: nullableString(formData.get('rgInscricaoEstadual')),
-        email:               nullableString(formData.get('email')),
+        email:               nullableString(formData.get('email'))?.toLowerCase(),
         telefone:            nullableString(formData.get('telefone')),
-        cep:                 nullableString(formData.get('cep')),
+        cep:                 nullableString(formData.get('cep'))?.replace(/\D/g, ''),
         endereco:            nullableString(formData.get('endereco')),
         numero:              nullableString(formData.get('numero')),
         complemento:         nullableString(formData.get('complemento')),

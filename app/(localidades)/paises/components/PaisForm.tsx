@@ -135,7 +135,9 @@ export function PaisForm({ pais }: PaisFormProps) {
                 <div>
                     <FormLabel required>Sigla</FormLabel>
                     <FormInput
-                        {...register('sigla')}
+                        {...register('sigla',{
+                            setValueAs: (v: string) => v.toUpperCase(),
+                        })}
                         maxLength={3}
                         placeholder="Ex: BRA"
                         className="uppercase"
@@ -146,7 +148,9 @@ export function PaisForm({ pais }: PaisFormProps) {
                 <div>
                     <FormLabel required>Moeda</FormLabel>
                     <FormInput
-                        {...register('moeda')}
+                        {...register('moeda',{
+                            setValueAs: (v: string) => v.toUpperCase(),
+                        })}
                         maxLength={3}
                         placeholder="Ex: BRL"
                         className="uppercase"

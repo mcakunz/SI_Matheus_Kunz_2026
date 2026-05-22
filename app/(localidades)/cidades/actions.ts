@@ -1,5 +1,6 @@
 "use server"
 
+import { DBErrorLabels } from "@/components/errors"
 import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
@@ -11,11 +12,19 @@ const cidadeSchema = z.object({
     estadoId:   z.coerce.number().positive("Selecione um estado válido.")
 })
 
+const CIDADE_DB_ERROR_LABELS: DBErrorLabels = {
+    unique: {
+        codigoIbge: "este código IBGE",
+        cidade:     "este nome de cidade para o estado selecionado",
+    },
+    foreignKey: "Esta cidade não pode ser excluída pois existem clientes ou endereços vinculados a ela.",
+}
+
 export async function salvarCidade(formData: FormData) {
     const dados = {
         ativo:      formData.get('ativo') === 'true',
-        cidade:     formData.get('cidade') as string,
-        codigoIbge: formData.get('codigo_ibge') as string,
+        cidade:     (formData.get('cidade') as string).trim(),
+        codigoIbge: (formData.get('codigo_ibge') as string).trim(),
         estadoId:   formData.get('estado_id'),
     }
 

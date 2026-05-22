@@ -1,5 +1,6 @@
 "use server"
 
+import { DBErrorLabels, tratarErroDB } from "@/components/errors"
 import { query, queryOne } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
@@ -13,14 +14,24 @@ const paisSchema = z.object({
     ativo:          z.boolean()
 })
 
+const PAIS_DB_ERROR_LABELS: DBErrorLabels = {
+    unique: {
+        pais:          "este nome de país",
+        sigla:         "esta sigla",
+        codigo:        "este código BACEN",
+        nacionalidade: "esta nacionalidade",
+    },
+    foreignKey: "Este país não pode ser excluído pois existem estados vinculados a ele.",
+}
+
 export async function salvarPais(formData: FormData) {
     const dados = {
-        pais:           formData.get('pais') as string,
-        codigo:         formData.get('codigo') as string,
-        sigla:          formData.get('sigla') as string,
-        moeda:          formData.get('moeda') as string,
-        nacionalidade:  formData.get('nacionalidade') as string,
-        ativo:          formData.get('ativo') === 'true',
+        pais:           (formData.get('pais') as string).trim(),
+        codigo:         (formData.get('codigo') as string).trim(),
+        sigla:          (formData.get('sigla') as string).trim().toUpperCase(),
+        moeda:          (formData.get('moeda') as string).trim().toUpperCase(),
+        nacionalidade:  (formData.get('nacionalidade') as string).trim(),
+        ativo:          (formData.get('ativo') === 'true'),
     }
 
     const validacao = paisSchema.safeParse(dados)
@@ -34,7 +45,7 @@ export async function salvarPais(formData: FormData) {
             await query(
                 `UPDATE tb_paises
                     SET pais = $1, codigo = $2, sigla = $3, moeda = $4,
-                        nacionalidade = $5, ativo = $6, data_alteracao = NOW()
+                        nacionalidade = $5, ativo = $6
                   WHERE id = $7`,
                 [pais, codigo, sigla, moeda, nacionalidade, ativo, Number(id)]
             )
@@ -46,7 +57,7 @@ export async function salvarPais(formData: FormData) {
             )
         }
     } catch (error: any) {
-        throw new Error(error.message)
+        tratarErroDB(error, PAIS_DB_ERROR_LABELS)
     }
 
     revalidatePath('/paises')
@@ -78,18 +89,18 @@ export async function salvarPaisComRetorno(formData: FormData) {
         revalidatePath('/paises')
         return inserted!
     } catch (error: any) {
-        throw new Error(error.message)
+        tratarErroDB(error)
     }
 }
 
 export async function alternarStatusPais(id: number, statusAtual: boolean) {
     try {
         await query(
-            `UPDATE tb_paises SET ativo = $1, data_alteracao = NOW() WHERE id = $2`,
+            `UPDATE tb_paises SET ativo = $1 WHERE id = $2`,
             [!statusAtual, id]
         )
     } catch (error: any) {
-        throw new Error(error.message)
+        tratarErroDB(error)
     }
 
     revalidatePath('/paises')
@@ -99,11 +110,7 @@ export async function excluirPais(id: number) {
     try {
         await query(`DELETE FROM tb_paises WHERE id = $1`, [id])
     } catch (error: any) {
-        // Código 23503 = foreign_key_violation no PostgreSQL
-        if (error.code === '23503') {
-            throw new Error("Este país não pode ser excluído pois existem estados vinculados a ele.")
-        }
-        throw new Error(error.message)
+        tratarErroDB(error)
     }
 
     revalidatePath('/paises')
