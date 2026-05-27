@@ -8,12 +8,14 @@ import { z } from "zod"
 import { salvarPais, salvarPaisComRetorno } from "../actions"
 import toast from "react-hot-toast"
 
-import { Button } from "@/app/components/ui/Button"
-import { FormInput } from "@/app/components/ui/FormInput"
-import { FormLabel } from "@/app/components/ui/FormLabel"
-import { Pais } from "@/lib/types"
+import { Button }     from "@/app/components/ui/Button"
+import { FormInput }  from "@/app/components/ui/FormInput"
+import { FormLabel }  from "@/app/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
+import { Pais }       from "@/lib/types"
 import { emitirPaisCadastrado } from "@/lib/hooks/usePaisCadastrado"
+
+import { formatarData } from "@/lib/utils/date"
 
 const schema = z.object({
     pais:          z.string().min(2, "O nome do país deve ter no mínimo 2 caracteres.").max(100),
@@ -30,8 +32,9 @@ interface PaisFormProps {
     pais?: Pais | null
 }
 
+
 export function PaisForm({ pais }: PaisFormProps) {
-    const router = useRouter()
+    const router       = useRouter()
     const searchParams = useSearchParams()
     const [loading, setLoading] = useState(false)
 
@@ -92,10 +95,7 @@ export function PaisForm({ pais }: PaisFormProps) {
 
                 <div>
                     <FormLabel required>País</FormLabel>
-                    <FormInput
-                        {...register('pais')}
-                        placeholder="Digite o nome do país"
-                    />
+                    <FormInput {...register('pais')} placeholder="Digite o nome do país" />
                     <Erro campo="pais" />
                 </div>
 
@@ -110,10 +110,7 @@ export function PaisForm({ pais }: PaisFormProps) {
             <div className="grid grid-cols-1 md:grid-cols-[1fr_80px_100px_150px] gap-4 md:gap-6">
                 <div>
                     <FormLabel required>Nacionalidade</FormLabel>
-                    <FormInput
-                        {...register('nacionalidade')}
-                        placeholder="Ex: Brasileira"
-                    />
+                    <FormInput {...register('nacionalidade')} placeholder="Ex: Brasileira" />
                     <Erro campo="nacionalidade" />
                 </div>
 
@@ -135,9 +132,7 @@ export function PaisForm({ pais }: PaisFormProps) {
                 <div>
                     <FormLabel required>Sigla</FormLabel>
                     <FormInput
-                        {...register('sigla',{
-                            setValueAs: (v: string) => v.toUpperCase(),
-                        })}
+                        {...register('sigla', { setValueAs: (v: string) => v.toUpperCase() })}
                         maxLength={3}
                         placeholder="Ex: BRA"
                         className="uppercase"
@@ -148,9 +143,7 @@ export function PaisForm({ pais }: PaisFormProps) {
                 <div>
                     <FormLabel required>Moeda</FormLabel>
                     <FormInput
-                        {...register('moeda',{
-                            setValueAs: (v: string) => v.toUpperCase(),
-                        })}
+                        {...register('moeda', { setValueAs: (v: string) => v.toUpperCase() })}
                         maxLength={3}
                         placeholder="Ex: BRL"
                         className="uppercase"
@@ -160,17 +153,25 @@ export function PaisForm({ pais }: PaisFormProps) {
             </div>
 
             {pais && (
-                <div className="pt-4 border-t border-slate-100 text-xs text-slate-400 flex justify-between">
-                    <span>Cadastrado: {new Date(pais.dataCadastro).toLocaleDateString('pt-BR')}</span>
+                <div className="pt-4 border-t border-slate-100">
+                    <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs text-slate-400">
+                        <div className="flex flex-col gap-0.5">
+                            <span className="text-slate-300 font-medium">Cadastrado em</span>
+                            <span>{formatarData(pais.dataCadastro)}</span>
+                            {pais.usuarioCadastro && (
+                                <span className="text-slate-500">por {pais.usuarioCadastro}</span>
+                            )}
+                        </div>
                     {pais.dataAlteracao && (
-                        <span>
-                            Alterado:{" "}
-                            {new Date(pais.dataAlteracao).toLocaleDateString('pt-BR', {
-                                day: '2-digit', month: '2-digit', year: 'numeric',
-                                hour: '2-digit', minute: '2-digit',
-                            })}
-                        </span>
+                            <div className="flex flex-col gap-0.5">
+                                <span className="text-slate-300 font-medium">Última alteração</span>
+                                <span>{formatarData(pais.dataAlteracao, true)}</span>
+                                {pais.usuarioAlteracao && (
+                                    <span className="text-slate-500">por {pais.usuarioAlteracao}</span>
                     )}
+                            </div>
+                        )}
+                    </div>
                 </div>
             )}
 

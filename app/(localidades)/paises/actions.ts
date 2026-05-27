@@ -2,6 +2,8 @@
 
 import { DBErrorLabels, tratarErroDB } from "@/components/errors"
 import { query, queryOne } from "@/lib/db"
+import { obterSessao } from "@/lib/auth/session"
+import { exigirPermissao } from "@/lib/auth/permissoes"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
@@ -24,7 +26,16 @@ const PAIS_DB_ERROR_LABELS: DBErrorLabels = {
     foreignKey: "Este país não pode ser excluído pois existem estados vinculados a ele.",
 }
 
+async function setarUsuarioAuditoria(usuarioId: number) {
+    await query(`SET LOCAL app.usuario_id = ${usuarioId}`)
+}
+
 export async function salvarPais(formData: FormData) {
+    const id = formData.get('id')
+    await exigirPermissao('paises', id ? 'editar' : 'criar')
+
+    const sessao = await obterSessao()
+
     const dados = {
         pais:           (formData.get('pais') as string).trim(),
         codigo:         (formData.get('codigo') as string).trim(),
@@ -38,22 +49,22 @@ export async function salvarPais(formData: FormData) {
     if (!validacao.success) throw new Error(validacao.error.issues[0].message)
 
     const { pais, codigo, sigla, moeda, nacionalidade, ativo } = validacao.data
-    const id = formData.get('id')
 
     try {
         if (id) {
             await query(
                 `UPDATE tb_paises
                     SET pais = $1, codigo = $2, sigla = $3, moeda = $4,
-                        nacionalidade = $5, ativo = $6
-                  WHERE id = $7`,
-                [pais, codigo, sigla, moeda, nacionalidade, ativo, Number(id)]
+                        nacionalidade = $5, ativo = $6,
+                        "usuarioAlteracaoId" = $7
+                  WHERE id = $8`,
+                [pais, codigo, sigla, moeda, nacionalidade, ativo, sessao?.id ?? null, Number(id)]
             )
         } else {
             await query(
-                `INSERT INTO tb_paises (pais, codigo, sigla, moeda, nacionalidade, ativo)
-                 VALUES ($1, $2, $3, $4, $5, $6)`,
-                [pais, codigo, sigla, moeda, nacionalidade, ativo]
+                `INSERT INTO tb_paises (pais, codigo, sigla, moeda, nacionalidade, ativo, "usuarioCadastroId", "usuarioAlteracaoId")
+                 VALUES ($1, $2, $3, $4, $5, $6, $7, $7)`,
+                [pais, codigo, sigla, moeda, nacionalidade, ativo, sessao?.id ?? null]
             )
         }
     } catch (error: any) {
@@ -64,6 +75,9 @@ export async function salvarPais(formData: FormData) {
 }
 
 export async function salvarPaisComRetorno(formData: FormData) {
+    //await exigirPermissao('paises', 'criar')
+    const sessao = await obterSessao()
+
     const dados = {
         pais:           formData.get('pais') as string,
         codigo:         formData.get('codigo') as string,
@@ -80,10 +94,10 @@ export async function salvarPaisComRetorno(formData: FormData) {
 
     try {
         const inserted = await queryOne<{ id: number; pais: string }>(
-            `INSERT INTO tb_paises (pais, codigo, sigla, moeda, nacionalidade, ativo)
-             VALUES ($1, $2, $3, $4, $5, $6)
+            `INSERT INTO tb_paises (pais, codigo, sigla, moeda, nacionalidade, ativo, "usuarioCadastroId", "usuarioAlteracaoId")
+             VALUES ($1, $2, $3, $4, $5, $6, $7, $7)
              RETURNING id, pais`,
-            [pais, codigo, sigla, moeda, nacionalidade, ativo]
+            [pais, codigo, sigla, moeda, nacionalidade, ativo, sessao?.id ?? null]
         )
 
         revalidatePath('/paises')
@@ -94,10 +108,15 @@ export async function salvarPaisComRetorno(formData: FormData) {
 }
 
 export async function alternarStatusPais(id: number, statusAtual: boolean) {
+    await exigirPermissao('paises', 'ativar')
+    const sessao = await obterSessao()
+
     try {
         await query(
-            `UPDATE tb_paises SET ativo = $1 WHERE id = $2`,
-            [!statusAtual, id]
+            `UPDATE tb_paises
+                SET ativo = $1, "usuarioAlteracaoId" = $2
+              WHERE id = $3`,
+            [!statusAtual, sessao?.id ?? null, id]
         )
     } catch (error: any) {
         tratarErroDB(error)
@@ -107,10 +126,12 @@ export async function alternarStatusPais(id: number, statusAtual: boolean) {
 }
 
 export async function excluirPais(id: number) {
+    await exigirPermissao('paises', 'excluir')
+
     try {
         await query(`DELETE FROM tb_paises WHERE id = $1`, [id])
     } catch (error: any) {
-        tratarErroDB(error)
+        tratarErroDB(error, PAIS_DB_ERROR_LABELS)
     }
 
     revalidatePath('/paises')
