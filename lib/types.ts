@@ -1,41 +1,46 @@
 export interface Pais {
-    id:             number
-    pais:           string
-    codigo:         string
-    sigla:          string
-    moeda:          string
-    nacionalidade:  string
-    ativo:          boolean
-    dataCadastro:   string
-    dataAlteracao:  string | null
+    id:                  number
+    pais:                string
+    codigo:              string
+    sigla:               string
+    moeda:               string
+    nacionalidade:       string
+    ativo:               boolean
+    dataCadastro:        string
+    dataAlteracao:       string | null
+
+    usuarioCadastroId:   number | null
+    usuarioCadastro:     string | null   
+    usuarioAlteracaoId:  number | null
+    usuarioAlteracao:    string | null   
 }
 
 export interface Estado {
-    id:             number
-    estado:         string
-    uf:             string
-    paisId:         number
-    ativo:          boolean
-    dataCadastro:   string
-    dataAlteracao:  string | null
+    id:                  number
+    estado:              string
+    uf:                  string
+    paisId:              number
+    ativo:               boolean
+    dataCadastro:        string
+    dataAlteracao:       string | null
 }
 
 export interface Cidade {
-    id:             number
-    cidade:         string
-    codigoIbge:     string
-    estadoId:       number
-    ativo:          boolean
-    dataCadastro:   string
-    dataAlteracao:  string | null
+    id:                  number
+    cidade:              string
+    codigoIbge:          string
+    estadoId:            number
+    ativo:               boolean
+    dataCadastro:        string
+    dataAlteracao:       string | null
 }
 
 export interface CondicaoPagamento {
-    id:                 number
-    condicaoPagamento:  string
-    ativo:              boolean
-    dataCadastro:       string
-    dataAlteracao:      string | null
+    id:                  number
+    condicaoPagamento:   string
+    ativo:               boolean
+    dataCadastro:        string
+    dataAlteracao:       string | null
 }
 
 export interface Cliente {

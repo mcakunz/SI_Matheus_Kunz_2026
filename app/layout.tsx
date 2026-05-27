@@ -7,6 +7,16 @@ import { cn } from "@/lib/utils";
 
 const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
+const SESSAO_DEV = {
+    id: 1,
+    usuario: 'dev',
+    nome: 'Desenvolvedor',
+    email: 'dev@local',
+    perfilId: 1,
+    perfil: 'SUPER_ADMIN',
+    nivelPerfil: 99,
+    fotoPerfil: null,
+}
 
 export default function RootLayout({
   children,
@@ -18,7 +28,7 @@ export default function RootLayout({
       <body>
         <NuqsAdapter>
           <ToasterProvider />
-          <Sidebar>
+          <Sidebar sessao={SESSAO_DEV}>
             {children}
           </Sidebar>
         </NuqsAdapter>
