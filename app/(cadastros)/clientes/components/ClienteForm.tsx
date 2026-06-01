@@ -183,16 +183,15 @@ export function ClienteForm({ cliente, listaCidades, listaPaises, listaCondicoes
                 </div>
             </div>
 
-            <div>
-                <FormLabel required>{isPF ? "Nome Completo" : "Razão Social"}</FormLabel>
-                <FormInput
-                    {...register('cliente')}
-                    placeholder={isPF ? "Digite o nome completo" : "Digite a razão social"}
-                />
-                <Erro campo="cliente" />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div>
+                    <FormLabel required>{isPF ? "Cliente" : "Razão Social"}</FormLabel>
+                    <FormInput
+                        {...register('cliente')}
+                        placeholder={isPF ? "Digite o nome completo" : "Digite a razão social"}
+                    />
+                    <Erro campo="cliente" />
+                </div>
                 <div>
                     <FormLabel>{isPF ? "Apelido" : "Nome Fantasia"}</FormLabel>
                     <FormInput
@@ -200,42 +199,7 @@ export function ClienteForm({ cliente, listaCidades, listaPaises, listaCondicoes
                         placeholder={isPF ? "Apelido" : "Nome fantasia"}
                     />
                 </div>
-                <div>
-                    <FormLabel required>{isPF ? "CPF" : "CNPJ"}</FormLabel>
-                    <FormInput
-                        {...register('cpfCnpj', {
-                            onChange: (e) => {
-                                e.target.value = isPF
-                                    ? mascaraCPF(e.target.value)
-                                    : mascaraCNPJ(e.target.value)
-                            }
-                        })}
-                        maxLength={isPF ? 14 : 18}
-                        placeholder={isPF ? "000.000.000-00" : "00.000.000/0000-00"}
-                        inputMode="numeric"
-                    />
-                    <Erro campo="cpfCnpj" />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div>
-                    <FormLabel>{isPF ? "RG" : "Inscrição Estadual"}</FormLabel>
-                    <FormInput
-                        {...register('rgInscricaoEstadual')}
-                        placeholder={isPF ? "Número do RG" : "Número da I.E."}
-                        maxLength={isPF ? 9 : 20}
-                    />
-                    <Erro campo="rgInscricaoEstadual" />
-                </div>
-                <div>
-                    <FormLabel>{isPF ? "Data de Nascimento" : "Data de Fundação"}</FormLabel>
-                    <FormInput type="date" {...register('dataNascimento')} />
-                </div>
-            </div>
-
-            {isPF && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+                {isPF ? (
                     <div>
                         <FormLabel>Sexo</FormLabel>
                         <FormSelect {...register('sexo')}>
@@ -245,33 +209,7 @@ export function ClienteForm({ cliente, listaCidades, listaPaises, listaCondicoes
                             <option value="O">Outro</option>
                         </FormSelect>
                     </div>
-                </div>
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div>
-                    <FormLabel>E-mail</FormLabel>
-                    <FormInput type="email" {...register('email')} placeholder="email@exemplo.com" />
-                    <Erro campo="email" />
-                </div>
-                <div>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormInput
-                        {...register('telefone', {
-                            onChange: (e) => {
-                                e.target.value = mascaraTelefone(e.target.value)
-                            }
-                        })}
-                        maxLength={16}
-                        placeholder="(00) 00000-0000"
-                        inputMode="numeric"
-                    />
-                </div>
-            </div>
-
-            <div>
-                <FormLabel>Observações</FormLabel>
-                <FormInput {...register('observacao')} placeholder="Observações adicionais" />
+                ) : <div />}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-[160px_1fr_120px] gap-4 md:gap-6">
@@ -339,6 +277,60 @@ export function ClienteForm({ cliente, listaCidades, listaPaises, listaCondicoes
                 </div>
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div>
+                    <FormLabel>Telefone</FormLabel>
+                    <FormInput
+                        {...register('telefone', {
+                            onChange: (e) => {
+                                e.target.value = mascaraTelefone(e.target.value)
+                            }
+                        })}
+                        maxLength={16}
+                        placeholder="(00) 00000-0000"
+                        inputMode="numeric"
+                    />
+                </div>
+                <div>
+                    <FormLabel>E-mail</FormLabel>
+                    <FormInput type="email" {...register('email')} placeholder="email@exemplo.com" />
+                    <Erro campo="email" />
+                </div>
+                <div />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div>
+                    <FormLabel required>{isPF ? "CPF" : "CNPJ"}</FormLabel>
+                    <FormInput
+                        {...register('cpfCnpj', {
+                            onChange: (e) => {
+                                e.target.value = isPF
+                                    ? mascaraCPF(e.target.value)
+                                    : mascaraCNPJ(e.target.value)
+                            }
+                        })}
+                        maxLength={isPF ? 14 : 18}
+                        placeholder={isPF ? "000.000.000-00" : "00.000.000/0000-00"}
+                        inputMode="numeric"
+                    />
+                    <Erro campo="cpfCnpj" />
+                </div>
+                <div>
+                    <FormLabel>{isPF ? "RG" : "Inscrição Estadual"}</FormLabel>
+                    <FormInput
+                        {...register('rgInscricaoEstadual')}
+                        placeholder={isPF ? "Número do RG" : "Número da I.E."}
+                        maxLength={isPF ? 9 : 20}
+                    />
+                    <Erro campo="rgInscricaoEstadual" />
+                </div>
+                <div>
+                    <FormLabel>{isPF ? "Data de Nascimento" : "Data de Fundação"}</FormLabel>
+                    <FormInput type="date" {...register('dataNascimento')} />
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
                     <FormLabel>Condição de Pagamento</FormLabel>
@@ -355,6 +347,11 @@ export function ClienteForm({ cliente, listaCidades, listaPaises, listaCondicoes
                     <FormInput type="number" {...register('limiteCredito')} min={0} step="0.01" />
                     <Erro campo="limiteCredito" />
                 </div>
+            </div>
+
+            <div>
+                <FormLabel>Observações</FormLabel>
+                <FormInput {...register('observacao')} placeholder="Observações adicionais" />
             </div>
 
             {cliente && (
