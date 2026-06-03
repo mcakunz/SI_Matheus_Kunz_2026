@@ -151,6 +151,9 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
             )}
 
             <div className="flex items-center justify-end gap-3 pt-5 border-t border-slate-200">
+                <Button type="submit" disabled={loading} className="px-8">
+                    {loading ? "Salvando..." : cidade ? "Salvar Alterações" : "Salvar"}
+                </Button>
                 <button
                     type="button"
                     onClick={() => router.push("/cidades")}
@@ -158,9 +161,6 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
                 >
                     Cancelar
                 </button>
-                <Button type="submit" disabled={loading} className="px-8">
-                    {loading ? "Salvando..." : cidade ? "Salvar Alterações" : "Cadastrar Cidade"}
-                </Button>
             </div>
         </form>
     )

@@ -341,6 +341,9 @@ export function CondicaoPagamentoForm({
             )}
 
             <div className="flex items-center justify-end gap-3 pt-5 border-t border-slate-200">
+                <Button type="submit" disabled={loading} className="px-8">
+                    {loading ? "Salvando..." : condicao ? "Salvar Alterações" : "Salvar"}
+                </Button>
                 <button
                     type="button"
                     onClick={() => router.push("/condicoes-pagamento")}
@@ -348,9 +351,6 @@ export function CondicaoPagamentoForm({
                 >
                     Cancelar
                 </button>
-                <Button type="submit" disabled={loading} className="px-8">
-                    {loading ? "Salvando..." : condicao ? "Salvar Alterações" : "Cadastrar Condição"}
-                </Button>
             </div>
         </form>
     )

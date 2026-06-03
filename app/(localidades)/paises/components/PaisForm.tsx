@@ -176,6 +176,9 @@ export function PaisForm({ pais }: PaisFormProps) {
             )}
 
             <div className="flex items-center justify-end gap-3 pt-5 border-t border-slate-200">
+                <Button type="submit" disabled={loading} className="px-8">
+                    {loading ? "Salvando..." : pais ? "Salvar Alterações" : "Salvar"}
+                </Button>
                 <button
                     type="button"
                     onClick={() => abertoPorLookup ? window.close() : router.push("/paises")}
@@ -183,9 +186,6 @@ export function PaisForm({ pais }: PaisFormProps) {
                 >
                     Cancelar
                 </button>
-                <Button type="submit" disabled={loading} className="px-8">
-                    {loading ? "Salvando..." : pais ? "Salvar Alterações" : "Cadastrar País"}
-                </Button>
             </div>
         </form>
     )

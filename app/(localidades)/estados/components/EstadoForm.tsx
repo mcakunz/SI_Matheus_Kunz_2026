@@ -158,6 +158,9 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
             )}
 
             <div className="flex items-center justify-end gap-3 pt-5 border-t border-slate-200">
+                <Button type="submit" disabled={loading} className="px-8">
+                    {loading ? "Salvando..." : estado ? "Salvar Alterações" : "Salvar"}
+                </Button>
                 <button
                     type="button"
                     onClick={() => router.push("/estados")}
@@ -165,9 +168,6 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
                 >
                     Cancelar
                 </button>
-                <Button type="submit" disabled={loading} className="px-8">
-                    {loading ? "Salvando..." : estado ? "Salvar Alterações" : "Cadastrar Estado"}
-                </Button>
             </div>
         </form>
     )
