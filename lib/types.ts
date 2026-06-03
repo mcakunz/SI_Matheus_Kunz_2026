@@ -43,6 +43,26 @@ export interface CondicaoPagamento {
     dataAlteracao:       string | null
 }
 
+export interface FormaPagamento {
+    id:               number
+    formaPagamento:   string
+    ativo:            boolean
+    dataCadastro:     string
+    dataAlteracao:    string | null
+}
+
+export interface ParcelaCondicao {
+    id:                  number
+    condicaoPagamentoId: number
+    numero:              number
+    dias:                number
+    percentual:          number
+    formaPagamentoId:    number
+    formaPagamento:      string   
+    dataCadastro:        string
+    dataAlteracao:       string | null
+}
+
 export interface Cliente {
     id:                    number
     cliente:               string
@@ -83,7 +103,42 @@ export interface ClienteCompleto extends Cliente {
     condicaoPagamento: string | null   
 }
 
+export interface FormaPagamento {
+    id:                 number
+    formaPagamento:     string
+    ativo:              boolean
+    dataCadastro:       string
+    dataAlteracao:      string | null 
+}
+
+export interface ParcelaCondicao {
+    id:                         number
+    condicaoPagamentoId:        number
+    numero:                     number
+    dias:                       number
+    percentual:                 number
+    formaPagamentoId:           number
+    formaPagamento:             string
+    dataCadastro:               string
+    dataAlteracao:              string | null
+}
+
+export interface CondicaoPagamentoCompleto {
+    id:                  number
+    condicaoPagamento:   string
+    numeroParcelas:      number
+    diasPrimeiraParcela: number
+    diasEntreParcelas:   number
+    percentualJuros:     number
+    percentualMulta:     number
+    percentualDesconto:  number
+    ativo:               boolean
+    dataCadastro:        string
+    dataAlteracao:       string | null
+}
+
 export type PaisSelect              = Pick<Pais,             'id' | 'pais'>
 export type EstadoSelect            = Pick<Estado,           'id' | 'estado'>
 export type CidadeSelect            = Pick<Cidade,           'id' | 'cidade'>
 export type CondicaoPagamentoSelect = Pick<CondicaoPagamento,'id' | 'condicaoPagamento'>
+export type FormaPagamentoSelect    = Pick<FormaPagamento,   'id' | 'formaPagamento'>
