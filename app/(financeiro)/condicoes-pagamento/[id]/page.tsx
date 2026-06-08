@@ -49,7 +49,7 @@ export default async function CondicaoPagamentoPage({ params }: CondicaoPagament
         return (
             <div className="p-6 mx-auto">
                 <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
-                    <Link href="condicoes-pagamento" className="flex items-center gap-1 hover:text-slate-800 transition-colors">
+                    <Link href="/condicoes-pagamento" className="flex items-center gap-1 hover:text-slate-800 transition-colors">
                         <HiChevronLeft size={16} />
                         Condições de Pagamento
                     </Link>
