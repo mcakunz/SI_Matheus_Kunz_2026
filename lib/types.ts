@@ -102,15 +102,6 @@ export interface ClienteCompleto extends Cliente {
     cidade:            string | null   
     condicaoPagamento: string | null   
 }
-
-export interface FormaPagamento {
-    id:                 number
-    formaPagamento:     string
-    ativo:              boolean
-    dataCadastro:       string
-    dataAlteracao:      string | null 
-}
-
 export interface ParcelaCondicao {
     id:                         number
     condicaoPagamentoId:        number
