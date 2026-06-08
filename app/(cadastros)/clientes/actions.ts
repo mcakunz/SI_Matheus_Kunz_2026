@@ -11,7 +11,6 @@ const clienteSchema = z.object({
     cpfCnpj:             z.string().min(11, "CPF/CNPJ inválido.").max(14, "CPF/CNPJ inválido."),
     tipo:                z.enum(['F', 'J'], { message: "Tipo de pessoa inválido." }),
     cidadeId:            z.coerce.number().positive("Selecione uma cidade válida."),
-    paisId:              z.coerce.number().positive("Selecione um país válido."),
     condicaoPagamentoId: z.preprocess(
         (val) => (val === '' || val === null || val === undefined ? undefined : Number(val)),
         z.number().positive().optional()
@@ -75,7 +74,6 @@ export async function salvarCliente(formData: FormData) {
         cpfCnpj:             (formData.get('cpfCnpj') as string).replace(/\D/g, ''),
         tipo:                formData.get('tipo') as string,
         cidadeId:            formData.get('cidadeId'),
-        paisId:              formData.get('paisId'),
         condicaoPagamentoId: formData.get('condicaoPagamentoId'),
         limiteCredito:       formData.get('limiteCredito'),
         ativo:               formData.get('ativo') === 'true',
@@ -108,25 +106,24 @@ export async function salvarCliente(formData: FormData) {
                         "cpfCnpj"             = $2,
                         "tipo"                = $3,
                         "cidadeId"            = $4,
-                        "paisId"              = $5,
-                        "condicaoPagamentoId" = $6,
-                        "limiteCredito"       = $7,
-                        "ativo"               = $8,
-                        "apelido"             = $9,
-                        "rgInscricaoEstadual" = $10,
-                        "email"               = $11,
-                        "telefone"            = $12,
-                        "cep"                 = $13,
-                        "endereco"            = $14,
-                        "numero"              = $15,
-                        "complemento"         = $16,
-                        "bairro"              = $17,
-                        "dataNascimento"      = $18,
-                        "sexo"                = $19,
-                        "observacao"          = $20
-                  WHERE id = $21`,
+                        "condicaoPagamentoId" = $5,
+                        "limiteCredito"       = $6,
+                        "ativo"               = $7,
+                        "apelido"             = $8,
+                        "rgInscricaoEstadual" = $9,
+                        "email"               = $10,
+                        "telefone"            = $11,
+                        "cep"                 = $12,
+                        "endereco"            = $13,
+                        "numero"              = $14,
+                        "complemento"         = $15,
+                        "bairro"              = $16,
+                        "dataNascimento"      = $17,
+                        "sexo"                = $18,
+                        "observacao"          = $19
+                  WHERE id = $20`,
                 [
-                    v.cliente, v.cpfCnpj, v.tipo, v.cidadeId, v.paisId,
+                    v.cliente, v.cpfCnpj, v.tipo, v.cidadeId, 
                     v.condicaoPagamentoId ?? null, v.limiteCredito, v.ativo,
                     v.apelido, v.rgInscricaoEstadual, v.email, v.telefone,
                     v.cep, v.endereco, v.numero, v.complemento, v.bairro,
@@ -137,17 +134,17 @@ export async function salvarCliente(formData: FormData) {
         } else {
             await pool.query(
                 `INSERT INTO tb_clientes (
-                    "cliente", "cpfCnpj", "tipo", "cidadeId", "paisId",
+                    "cliente", "cpfCnpj", "tipo", "cidadeId",
                     "condicaoPagamentoId", "limiteCredito", "ativo",
                     "apelido", "rgInscricaoEstadual", "email", "telefone",
                     "cep", "endereco", "numero", "complemento", "bairro",
                     "dataNascimento", "sexo", "observacao"
                 ) VALUES (
                     $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,
-                    $11,$12,$13,$14,$15,$16,$17,$18,$19,$20
+                    $11,$12,$13,$14,$15,$16,$17,$18,$19
                 )`,
                 [
-                    v.cliente, v.cpfCnpj, v.tipo, v.cidadeId, v.paisId,
+                    v.cliente, v.cpfCnpj, v.tipo, v.cidadeId,
                     v.condicaoPagamentoId ?? null, v.limiteCredito, v.ativo,
                     v.apelido, v.rgInscricaoEstadual, v.email, v.telefone,
                     v.cep, v.endereco, v.numero, v.complemento, v.bairro,

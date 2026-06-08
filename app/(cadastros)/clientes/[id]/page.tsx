@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { HiChevronLeft } from "react-icons/hi"
 
 import { pool } from "@/lib/db"
-import { ClienteCompleto, CidadeSelect, PaisSelect, CondicaoPagamentoSelect } from "@/lib/types"
+import { ClienteCompleto, CidadeSelect, PaisSelect, CondicaoPagamentoSelect, EstadoSelect } from "@/lib/types"
 import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
 import { ClienteForm } from "../components/ClienteForm"
 
@@ -18,16 +18,14 @@ export default async function ClientePage({ params }: ClientePageProps) {
     if (!isNovo && isNaN(Number(id))) return notFound()
 
     try {
-        const [cidadesResult, paisesResult, condicoesResult] = await Promise.all([
+        const [cidadesResult, estadosResult, paisesResult, condicoesResult] = await Promise.all([
             pool.query<CidadeSelect>(
-                `SELECT id, cidade FROM tb_cidades WHERE ativo = true ORDER BY cidade ASC`
-            ),
+                `SELECT id, cidade, "estadoId" FROM tb_cidades WHERE ativo = true ORDER BY cidade ASC`),
+            pool.query<EstadoSelect>(
+                `SELECT id, estado, "paisId" FROM tb_estados WHERE ativo = true ORDER BY estado ASC`),
             pool.query<PaisSelect>(
-                `SELECT id, pais FROM tb_paises WHERE ativo = true ORDER BY pais ASC`
-            ),
-            pool.query<CondicaoPagamentoSelect>(
-                `SELECT id, "condicaoPagamento" FROM tb_condicoes_pagamento WHERE ativo = true ORDER BY "condicaoPagamento" ASC`
-            ),
+                `SELECT id, pais FROM tb_paises WHERE ativo = true ORDER BY pais ASC`),
+            pool.query<CondicaoPagamentoSelect>(`SELECT id, "condicaoPagamento" FROM tb_condicoes_pagamento WHERE ativo = true ORDER BY "condicaoPagamento" ASC`),
         ])
 
         let cliente: ClienteCompleto | null = null
@@ -37,11 +35,9 @@ export default async function ClientePage({ params }: ClientePageProps) {
                 `SELECT
                     c.*,
                     ci.cidade,
-                    p.pais,
                     cp."condicaoPagamento"
                  FROM tb_clientes c
                  LEFT JOIN tb_cidades ci ON ci.id = c."cidadeId"
-                 LEFT JOIN tb_paises p   ON p.id  = c."paisId"
                  LEFT JOIN tb_condicoes_pagamento cp ON cp.id = c."condicaoPagamentoId"
                  WHERE c.id = $1`,
                 [Number(id)]
@@ -79,6 +75,7 @@ export default async function ClientePage({ params }: ClientePageProps) {
                     <ClienteForm
                         cliente={cliente}
                         listaCidades={cidadesResult.rows}
+                        listaEstados={estadosResult.rows}
                         listaPaises={paisesResult.rows}
                         listaCondicoes={condicoesResult.rows}
                     />

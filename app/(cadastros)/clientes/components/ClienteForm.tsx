@@ -13,7 +13,7 @@ import { FormInput } from "@/app/components/ui/FormInput"
 import { FormLabel } from "@/app/components/ui/FormLabel"
 import { FormSelect } from "@/app/components/ui/FormSelect"
 import { FormSwitch } from "@/components/ui/FormSwitch"
-import { ClienteCompleto, CidadeSelect, PaisSelect, CondicaoPagamentoSelect } from "@/lib/types"
+import { ClienteCompleto, CidadeSelect, PaisSelect, EstadoSelect, CondicaoPagamentoSelect } from "@/lib/types"
 
 
 function mascaraCPF(valor: string): string {
@@ -60,7 +60,6 @@ const schema = z.object({
     bairro:              z.string().max(50).optional(),
     cep:                 z.string().max(9).optional(),
     cidadeId:            z.string().min(1, "Selecione uma cidade."),
-    paisId:              z.string().min(1, "Selecione um país."),
     condicaoPagamentoId: z.string().optional(),
     limiteCredito:       z.string().min(1, "Informe o limite de crédito."),
 }).superRefine((data, ctx) => {
@@ -91,17 +90,32 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 interface ClienteFormProps {
-    cliente?: ClienteCompleto | null
-    listaCidades: CidadeSelect[]
-    listaPaises: PaisSelect[]
+    cliente?:       ClienteCompleto | null
+    listaCidades:   CidadeSelect[]
+    listaEstados:   EstadoSelect[]
+    listaPaises:    PaisSelect[]
     listaCondicoes: CondicaoPagamentoSelect[]
 }
 
-export function ClienteForm({ cliente, listaCidades, listaPaises, listaCondicoes }: ClienteFormProps) {
+export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, listaCondicoes }: ClienteFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
-    const { register, handleSubmit, watch, formState: { errors } } = useForm<FormData>({
+    const cidadeInicial  = listaCidades.find(c => c.id === cliente?.cidadeId)
+    const estadoInicial  = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
+
+    const [paisSelecionado,   setPaisSelecionado]   = useState<number | ''>(estadoInicial?.paisId   ?? '')
+    const [estadoSelecionado, setEstadoSelecionado] = useState<number | ''>(estadoInicial?.id       ?? '')
+
+    const estadosFiltrados = paisSelecionado
+        ? listaEstados.filter(e => e.paisId === paisSelecionado)
+        : listaEstados
+
+    const cidadesFiltradas = estadoSelecionado
+        ? listaCidades.filter(c => c.estadoId === estadoSelecionado)
+        : listaCidades
+
+    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             tipo:                (cliente?.tipo as 'F' | 'J') ?? 'F',
@@ -125,7 +139,6 @@ export function ClienteForm({ cliente, listaCidades, listaPaises, listaCondicoes
             bairro:              cliente?.bairro ?? '',
             cep:                 cliente?.cep ?? '',
             cidadeId:            cliente?.cidadeId?.toString() ?? '',
-            paisId:              cliente?.paisId?.toString() ?? '',
             condicaoPagamentoId: cliente?.condicaoPagamentoId?.toString() ?? '',
             limiteCredito:       cliente?.limiteCredito?.toString() ?? '0',
         }
@@ -133,6 +146,19 @@ export function ClienteForm({ cliente, listaCidades, listaPaises, listaCondicoes
 
     const tipoPessoa = watch("tipo")
     const isPF = tipoPessoa === "F"
+
+    const handlePaisChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const val = e.target.value ? Number(e.target.value) : ''
+        setPaisSelecionado(val)
+        setEstadoSelecionado('')
+        setValue('cidadeId', '')
+    }
+
+    const handleEstadoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const val = e.target.value ? Number(e.target.value) : ''
+        setEstadoSelecionado(val)
+        setValue('cidadeId', '')
+    }
 
     const onSubmit = async (data: FormData) => {
         setLoading(true)
@@ -254,26 +280,44 @@ export function ClienteForm({ cliente, listaCidades, listaPaises, listaCondicoes
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div>
-                    <FormLabel required>Cidade</FormLabel>
-                    <FormSelect {...register('cidadeId')}>
-                        <option value="">Selecione a cidade...</option>
-                        {listaCidades.map((c) => (
-                            <option key={c.id} value={c.id}>{c.cidade}</option>
-                        ))}
-                    </FormSelect>
-                    <Erro campo="cidadeId" />
-                </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                 <div>
                     <FormLabel required>País</FormLabel>
-                    <FormSelect {...register('paisId')}>
+                    <FormSelect
+                        value={paisSelecionado}
+                        onChange={handlePaisChange}
+                    >
                         <option value="">Selecione o país...</option>
                         {listaPaises.map((p) => (
                             <option key={p.id} value={p.id}>{p.pais}</option>
                         ))}
                     </FormSelect>
-                    <Erro campo="paisId" />
+                </div>
+                <div>
+                    <FormLabel required>Estado</FormLabel>
+                    <FormSelect
+                        value={estadoSelecionado}
+                        onChange={handleEstadoChange}
+                        disabled={!paisSelecionado}
+                    >
+                        <option value="">Selecione o estado...</option>
+                        {estadosFiltrados.map((e) => (
+                            <option key={e.id} value={e.id}>{e.estado}</option>
+                        ))}
+                    </FormSelect>
+                </div>
+                <div>
+                    <FormLabel required>Cidade</FormLabel>
+                    <FormSelect
+                        {...register('cidadeId')}
+                        disabled={!estadoSelecionado}
+                    >
+                        <option value="">Selecione a cidade...</option>
+                        {cidadesFiltradas.map((c) => (
+                            <option key={c.id} value={c.id}>{c.cidade}</option>
+                        ))}
+                    </FormSelect>
+                    <Erro campo="cidadeId" />
                 </div>
             </div>
 

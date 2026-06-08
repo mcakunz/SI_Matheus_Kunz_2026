@@ -9,11 +9,9 @@ export default async function ClientesPage() {
             `SELECT
                 c.*,
                 ci.cidade,
-                p.pais,
                 cp."condicaoPagamento"
              FROM tb_clientes c
              LEFT JOIN tb_cidades ci           ON ci.id = c."cidadeId"
-             LEFT JOIN tb_paises p             ON p.id  = c."paisId"
              LEFT JOIN tb_condicoes_pagamento cp ON cp.id = c."condicaoPagamentoId"
              ORDER BY c.cliente ASC`
         )

@@ -44,11 +44,12 @@ export interface CondicaoPagamento {
 }
 
 export interface FormaPagamento {
-    id:               number
-    formaPagamento:   string
-    ativo:            boolean
-    dataCadastro:     string
-    dataAlteracao:    string | null
+    id:             number
+    formaPagamento: string
+    descricao:      string
+    ativo:          boolean
+    dataCadastro:   string
+    dataAlteracao:  string | null
 }
 
 export interface ParcelaCondicao {
@@ -99,7 +100,6 @@ export interface CidadeComEstado extends Cidade {
 
 export interface ClienteCompleto extends Cliente {
     cidade:            string | null   
-    pais:              string | null   
     condicaoPagamento: string | null   
 }
 
@@ -138,7 +138,7 @@ export interface CondicaoPagamentoCompleto {
 }
 
 export type PaisSelect              = Pick<Pais,             'id' | 'pais'>
-export type EstadoSelect            = Pick<Estado,           'id' | 'estado'>
-export type CidadeSelect            = Pick<Cidade,           'id' | 'cidade'>
+export type EstadoSelect            = Pick<Estado,           'id' | 'estado' | 'paisId'>
+export type CidadeSelect            = Pick<Cidade,           'id' | 'cidade' | 'estadoId'>
 export type CondicaoPagamentoSelect = Pick<CondicaoPagamento,'id' | 'condicaoPagamento'>
 export type FormaPagamentoSelect    = Pick<FormaPagamento,   'id' | 'formaPagamento'>
