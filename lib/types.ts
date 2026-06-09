@@ -98,7 +98,7 @@ export interface CidadeComEstado extends Cidade {
     estado: string | null
 }
 
-export interface ClienteCompleto extends Cliente {
+export interface ClienteView extends Cliente {
     cidade:            string | null   
     condicaoPagamento: string | null   
 }

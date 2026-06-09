@@ -13,7 +13,7 @@ import { FormInput } from "@/app/components/ui/FormInput"
 import { FormLabel } from "@/app/components/ui/FormLabel"
 import { FormSelect } from "@/app/components/ui/FormSelect"
 import { FormSwitch } from "@/components/ui/FormSwitch"
-import { ClienteCompleto, CidadeSelect, PaisSelect, EstadoSelect, CondicaoPagamentoSelect } from "@/lib/types"
+import { ClienteView, CidadeSelect, PaisSelect, EstadoSelect, CondicaoPagamentoSelect } from "@/lib/types"
 
 
 function mascaraCPF(valor: string): string {
@@ -60,7 +60,7 @@ const schema = z.object({
     bairro:              z.string().max(50).optional(),
     cep:                 z.string().max(9).optional(),
     cidadeId:            z.string().min(1, "Selecione uma cidade."),
-    condicaoPagamentoId: z.string().optional(),
+    condicaoPagamentoId: z.string().min(1, "Selecione uma condição de pagamento"),
     limiteCredito:       z.string().min(1, "Informe o limite de crédito."),
 }).superRefine((data, ctx) => {
     const valor = data.rgInscricaoEstadual?.trim() ?? ''
@@ -90,7 +90,7 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 interface ClienteFormProps {
-    cliente?:       ClienteCompleto | null
+    cliente?:       ClienteView | null
     listaCidades:   CidadeSelect[]
     listaEstados:   EstadoSelect[]
     listaPaises:    PaisSelect[]

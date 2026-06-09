@@ -1,11 +1,11 @@
 import { pool } from "@/lib/db"
-import { ClienteCompleto } from "@/lib/types"
+import { ClienteView } from "@/lib/types"
 import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
 import ClientesClientTable from "./components/ClientesClientTable"
 
 export default async function ClientesPage() {
     try {
-        const result = await pool.query<ClienteCompleto>(
+        const result = await pool.query<ClienteView>(
             `SELECT
                 c.*,
                 ci.cidade,

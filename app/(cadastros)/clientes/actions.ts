@@ -13,7 +13,7 @@ const clienteSchema = z.object({
     cidadeId:            z.coerce.number().positive("Selecione uma cidade válida."),
     condicaoPagamentoId: z.preprocess(
         (val) => (val === '' || val === null || val === undefined ? undefined : Number(val)),
-        z.number().positive().optional()
+        z.number().positive()
     ),
     limiteCredito:       z.coerce.number().min(0, "O limite de crédito não pode ser negativo."),
     ativo:               z.boolean(),

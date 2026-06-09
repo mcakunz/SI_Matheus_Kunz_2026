@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { HiChevronLeft } from "react-icons/hi"
 
 import { pool } from "@/lib/db"
-import { ClienteCompleto, CidadeSelect, PaisSelect, CondicaoPagamentoSelect, EstadoSelect } from "@/lib/types"
+import { ClienteView, CidadeSelect, PaisSelect, CondicaoPagamentoSelect, EstadoSelect } from "@/lib/types"
 import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
 import { ClienteForm } from "../components/ClienteForm"
 
@@ -28,10 +28,10 @@ export default async function ClientePage({ params }: ClientePageProps) {
             pool.query<CondicaoPagamentoSelect>(`SELECT id, "condicaoPagamento" FROM tb_condicoes_pagamento WHERE ativo = true ORDER BY "condicaoPagamento" ASC`),
         ])
 
-        let cliente: ClienteCompleto | null = null
+        let cliente: ClienteView | null = null
 
         if (!isNovo) {
-            const clienteResult = await pool.query<ClienteCompleto>(
+            const clienteResult = await pool.query<ClienteView>(
                 `SELECT
                     c.*,
                     ci.cidade,

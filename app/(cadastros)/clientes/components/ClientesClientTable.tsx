@@ -9,7 +9,7 @@ import { ConfirmModal } from "@/app/components/ui/ConfirmModal"
 import { ActionToolbar } from "@/app/components/ui/ActionToolbar"
 import { StatusBadge } from "@/app/components/ui/StatusBadge"
 import toast from "react-hot-toast"
-import { ClienteCompleto } from "@/lib/types"
+import { ClienteView } from "@/lib/types"
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
@@ -41,8 +41,8 @@ const columns: GridColDef[] = [
     },
 ]
 
-export default function ClientesClientTable({ clientes }: { clientes: ClienteCompleto[] }) {
-    const [clienteSelecionado, setClienteSelecionado] = useState<ClienteCompleto | null>(null)
+export default function ClientesClientTable({ clientes }: { clientes: ClienteView[] }) {
+    const [clienteSelecionado, setClienteSelecionado] = useState<ClienteView | null>(null)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [loadingStatus, setLoadingStatus] = useState(false)
 
