@@ -11,10 +11,7 @@ const clienteSchema = z.object({
     cpfCnpj:             z.string().min(11, "CPF/CNPJ inválido.").max(14, "CPF/CNPJ inválido."),
     tipo:                z.enum(['F', 'J'], { message: "Tipo de pessoa inválido." }),
     cidadeId:            z.coerce.number().positive("Selecione uma cidade válida."),
-    condicaoPagamentoId: z.preprocess(
-        (val) => (val === '' || val === null || val === undefined ? undefined : Number(val)),
-        z.number().positive()
-    ),
+    condicaoPagamentoId: z.coerce.number().int().positive("Selecione uma condição de pagamento"),
     limiteCredito:       z.coerce.number().min(0, "O limite de crédito não pode ser negativo."),
     ativo:               z.boolean(),
 
@@ -124,7 +121,7 @@ export async function salvarCliente(formData: FormData) {
                   WHERE id = $20`,
                 [
                     v.cliente, v.cpfCnpj, v.tipo, v.cidadeId, 
-                    v.condicaoPagamentoId ?? null, v.limiteCredito, v.ativo,
+                    v.condicaoPagamentoId, v.limiteCredito, v.ativo,
                     v.apelido, v.rgInscricaoEstadual, v.email, v.telefone,
                     v.cep, v.endereco, v.numero, v.complemento, v.bairro,
                     v.dataNascimento, v.sexo, v.observacao,
@@ -145,7 +142,7 @@ export async function salvarCliente(formData: FormData) {
                 )`,
                 [
                     v.cliente, v.cpfCnpj, v.tipo, v.cidadeId,
-                    v.condicaoPagamentoId ?? null, v.limiteCredito, v.ativo,
+                    v.condicaoPagamentoId, v.limiteCredito, v.ativo,
                     v.apelido, v.rgInscricaoEstadual, v.email, v.telefone,
                     v.cep, v.endereco, v.numero, v.complemento, v.bairro,
                     v.dataNascimento, v.sexo, v.observacao
