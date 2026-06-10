@@ -5,6 +5,8 @@ import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
+import { nullableString } from "@/lib/utils/helpers"
+
 const clienteSchema = z.object({
     // Obrigatórios
     cliente:             z.string().min(2, "O nome deve ter no mínimo 2 caracteres.").max(100),
@@ -52,11 +54,6 @@ const clienteSchema = z.object({
         }
     }
 })
-
-function nullableString(value: FormDataEntryValue | null): string | null {
-    if (!value || (value as string).trim() === '') return null
-    return (value as string).trim()
-}
 
 const CLIENTE_DB_ERROR_LABELS: DBErrorLabels = {
     unique: {

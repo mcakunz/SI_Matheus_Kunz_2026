@@ -14,7 +14,8 @@ import { FormLabel } from "@/app/components/ui/FormLabel"
 import { FormSelect } from "@/app/components/ui/FormSelect"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { ClienteView, CidadeSelect, PaisSelect, EstadoSelect, CondicaoPagamentoSelect } from "@/lib/types"
-import { mascaraCNPJ, mascaraCPF, mascaraTelefone } from "@/lib/utils/marcaras"
+import { mascaraCNPJ, mascaraCPF, mascaraTelefone } from "@/lib/utils/mascaras"
+import { validarIE, validarRG } from "@/lib/utils/validacoes"
 const schema = z.object({
     tipo:                z.enum(['F', 'J']),
     ativo:               z.boolean(),
@@ -36,29 +37,25 @@ const schema = z.object({
     condicaoPagamentoId: z.string().min(1, "Selecione uma condição de pagamento"),
     limiteCredito:       z.string().min(1, "Informe o limite de crédito."),
 }).superRefine((data, ctx) => {
-    const valor = data.rgInscricaoEstadual?.trim() ?? ''
-    if (!valor) return
+    const valor = data.rgInscricaoEstadual?.trim();
+    if (!valor) return;
 
-    if (data.tipo === 'F') {
-        const digitos = valor.replace(/[^\dXx]/g, '')
-        if (!/^\d{6,8}[\dXx]$/.test(digitos)) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ['rgInscricaoEstadual'],
-                message: "RG inválido. Informe entre 7 e 9 dígitos.",
-            })
-        }
-    } else {
-        const apenasAlfanum = valor.replace(/[\s.\-\/]/g, '')
-        if (apenasAlfanum.length < 8 || apenasAlfanum.length > 14) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ['rgInscricaoEstadual'],
-                message: "Inscrição Estadual inválida. Informe entre 8 e 14 caracteres.",
-            })
-        }
+    if (data.tipo === 'F' && !validarRG(valor)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['rgInscricaoEstadual'],
+            message: "RG inválido. Informe entre 7 e 9 dígitos.",
+        });
     }
-})
+
+    if (data.tipo === 'J' && !validarIE(valor)) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['rgInscricaoEstadual'],
+            message: "Inscrição Estadual inválida. Informe entre 8 e 14 caracteres.",
+        });
+    }
+});
 
 type FormData = z.infer<typeof schema>
 
