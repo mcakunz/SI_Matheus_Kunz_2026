@@ -1,1610 +1,1262 @@
--- DROP SCHEMA public;
-
-CREATE SCHEMA public AUTHORIZATION postgres;
-
--- DROP SEQUENCE public.tb_categorias_id_seq;
-
-CREATE SEQUENCE public.tb_categorias_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_cidades_id_seq;
-
-CREATE SEQUENCE public.tb_cidades_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_clientes_id_seq;
-
-CREATE SEQUENCE public.tb_clientes_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_condicoes_pagamento_id_seq;
-
-CREATE SEQUENCE public.tb_condicoes_pagamento_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_contas_pagar_avulsa_id_seq;
-
-CREATE SEQUENCE public.tb_contas_pagar_avulsa_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_contas_pagar_id_seq;
-
-CREATE SEQUENCE public.tb_contas_pagar_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_contas_receber_id_seq;
-
-CREATE SEQUENCE public.tb_contas_receber_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_estados_id_seq;
-
-CREATE SEQUENCE public.tb_estados_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_formas_pagamento_id_seq;
-
-CREATE SEQUENCE public.tb_formas_pagamento_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_fornecedor_email_id_seq;
-
-CREATE SEQUENCE public.tb_fornecedor_email_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_fornecedor_telefone_id_seq;
-
-CREATE SEQUENCE public.tb_fornecedor_telefone_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_fornecedores_id_seq;
-
-CREATE SEQUENCE public.tb_fornecedores_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_funcionarios_id_seq;
-
-CREATE SEQUENCE public.tb_funcionarios_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_funcoes_funcionario_id_seq;
-
-CREATE SEQUENCE public.tb_funcoes_funcionario_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_itens_nfe_id_seq;
-
-CREATE SEQUENCE public.tb_itens_nfe_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_log_acesso_id_seq;
-
-CREATE SEQUENCE public.tb_log_acesso_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_marcas_id_seq;
-
-CREATE SEQUENCE public.tb_marcas_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_modalidades_nfe_id_seq;
-
-CREATE SEQUENCE public.tb_modalidades_nfe_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_movimentacoes_nfe_id_seq;
-
-CREATE SEQUENCE public.tb_movimentacoes_nfe_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_nfe_id_seq;
-
-CREATE SEQUENCE public.tb_nfe_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_paises_id_seq;
-
-CREATE SEQUENCE public.tb_paises_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_parcelas_condicao_pagamento_id_seq;
-
-CREATE SEQUENCE public.tb_parcelas_condicao_pagamento_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_perfis_usuario_id_seq;
-
-CREATE SEQUENCE public.tb_perfis_usuario_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_permissoes_id_seq;
-
-CREATE SEQUENCE public.tb_permissoes_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_produto_fornecedor_id_seq;
-
-CREATE SEQUENCE public.tb_produto_fornecedor_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_produtos_id_seq;
-
-CREATE SEQUENCE public.tb_produtos_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_refresh_tokens_id_seq;
-
-CREATE SEQUENCE public.tb_refresh_tokens_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_transp_itens_id_seq;
-
-CREATE SEQUENCE public.tb_transp_itens_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_transportadora_emails_id_email_seq;
-
-CREATE SEQUENCE public.tb_transportadora_emails_id_email_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_transportadora_telefones_id_telefone_seq;
-
-CREATE SEQUENCE public.tb_transportadora_telefones_id_telefone_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_transportadoras_id_seq;
-
-CREATE SEQUENCE public.tb_transportadoras_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_unidades_medida_id_seq;
-
-CREATE SEQUENCE public.tb_unidades_medida_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_usuarios_id_seq;
-
-CREATE SEQUENCE public.tb_usuarios_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;
--- DROP SEQUENCE public.tb_veiculos_id_seq;
-
-CREATE SEQUENCE public.tb_veiculos_id_seq
-	INCREMENT BY 1
-	MINVALUE 1
-	MAXVALUE 9223372036854775807
-	START 1
-	CACHE 1
-	NO CYCLE;-- public.tb_categorias definition
-
--- Drop table
-
--- DROP TABLE public.tb_categorias;
-
-CREATE TABLE public.tb_categorias (
-	id bigserial NOT NULL,
-	categoria varchar(60) NOT NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_categorias_pkey PRIMARY KEY (id)
-);
-CREATE INDEX idx_tb_categorias_nome ON public.tb_categorias USING btree (categoria);
-
--- Table Triggers
-
-create trigger trg_categorias_alt before
-update
-    on
-    public.tb_categorias for each row execute function fn_atualiza_data_alteracao();
+CREATE SCHEMA IF NOT EXISTS public AUTHORIZATION postgres;
 
 
--- public.tb_condicoes_pagamento definition
 
--- Drop table
-
--- DROP TABLE public.tb_condicoes_pagamento;
-
-CREATE TABLE public.tb_condicoes_pagamento (
-	id bigserial NOT NULL,
-	condicao_pagamento varchar(255) NOT NULL,
-	numero_parcelas int4 DEFAULT 1 NOT NULL,
-	dias_primeira_parcela int4 DEFAULT 0 NOT NULL,
-	dias_entre_parcelas int4 DEFAULT 0 NOT NULL,
-	percentual_juros numeric(10, 2) DEFAULT 0.00 NOT NULL,
-	percentual_multa numeric(10, 2) DEFAULT 0.00 NOT NULL,
-	percentual_desconto numeric(10, 2) DEFAULT 0.00 NOT NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_condicoes_pagamento_pkey PRIMARY KEY (id)
-);
-CREATE INDEX idx_tb_condicoes_pagamento ON public.tb_condicoes_pagamento USING btree (condicao_pagamento);
-
--- Table Triggers
-
-create trigger trg_condicoes_pagamento_alt before
-update
-    on
-    public.tb_condicoes_pagamento for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_formas_pagamento definition
-
--- Drop table
-
--- DROP TABLE public.tb_formas_pagamento;
-
-CREATE TABLE public.tb_formas_pagamento (
-	id bigserial NOT NULL,
-	forma_pagamento varchar(100) NOT NULL,
-	descricao varchar(100) NOT NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_formas_pagamento_pkey PRIMARY KEY (id)
+CREATE TYPE public.situacao_usuario AS ENUM (
+    'ATIVO', 'INATIVO', 'BLOQUEADO', 'PENDENTE'
 );
 
--- Table Triggers
-
-create trigger trg_formas_pagamento_alt before
-update
-    on
-    public.tb_formas_pagamento for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_funcoes_funcionario definition
-
--- Drop table
-
--- DROP TABLE public.tb_funcoes_funcionario;
-
-CREATE TABLE public.tb_funcoes_funcionario (
-	id bigserial NOT NULL,
-	funcao_funcionario varchar(255) NOT NULL,
-	descricao varchar(255) NULL,
-	salario_base numeric(10, 2) DEFAULT 0.00 NOT NULL,
-	carga_horaria numeric(10, 2) NOT NULL,
-	requer_cnh bool DEFAULT false NOT NULL,
-	observacao varchar(255) NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_funcoes_funcionario_pkey PRIMARY KEY (id)
-);
-CREATE INDEX idx_tb_funcoes_ativo ON public.tb_funcoes_funcionario USING btree (ativo);
-
--- Table Triggers
-
-create trigger trg_funcoes_funcionario_alt before
-update
-    on
-    public.tb_funcoes_funcionario for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_marcas definition
-
--- Drop table
-
--- DROP TABLE public.tb_marcas;
-
-CREATE TABLE public.tb_marcas (
-	id bigserial NOT NULL,
-	marca varchar(60) NOT NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_marcas_pkey PRIMARY KEY (id)
-);
-CREATE INDEX idx_tb_marcas_nome ON public.tb_marcas USING btree (marca);
-
--- Table Triggers
-
-create trigger trg_marcas_alt before
-update
-    on
-    public.tb_marcas for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_modalidades_nfe definition
-
--- Drop table
-
--- DROP TABLE public.tb_modalidades_nfe;
-
-CREATE TABLE public.tb_modalidades_nfe (
-	id bigserial NOT NULL,
-	codigo varchar(10) NOT NULL,
-	descricao varchar(100) NOT NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_modalidades_nfe_codigo_key UNIQUE (codigo),
-	CONSTRAINT tb_modalidades_nfe_pkey PRIMARY KEY (id)
+CREATE TYPE public.tipo_operacao AS ENUM (
+    'INSERT', 'UPDATE', 'DELETE'
 );
 
--- Table Triggers
-
-create trigger trg_modalidades_nfe_alt before
-update
-    on
-    public.tb_modalidades_nfe for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_paises definition
-
--- Drop table
-
--- DROP TABLE public.tb_paises;
-
-CREATE TABLE public.tb_paises (
-	id bigserial NOT NULL,
-	pais varchar(100) NOT NULL,
-	codigo varchar(5) NOT NULL,
-	sigla bpchar(3) NOT NULL,
-	moeda bpchar(3) NOT NULL,
-	nacionalidade varchar(100) NOT NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_paises_pkey PRIMARY KEY (id)
-);
-CREATE INDEX idx_tb_paises_nacionalidade ON public.tb_paises USING btree (nacionalidade);
-
--- Table Triggers
-
-create trigger trg_paises_alt before
-update
-    on
-    public.tb_paises for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_perfis_usuario definition
-
--- Drop table
-
--- DROP TABLE public.tb_perfis_usuario;
-
-CREATE TABLE public.tb_perfis_usuario (
-	id bigserial NOT NULL,
-	perfil varchar(50) NOT NULL,
-	descricao varchar(255) NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_perfis_usuario_perfil_key UNIQUE (perfil),
-	CONSTRAINT tb_perfis_usuario_pkey PRIMARY KEY (id)
-);
-
--- Table Triggers
-
-create trigger trg_perfis_usuario_alt before
-update
-    on
-    public.tb_perfis_usuario for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_permissoes definition
-
--- Drop table
-
--- DROP TABLE public.tb_permissoes;
-
-CREATE TABLE public.tb_permissoes (
-	id bigserial NOT NULL,
-	recurso varchar(100) NOT NULL,
-	acao varchar(50) NOT NULL,
-	descricao varchar(255) NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_permissoes_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_permissoes_recurso_acao_key UNIQUE (recurso, acao)
-);
-
--- Table Triggers
-
-create trigger trg_permissoes_alt before
-update
-    on
-    public.tb_permissoes for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_unidades_medida definition
-
--- Drop table
-
--- DROP TABLE public.tb_unidades_medida;
-
-CREATE TABLE public.tb_unidades_medida (
-	id bigserial NOT NULL,
-	unidade_medida varchar(255) NOT NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_unidades_medida_pkey PRIMARY KEY (id)
-);
-CREATE INDEX idx_tb_unidades_medida_nome ON public.tb_unidades_medida USING btree (unidade_medida);
-
--- Table Triggers
-
-create trigger trg_unidades_medida_alt before
-update
-    on
-    public.tb_unidades_medida for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_veiculos definition
-
--- Drop table
-
--- DROP TABLE public.tb_veiculos;
-
-CREATE TABLE public.tb_veiculos (
-	id bigserial NOT NULL,
-	placa varchar(10) NOT NULL,
-	modelo varchar(50) NOT NULL,
-	marca varchar(50) NOT NULL,
-	ano int4 NOT NULL,
-	capacidade numeric(10, 2) NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_veiculos_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_veiculos_placa_key UNIQUE (placa)
-);
-
--- Table Triggers
-
-create trigger trg_veiculos_alt before
-update
-    on
-    public.tb_veiculos for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_estados definition
-
--- Drop table
-
--- DROP TABLE public.tb_estados;
-
-CREATE TABLE public.tb_estados (
-	id bigserial NOT NULL,
-	estado varchar(100) NOT NULL,
-	uf varchar(2) NOT NULL,
-	pais_id int8 NOT NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_estados_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_estados_pais_id_fkey FOREIGN KEY (pais_id) REFERENCES public.tb_paises(id)
-);
-
--- Table Triggers
-
-create trigger trg_estados_alt before
-update
-    on
-    public.tb_estados for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_parcelas_condicao_pagamento definition
-
--- Drop table
-
--- DROP TABLE public.tb_parcelas_condicao_pagamento;
-
-CREATE TABLE public.tb_parcelas_condicao_pagamento (
-	id bigserial NOT NULL,
-	condicao_pagamento_id int8 NOT NULL,
-	numero int4 NOT NULL,
-	dias int4 NOT NULL,
-	percentual numeric(10, 2) NOT NULL,
-	forma_pagamento_id int8 NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_parcelas_condicao_pagamento_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_parcelas_condicao_pagamento_condicao_pagamento_id_fkey FOREIGN KEY (condicao_pagamento_id) REFERENCES public.tb_condicoes_pagamento(id) ON DELETE CASCADE,
-	CONSTRAINT tb_parcelas_condicao_pagamento_forma_pagamento_id_fkey FOREIGN KEY (forma_pagamento_id) REFERENCES public.tb_formas_pagamento(id)
-);
-
--- Table Triggers
-
-create trigger trg_parcelas_condicao_alt before
-update
-    on
-    public.tb_parcelas_condicao_pagamento for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_perfil_permissoes definition
-
--- Drop table
-
--- DROP TABLE public.tb_perfil_permissoes;
-
-CREATE TABLE public.tb_perfil_permissoes (
-	perfil_id int8 NOT NULL,
-	permissao_id int8 NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_perfil_permissoes_pkey PRIMARY KEY (perfil_id, permissao_id),
-	CONSTRAINT tb_perfil_permissoes_perfil_id_fkey FOREIGN KEY (perfil_id) REFERENCES public.tb_perfis_usuario(id) ON DELETE CASCADE,
-	CONSTRAINT tb_perfil_permissoes_permissao_id_fkey FOREIGN KEY (permissao_id) REFERENCES public.tb_permissoes(id) ON DELETE CASCADE
-);
-
-
--- public.tb_produtos definition
-
--- Drop table
-
--- DROP TABLE public.tb_produtos;
-
-CREATE TABLE public.tb_produtos (
-	id bigserial NOT NULL,
-	produto varchar(255) NOT NULL,
-	codigo_barras varchar(255) NULL,
-	referencia varchar(50) NULL,
-	marca_id int8 NOT NULL,
-	unidade_medida_id int8 NOT NULL,
-	categoria_id int8 NOT NULL,
-	valor_compra numeric(10, 2) NOT NULL,
-	valor_venda numeric(10, 2) NOT NULL,
-	quantidade int4 DEFAULT 0 NOT NULL,
-	quantidade_minima int4 DEFAULT 1 NOT NULL,
-	percentual_lucro numeric(10, 2) DEFAULT 0.00 NOT NULL,
-	descricao text NULL,
-	observacoes varchar(255) NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_produtos_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_produtos_valor_compra_check CHECK ((valor_compra >= (0)::numeric)),
-	CONSTRAINT tb_produtos_valor_venda_check CHECK ((valor_venda >= (0)::numeric)),
-	CONSTRAINT tb_produtos_categoria_id_fkey FOREIGN KEY (categoria_id) REFERENCES public.tb_categorias(id),
-	CONSTRAINT tb_produtos_marca_id_fkey FOREIGN KEY (marca_id) REFERENCES public.tb_marcas(id),
-	CONSTRAINT tb_produtos_unidade_medida_id_fkey FOREIGN KEY (unidade_medida_id) REFERENCES public.tb_unidades_medida(id)
-);
-CREATE INDEX idx_tb_produtos_ativo_categoria ON public.tb_produtos USING btree (ativo, categoria_id);
-
--- Table Triggers
-
-create trigger trg_produtos_alt before
-update
-    on
-    public.tb_produtos for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_cidades definition
-
--- Drop table
-
--- DROP TABLE public.tb_cidades;
-
-CREATE TABLE public.tb_cidades (
-	id bigserial NOT NULL,
-	cidade varchar(100) NOT NULL,
-	codigo_ibge varchar(10) NOT NULL,
-	estado_id int8 NOT NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_cidades_codigo_ibge_key UNIQUE (codigo_ibge),
-	CONSTRAINT tb_cidades_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_cidades_estado_id_fkey FOREIGN KEY (estado_id) REFERENCES public.tb_estados(id)
-);
-
--- Table Triggers
-
-create trigger trg_cidades_alt before
-update
-    on
-    public.tb_cidades for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_clientes definition
-
--- Drop table
-
--- DROP TABLE public.tb_clientes;
-
-CREATE TABLE public.tb_clientes (
-	id bigserial NOT NULL,
-	cliente varchar(150) NOT NULL,
-	apelido varchar(60) NULL,
-	cpf_cnpj varchar(14) NOT NULL,
-	rg_inscricao_estadual varchar(20) NULL,
-	email varchar(100) NULL,
-	telefone varchar(20) NULL,
-	cep varchar(9) NULL,
-	endereco varchar(200) NULL,
-	numero varchar(10) NULL,
-	complemento varchar(100) NULL,
-	bairro varchar(50) NULL,
-	cidade_id int8 NOT NULL,
-	pais_id int8 NOT NULL,
-	condicao_pagamento_id int8 NOT NULL,
-	limite_credito numeric(10, 2) DEFAULT 0.00 NOT NULL,
-	data_nascimento date NULL,
-	estado_civil varchar(20) NULL,
-	tipo varchar(1) NOT NULL,
-	sexo varchar(1) NULL,
-	observacao varchar(255) NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_clientes_cpf_cnpj_key UNIQUE (cpf_cnpj),
-	CONSTRAINT tb_clientes_estado_civil_check CHECK (((estado_civil IS NULL) OR ((estado_civil)::text = ANY ((ARRAY['SOLTEIRO'::character varying, 'CASADO'::character varying, 'DIVORCIADO'::character varying, 'VIUVO'::character varying, 'UNIAO_ESTAVEL'::character varying, 'OUTRO'::character varying])::text[])))),
-	CONSTRAINT tb_clientes_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_clientes_sexo_check CHECK (((sexo IS NULL) OR ((sexo)::text = ANY ((ARRAY['M'::character varying, 'F'::character varying, 'O'::character varying])::text[])))),
-	CONSTRAINT tb_clientes_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['F'::character varying, 'J'::character varying])::text[]))),
-	CONSTRAINT tb_clientes_cidade_id_fkey FOREIGN KEY (cidade_id) REFERENCES public.tb_cidades(id),
-	CONSTRAINT tb_clientes_condicao_pagamento_id_fkey FOREIGN KEY (condicao_pagamento_id) REFERENCES public.tb_condicoes_pagamento(id),
-	CONSTRAINT tb_clientes_pais_id_fkey FOREIGN KEY (pais_id) REFERENCES public.tb_paises(id)
-);
-CREATE INDEX idx_tb_clientes_ativo ON public.tb_clientes USING btree (ativo);
-CREATE INDEX idx_tb_clientes_cpf_cnpj ON public.tb_clientes USING btree (cpf_cnpj);
-
--- Table Triggers
-
-create trigger trg_clientes_alt before
-update
-    on
-    public.tb_clientes for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_contas_receber definition
-
--- Drop table
-
--- DROP TABLE public.tb_contas_receber;
-
-CREATE TABLE public.tb_contas_receber (
-	id bigserial NOT NULL,
-	nota_numero varchar(20) NOT NULL,
-	nota_modelo varchar(2) NOT NULL,
-	nota_serie varchar(3) NOT NULL,
-	cliente_id int8 NOT NULL,
-	forma_pagamento_id int8 NOT NULL,
-	numero_parcela int4 NOT NULL,
-	total_parcelas int4 NOT NULL,
-	valor_original numeric(15, 2) NOT NULL,
-	valor_recebido numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	valor_desconto numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	valor_juros numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	valor_multa numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	valor_total numeric(15, 2) NOT NULL,
-	data_emissao date NOT NULL,
-	data_vencimento date NOT NULL,
-	data_recebimento date NULL,
-	situacao varchar(20) DEFAULT 'PENDENTE'::character varying NOT NULL,
-	observacoes text NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_contas_receber_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_contas_receber_situacao_check CHECK (((situacao)::text = ANY ((ARRAY['PENDENTE'::character varying, 'RECEBIDO'::character varying, 'PARCIAL'::character varying, 'CANCELADO'::character varying])::text[]))),
-	CONSTRAINT tb_contas_receber_cliente_id_fkey FOREIGN KEY (cliente_id) REFERENCES public.tb_clientes(id),
-	CONSTRAINT tb_contas_receber_forma_pagamento_id_fkey FOREIGN KEY (forma_pagamento_id) REFERENCES public.tb_formas_pagamento(id)
-);
-CREATE INDEX idx_contas_receber_venc ON public.tb_contas_receber USING btree (data_vencimento);
-
--- Table Triggers
-
-create trigger trg_contas_receber_alt before
-update
-    on
-    public.tb_contas_receber for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_funcionarios definition
-
--- Drop table
-
--- DROP TABLE public.tb_funcionarios;
-
-CREATE TABLE public.tb_funcionarios (
-	id bigserial NOT NULL,
-	funcionario varchar(255) NOT NULL,
-	apelido varchar(60) NULL,
-	cpf_cnpj varchar(14) NOT NULL,
-	rg_inscricao_estadual varchar(20) NULL,
-	telefone varchar(20) NOT NULL,
-	email varchar(100) NOT NULL,
-	cep varchar(9) NOT NULL,
-	endereco varchar(200) NOT NULL,
-	numero varchar(10) NOT NULL,
-	complemento varchar(100) NULL,
-	bairro varchar(50) NOT NULL,
-	cidade_id int8 NOT NULL,
-	pais_id int8 NOT NULL,
-	funcao_funcionario_id int8 NOT NULL,
-	data_nascimento date NOT NULL,
-	data_admissao date NOT NULL,
-	data_demissao date NULL,
-	cnh varchar(25) NULL,
-	data_validade_cnh date NULL,
-	sexo varchar(1) NOT NULL,
-	estado_civil varchar(20) NOT NULL,
-	salario numeric(10, 2) NOT NULL,
-	tipo varchar(20) DEFAULT 'INTERNO'::character varying NOT NULL,
-	observacao varchar(255) NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_funcionarios_cpf_cnpj_key UNIQUE (cpf_cnpj),
-	CONSTRAINT tb_funcionarios_estado_civil_check CHECK (((estado_civil)::text = ANY ((ARRAY['SOLTEIRO'::character varying, 'CASADO'::character varying, 'DIVORCIADO'::character varying, 'VIUVO'::character varying, 'UNIAO_ESTAVEL'::character varying, 'OUTRO'::character varying])::text[]))),
-	CONSTRAINT tb_funcionarios_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_funcionarios_sexo_check CHECK (((sexo)::text = ANY ((ARRAY['M'::character varying, 'F'::character varying, 'O'::character varying])::text[]))),
-	CONSTRAINT tb_funcionarios_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['INTERNO'::character varying, 'EXTERNO'::character varying, 'TERCEIRIZADO'::character varying])::text[]))),
-	CONSTRAINT tb_funcionarios_cidade_id_fkey FOREIGN KEY (cidade_id) REFERENCES public.tb_cidades(id),
-	CONSTRAINT tb_funcionarios_funcao_funcionario_id_fkey FOREIGN KEY (funcao_funcionario_id) REFERENCES public.tb_funcoes_funcionario(id),
-	CONSTRAINT tb_funcionarios_pais_id_fkey FOREIGN KEY (pais_id) REFERENCES public.tb_paises(id)
-);
-CREATE INDEX idx_tb_funcionarios_ativo ON public.tb_funcionarios USING btree (ativo);
-
--- Table Triggers
-
-create trigger trg_funcionarios_alt before
-update
-    on
-    public.tb_funcionarios for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_transportadoras definition
-
--- Drop table
-
--- DROP TABLE public.tb_transportadoras;
-
-CREATE TABLE public.tb_transportadoras (
-	id bigserial NOT NULL,
-	razao_social varchar(150) NOT NULL,
-	nome_fantasia varchar(100) NULL,
-	cnpj varchar(14) NOT NULL,
-	rg_ie varchar(20) NULL,
-	email varchar(100) NULL,
-	telefone varchar(20) NULL,
-	cep varchar(9) NULL,
-	endereco varchar(200) NULL,
-	numero varchar(10) NULL,
-	complemento varchar(100) NULL,
-	bairro varchar(100) NULL,
-	cidade_id int8 NOT NULL,
-	condicao_pagamento_id int8 NOT NULL,
-	tipo varchar(1) DEFAULT 'J'::character varying NOT NULL,
-	observacao varchar(255) NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_transportadoras_cnpj_key UNIQUE (cnpj),
-	CONSTRAINT tb_transportadoras_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_transportadoras_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['F'::character varying, 'J'::character varying])::text[]))),
-	CONSTRAINT tb_transportadoras_cidade_id_fkey FOREIGN KEY (cidade_id) REFERENCES public.tb_cidades(id),
-	CONSTRAINT tb_transportadoras_condicao_pagamento_id_fkey FOREIGN KEY (condicao_pagamento_id) REFERENCES public.tb_condicoes_pagamento(id)
-);
-
--- Table Triggers
-
-create trigger trg_transportadoras_alt before
-update
-    on
-    public.tb_transportadoras for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_usuarios definition
-
--- Drop table
-
--- DROP TABLE public.tb_usuarios;
-
-CREATE TABLE public.tb_usuarios (
-	id bigserial NOT NULL,
-	usuario varchar(100) NOT NULL,
-	nome varchar(150) NOT NULL,
-	email varchar(150) NOT NULL,
-	senha_hash varchar(255) NOT NULL,
-	perfil_id int8 NOT NULL,
-	funcionario_id int8 NULL,
-	situacao varchar(20) DEFAULT 'ATIVO'::character varying NOT NULL,
-	tentativas_login int4 DEFAULT 0 NOT NULL,
-	ultimo_login timestamptz NULL,
-	token_reset_senha varchar(255) NULL,
-	expiracao_token timestamptz NULL,
-	foto_perfil varchar(500) NULL,
-	observacao varchar(255) NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_usuarios_email_key UNIQUE (email),
-	CONSTRAINT tb_usuarios_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_usuarios_situacao_check CHECK (((situacao)::text = ANY ((ARRAY['ATIVO'::character varying, 'INATIVO'::character varying, 'BLOQUEADO'::character varying, 'PENDENTE'::character varying])::text[]))),
-	CONSTRAINT tb_usuarios_tentativas_check CHECK ((tentativas_login >= 0)),
-	CONSTRAINT tb_usuarios_usuario_key UNIQUE (usuario),
-	CONSTRAINT tb_usuarios_funcionario_id_fkey FOREIGN KEY (funcionario_id) REFERENCES public.tb_funcionarios(id) ON DELETE SET NULL,
-	CONSTRAINT tb_usuarios_perfil_id_fkey FOREIGN KEY (perfil_id) REFERENCES public.tb_perfis_usuario(id)
-);
-CREATE INDEX idx_tb_usuarios_ativo ON public.tb_usuarios USING btree (ativo);
-CREATE INDEX idx_tb_usuarios_email ON public.tb_usuarios USING btree (email);
-CREATE INDEX idx_tb_usuarios_situacao ON public.tb_usuarios USING btree (situacao);
-
--- Table Triggers
-
-create trigger trg_usuarios_alt before
-update
-    on
-    public.tb_usuarios for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_usuarios_permissoes definition
-
--- Drop table
-
--- DROP TABLE public.tb_usuarios_permissoes;
-
-CREATE TABLE public.tb_usuarios_permissoes (
-	usuario_id int8 NOT NULL,
-	permissao_id int8 NOT NULL,
-	tipo varchar(10) DEFAULT 'CONCEDER'::character varying NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_usuarios_permissoes_pkey PRIMARY KEY (usuario_id, permissao_id),
-	CONSTRAINT tb_usuarios_permissoes_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['CONCEDER'::character varying, 'NEGAR'::character varying])::text[]))),
-	CONSTRAINT tb_usuarios_permissoes_permissao_id_fkey FOREIGN KEY (permissao_id) REFERENCES public.tb_permissoes(id) ON DELETE CASCADE,
-	CONSTRAINT tb_usuarios_permissoes_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.tb_usuarios(id) ON DELETE CASCADE
-);
-
-
--- public.tb_fornecedores definition
-
--- Drop table
-
--- DROP TABLE public.tb_fornecedores;
-
-CREATE TABLE public.tb_fornecedores (
-	id bigserial NOT NULL,
-	fornecedor varchar(255) NOT NULL,
-	apelido varchar(255) NOT NULL,
-	cpf_cnpj varchar(14) NOT NULL,
-	rg_inscricao_estadual varchar(20) NULL,
-	email varchar(255) NULL,
-	telefone varchar(255) NULL,
-	cep varchar(9) NULL,
-	endereco varchar(255) NULL,
-	numero varchar(10) NULL,
-	complemento varchar(255) NULL,
-	bairro varchar(255) NULL,
-	cidade_id int8 NOT NULL,
-	pais_id int8 NOT NULL,
-	condicao_pagamento_id int8 NOT NULL,
-	transportadora_id int8 NULL,
-	tipo varchar(1) NOT NULL,
-	limite_credito numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	observacoes varchar(255) NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_fornecedores_cpf_cnpj_key UNIQUE (cpf_cnpj),
-	CONSTRAINT tb_fornecedores_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_fornecedores_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['F'::character varying, 'J'::character varying])::text[]))),
-	CONSTRAINT tb_fornecedores_cidade_id_fkey FOREIGN KEY (cidade_id) REFERENCES public.tb_cidades(id),
-	CONSTRAINT tb_fornecedores_condicao_pagamento_id_fkey FOREIGN KEY (condicao_pagamento_id) REFERENCES public.tb_condicoes_pagamento(id),
-	CONSTRAINT tb_fornecedores_pais_id_fkey FOREIGN KEY (pais_id) REFERENCES public.tb_paises(id),
-	CONSTRAINT tb_fornecedores_transportadora_id_fkey FOREIGN KEY (transportadora_id) REFERENCES public.tb_transportadoras(id)
-);
-CREATE INDEX idx_tb_fornecedores_ativo ON public.tb_fornecedores USING btree (ativo);
-
--- Table Triggers
-
-create trigger trg_fornecedores_alt before
-update
-    on
-    public.tb_fornecedores for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_log_acesso definition
-
--- Drop table
-
--- DROP TABLE public.tb_log_acesso;
-
-CREATE TABLE public.tb_log_acesso (
-	id bigserial NOT NULL,
-	usuario_id int8 NULL,
-	login_tentado varchar(100) NULL,
-	sucesso bool NOT NULL,
-	ip_origem varchar(45) NULL,
-	user_agent varchar(500) NULL,
-	observacao varchar(255) NULL,
-	data_acesso timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_log_acesso_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_log_acesso_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.tb_usuarios(id) ON DELETE SET NULL
-);
-CREATE INDEX idx_tb_log_acesso_data ON public.tb_log_acesso USING btree (data_acesso);
-CREATE INDEX idx_tb_log_acesso_usuario ON public.tb_log_acesso USING btree (usuario_id);
-
-
--- public.tb_nfe definition
-
--- Drop table
-
--- DROP TABLE public.tb_nfe;
-
-CREATE TABLE public.tb_nfe (
-	id bigserial NOT NULL,
-	numero varchar(50) NOT NULL,
-	serie varchar(3) NOT NULL,
-	chave_acesso varchar(44) NULL,
-	data_emissao timestamp NOT NULL,
-	cliente_id int8 NOT NULL,
-	forma_pagamento_id int8 NOT NULL,
-	condicao_pagamento_id int8 NOT NULL,
-	transportadora_id int8 NULL,
-	veiculo_id int8 NULL,
-	modalidade_id int8 NOT NULL,
-	valor_total numeric(10, 2) NOT NULL,
-	cancelada bool DEFAULT false NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_nfe_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_nfe_cliente_id_fkey FOREIGN KEY (cliente_id) REFERENCES public.tb_clientes(id),
-	CONSTRAINT tb_nfe_condicao_pagamento_id_fkey FOREIGN KEY (condicao_pagamento_id) REFERENCES public.tb_condicoes_pagamento(id),
-	CONSTRAINT tb_nfe_forma_pagamento_id_fkey FOREIGN KEY (forma_pagamento_id) REFERENCES public.tb_formas_pagamento(id),
-	CONSTRAINT tb_nfe_modalidade_id_fkey FOREIGN KEY (modalidade_id) REFERENCES public.tb_modalidades_nfe(id),
-	CONSTRAINT tb_nfe_transportadora_id_fkey FOREIGN KEY (transportadora_id) REFERENCES public.tb_transportadoras(id),
-	CONSTRAINT tb_nfe_veiculo_id_fkey FOREIGN KEY (veiculo_id) REFERENCES public.tb_veiculos(id)
-);
-
--- Table Triggers
-
-create trigger trg_nfe_alt before
-update
-    on
-    public.tb_nfe for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_notas_entrada definition
-
--- Drop table
-
--- DROP TABLE public.tb_notas_entrada;
-
-CREATE TABLE public.tb_notas_entrada (
-	numero varchar(20) NOT NULL,
-	modelo varchar(10) DEFAULT '55'::character varying NOT NULL,
-	serie varchar(10) DEFAULT '1'::character varying NOT NULL,
-	fornecedor_id int8 NOT NULL,
-	condicao_pagamento_id int8 NOT NULL,
-	forma_pagamento_id int8 NOT NULL,
-	transportadora_id int8 NULL,
-	data_emissao date DEFAULT CURRENT_DATE NOT NULL,
-	data_chegada date NULL,
-	tipo_frete varchar(3) DEFAULT 'CIF'::character varying NOT NULL,
-	valor_produtos numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	valor_frete numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	valor_seguro numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	outras_despesas numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	valor_desconto numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	valor_total numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	placa_veiculo varchar(10) NULL,
-	observacoes text NULL,
-	situacao varchar(20) DEFAULT 'PENDENTE'::character varying NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT check_data_chegada CHECK (((data_chegada IS NULL) OR (data_chegada >= data_emissao))),
-	CONSTRAINT tb_notas_entrada_outras_despesas_check CHECK ((outras_despesas >= (0)::numeric)),
-	CONSTRAINT tb_notas_entrada_pkey PRIMARY KEY (numero, modelo, serie, fornecedor_id),
-	CONSTRAINT tb_notas_entrada_situacao_check CHECK (((situacao)::text = ANY ((ARRAY['PENDENTE'::character varying, 'CONFIRMADA'::character varying, 'CANCELADA'::character varying])::text[]))),
-	CONSTRAINT tb_notas_entrada_tipo_frete_check CHECK (((tipo_frete)::text = ANY ((ARRAY['CIF'::character varying, 'FOB'::character varying, 'SEM'::character varying])::text[]))),
-	CONSTRAINT tb_notas_entrada_valor_desconto_check CHECK ((valor_desconto >= (0)::numeric)),
-	CONSTRAINT tb_notas_entrada_valor_frete_check CHECK ((valor_frete >= (0)::numeric)),
-	CONSTRAINT tb_notas_entrada_valor_produtos_check CHECK ((valor_produtos >= (0)::numeric)),
-	CONSTRAINT tb_notas_entrada_valor_seguro_check CHECK ((valor_seguro >= (0)::numeric)),
-	CONSTRAINT tb_notas_entrada_valor_total_check CHECK ((valor_total >= (0)::numeric)),
-	CONSTRAINT tb_notas_entrada_condicao_pagamento_id_fkey FOREIGN KEY (condicao_pagamento_id) REFERENCES public.tb_condicoes_pagamento(id),
-	CONSTRAINT tb_notas_entrada_forma_pagamento_id_fkey FOREIGN KEY (forma_pagamento_id) REFERENCES public.tb_formas_pagamento(id),
-	CONSTRAINT tb_notas_entrada_fornecedor_id_fkey FOREIGN KEY (fornecedor_id) REFERENCES public.tb_fornecedores(id),
-	CONSTRAINT tb_notas_entrada_transportadora_id_fkey FOREIGN KEY (transportadora_id) REFERENCES public.tb_transportadoras(id)
-);
-
--- Table Triggers
-
-create trigger trg_notas_entrada_alt before
-update
-    on
-    public.tb_notas_entrada for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_notas_saida definition
-
--- Drop table
-
--- DROP TABLE public.tb_notas_saida;
-
-CREATE TABLE public.tb_notas_saida (
-	numero varchar(20) NOT NULL,
-	modelo varchar(10) DEFAULT '55'::character varying NOT NULL,
-	serie varchar(10) DEFAULT '1'::character varying NOT NULL,
-	cliente_id int8 NOT NULL,
-	condicao_pagamento_id int8 NOT NULL,
-	forma_pagamento_id int8 NOT NULL,
-	transportadora_id int8 NULL,
-	data_emissao date DEFAULT CURRENT_DATE NOT NULL,
-	data_saida date NULL,
-	tipo_frete varchar(3) DEFAULT 'CIF'::character varying NOT NULL,
-	valor_produtos numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	valor_frete numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	valor_seguro numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	outras_despesas numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	valor_desconto numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	valor_total numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	placa_veiculo varchar(10) NULL,
-	observacoes text NULL,
-	situacao varchar(20) DEFAULT 'PENDENTE'::character varying NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT check_data_saida CHECK (((data_saida IS NULL) OR (data_saida >= data_emissao))),
-	CONSTRAINT tb_notas_saida_outras_despesas_check CHECK ((outras_despesas >= (0)::numeric)),
-	CONSTRAINT tb_notas_saida_pkey PRIMARY KEY (numero, modelo, serie, cliente_id),
-	CONSTRAINT tb_notas_saida_situacao_check CHECK (((situacao)::text = ANY ((ARRAY['PENDENTE'::character varying, 'CONFIRMADA'::character varying, 'CANCELADA'::character varying])::text[]))),
-	CONSTRAINT tb_notas_saida_tipo_frete_check CHECK (((tipo_frete)::text = ANY ((ARRAY['CIF'::character varying, 'FOB'::character varying, 'SEM'::character varying])::text[]))),
-	CONSTRAINT tb_notas_saida_valor_desconto_check CHECK ((valor_desconto >= (0)::numeric)),
-	CONSTRAINT tb_notas_saida_valor_frete_check CHECK ((valor_frete >= (0)::numeric)),
-	CONSTRAINT tb_notas_saida_valor_produtos_check CHECK ((valor_produtos >= (0)::numeric)),
-	CONSTRAINT tb_notas_saida_valor_seguro_check CHECK ((valor_seguro >= (0)::numeric)),
-	CONSTRAINT tb_notas_saida_valor_total_check CHECK ((valor_total >= (0)::numeric)),
-	CONSTRAINT tb_notas_saida_cliente_id_fkey FOREIGN KEY (cliente_id) REFERENCES public.tb_clientes(id),
-	CONSTRAINT tb_notas_saida_condicao_pagamento_id_fkey FOREIGN KEY (condicao_pagamento_id) REFERENCES public.tb_condicoes_pagamento(id),
-	CONSTRAINT tb_notas_saida_forma_pagamento_id_fkey FOREIGN KEY (forma_pagamento_id) REFERENCES public.tb_formas_pagamento(id),
-	CONSTRAINT tb_notas_saida_transportadora_id_fkey FOREIGN KEY (transportadora_id) REFERENCES public.tb_transportadoras(id)
-);
-
--- Table Triggers
-
-create trigger trg_notas_saida_alt before
-update
-    on
-    public.tb_notas_saida for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_produto_fornecedor definition
-
--- Drop table
-
--- DROP TABLE public.tb_produto_fornecedor;
-
-CREATE TABLE public.tb_produto_fornecedor (
-	id bigserial NOT NULL,
-	produto_id int8 NOT NULL,
-	fornecedor_id int8 NOT NULL,
-	codigo_prod varchar(50) NULL,
-	custo numeric(10, 2) NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_produto_fornecedor_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_produto_fornecedor_fornecedor_id_fkey FOREIGN KEY (fornecedor_id) REFERENCES public.tb_fornecedores(id) ON DELETE CASCADE,
-	CONSTRAINT tb_produto_fornecedor_produto_id_fkey FOREIGN KEY (produto_id) REFERENCES public.tb_produtos(id) ON DELETE CASCADE
-);
-
--- Table Triggers
-
-create trigger trg_produto_fornecedor_alt before
-update
-    on
-    public.tb_produto_fornecedor for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_produtos_nota_entrada definition
-
--- Drop table
-
--- DROP TABLE public.tb_produtos_nota_entrada;
-
-CREATE TABLE public.tb_produtos_nota_entrada (
-	nota_numero varchar(20) NOT NULL,
-	nota_modelo varchar(10) NOT NULL,
-	nota_serie varchar(10) NOT NULL,
-	fornecedor_id int8 NOT NULL,
-	produto_id int8 NOT NULL,
-	sequencia int4 DEFAULT 1 NOT NULL,
-	quantidade numeric(15, 4) NOT NULL,
-	valor_unitario numeric(15, 4) NOT NULL,
-	valor_desconto numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	percentual_desconto numeric(5, 2) DEFAULT 0.00 NOT NULL,
-	valor_total numeric(15, 4) NOT NULL,
-	rateio_frete numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	rateio_seguro numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	rateio_outras numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	custo_preco_final numeric(15, 4) NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_produtos_nota_entrada_percentual_desconto_check CHECK (((percentual_desconto >= (0)::numeric) AND (percentual_desconto <= (100)::numeric))),
-	CONSTRAINT tb_produtos_nota_entrada_pkey PRIMARY KEY (nota_numero, nota_modelo, nota_serie, fornecedor_id, produto_id, sequencia),
-	CONSTRAINT tb_produtos_nota_entrada_quantidade_check CHECK ((quantidade > (0)::numeric)),
-	CONSTRAINT tb_produtos_nota_entrada_sequencia_check CHECK ((sequencia > 0)),
-	CONSTRAINT tb_produtos_nota_entrada_valor_desconto_check CHECK ((valor_desconto >= (0)::numeric)),
-	CONSTRAINT tb_produtos_nota_entrada_valor_total_check CHECK ((valor_total >= (0)::numeric)),
-	CONSTRAINT tb_produtos_nota_entrada_valor_unitario_check CHECK ((valor_unitario >= (0)::numeric)),
-	CONSTRAINT tb_produtos_nota_entrada_nota_fkey FOREIGN KEY (nota_numero,nota_modelo,nota_serie,fornecedor_id) REFERENCES public.tb_notas_entrada(numero,modelo,serie,fornecedor_id) ON DELETE CASCADE,
-	CONSTRAINT tb_produtos_nota_entrada_produto_id_fkey FOREIGN KEY (produto_id) REFERENCES public.tb_produtos(id)
-);
-
--- Table Triggers
-
-create trigger trg_produtos_nota_entrada_alt before
-update
-    on
-    public.tb_produtos_nota_entrada for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_produtos_nota_saida definition
-
--- Drop table
-
--- DROP TABLE public.tb_produtos_nota_saida;
-
-CREATE TABLE public.tb_produtos_nota_saida (
-	nota_numero varchar(20) NOT NULL,
-	nota_modelo varchar(10) NOT NULL,
-	nota_serie varchar(10) NOT NULL,
-	cliente_id int8 NOT NULL,
-	produto_id int8 NOT NULL,
-	sequencia int4 NOT NULL,
-	quantidade numeric(15, 4) NOT NULL,
-	valor_unitario numeric(15, 4) NOT NULL,
-	valor_desconto numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	percentual_desconto numeric(5, 2) DEFAULT 0.00 NOT NULL,
-	valor_total numeric(15, 4) NOT NULL,
-	rateio_frete numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	rateio_seguro numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	rateio_outras numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	custo_preco_final numeric(15, 4) DEFAULT 0.0000 NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_produtos_nota_saida_percentual_desconto_check CHECK (((percentual_desconto >= (0)::numeric) AND (percentual_desconto <= (100)::numeric))),
-	CONSTRAINT tb_produtos_nota_saida_pkey PRIMARY KEY (nota_numero, nota_modelo, nota_serie, cliente_id, produto_id, sequencia),
-	CONSTRAINT tb_produtos_nota_saida_quantidade_check CHECK ((quantidade > (0)::numeric)),
-	CONSTRAINT tb_produtos_nota_saida_valor_desconto_check CHECK ((valor_desconto >= (0)::numeric)),
-	CONSTRAINT tb_produtos_nota_saida_valor_unitario_check CHECK ((valor_unitario >= (0)::numeric)),
-	CONSTRAINT tb_produtos_nota_saida_nota_fkey FOREIGN KEY (nota_numero,nota_modelo,nota_serie,cliente_id) REFERENCES public.tb_notas_saida(numero,modelo,serie,cliente_id) ON DELETE CASCADE,
-	CONSTRAINT tb_produtos_nota_saida_produto_id_fkey FOREIGN KEY (produto_id) REFERENCES public.tb_produtos(id)
-);
-
--- Table Triggers
-
-create trigger trg_produtos_nota_saida_alt before
-update
-    on
-    public.tb_produtos_nota_saida for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_refresh_tokens definition
-
--- Drop table
-
--- DROP TABLE public.tb_refresh_tokens;
-
-CREATE TABLE public.tb_refresh_tokens (
-	id bigserial NOT NULL,
-	usuario_id int8 NOT NULL,
-	"token" varchar(500) NOT NULL,
-	expiracao timestamptz NOT NULL,
-	revogado bool DEFAULT false NOT NULL,
-	ip_origem varchar(45) NULL,
-	user_agent varchar(500) NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_refresh_tokens_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_refresh_tokens_token_key UNIQUE (token),
-	CONSTRAINT tb_refresh_tokens_usuario_id_fkey FOREIGN KEY (usuario_id) REFERENCES public.tb_usuarios(id) ON DELETE CASCADE
-);
-CREATE INDEX idx_tb_refresh_tokens_expiracao ON public.tb_refresh_tokens USING btree (expiracao);
-CREATE INDEX idx_tb_refresh_tokens_usuario ON public.tb_refresh_tokens USING btree (usuario_id);
-
-
--- public.tb_transp_itens definition
-
--- Drop table
-
--- DROP TABLE public.tb_transp_itens;
-
-CREATE TABLE public.tb_transp_itens (
-	id bigserial NOT NULL,
-	codigo varchar(20) NOT NULL,
-	descricao varchar(100) NULL,
-	transportadora_id int8 NOT NULL,
-	codigo_transp varchar(20) NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_transp_itens_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_transp_itens_transportadora_id_fkey FOREIGN KEY (transportadora_id) REFERENCES public.tb_transportadoras(id)
-);
-
--- Table Triggers
-
-create trigger trg_transp_itens_alt before
-update
-    on
-    public.tb_transp_itens for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_transportadora_emails definition
-
--- Drop table
-
--- DROP TABLE public.tb_transportadora_emails;
-
-CREATE TABLE public.tb_transportadora_emails (
-	id_email bigserial NOT NULL,
-	cod_trans int8 NOT NULL,
-	email varchar(100) NOT NULL,
-	CONSTRAINT tb_transportadora_emails_pkey PRIMARY KEY (id_email),
-	CONSTRAINT tb_transportadora_emails_cod_trans_fkey FOREIGN KEY (cod_trans) REFERENCES public.tb_transportadoras(id) ON DELETE CASCADE
-);
-
-
--- public.tb_transportadora_telefones definition
-
--- Drop table
-
--- DROP TABLE public.tb_transportadora_telefones;
-
-CREATE TABLE public.tb_transportadora_telefones (
-	id_telefone bigserial NOT NULL,
-	cod_trans int8 NOT NULL,
-	telefone varchar(20) NOT NULL,
-	CONSTRAINT tb_transportadora_telefones_pkey PRIMARY KEY (id_telefone),
-	CONSTRAINT tb_transportadora_telefones_cod_trans_fkey FOREIGN KEY (cod_trans) REFERENCES public.tb_transportadoras(id) ON DELETE CASCADE
-);
-
-
--- public.tb_transportadora_veiculo definition
-
--- Drop table
-
--- DROP TABLE public.tb_transportadora_veiculo;
-
-CREATE TABLE public.tb_transportadora_veiculo (
-	transportadora_id int8 NOT NULL,
-	veiculo_id int8 NOT NULL,
-	CONSTRAINT tb_transportadora_veiculo_pkey PRIMARY KEY (transportadora_id, veiculo_id),
-	CONSTRAINT tb_transportadora_veiculo_transportadora_id_fkey FOREIGN KEY (transportadora_id) REFERENCES public.tb_transportadoras(id) ON DELETE CASCADE,
-	CONSTRAINT tb_transportadora_veiculo_veiculo_id_fkey FOREIGN KEY (veiculo_id) REFERENCES public.tb_veiculos(id) ON DELETE CASCADE
-);
-
-
--- public.tb_contas_pagar definition
-
--- Drop table
-
--- DROP TABLE public.tb_contas_pagar;
-
-CREATE TABLE public.tb_contas_pagar (
-	id bigserial NOT NULL,
-	nota_numero varchar(20) NOT NULL,
-	nota_modelo varchar(2) NOT NULL,
-	nota_serie varchar(3) NOT NULL,
-	fornecedor_id int8 NOT NULL,
-	forma_pagamento_id int8 NOT NULL,
-	numero_parcela int4 NOT NULL,
-	total_parcelas int4 NOT NULL,
-	valor_original numeric(15, 2) NOT NULL,
-	valor_pago numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	valor_desconto numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	valor_juros numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	valor_multa numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	valor_total numeric(15, 2) NOT NULL,
-	data_emissao date NOT NULL,
-	data_vencimento date NOT NULL,
-	data_pagamento date NULL,
-	situacao varchar(20) DEFAULT 'PENDENTE'::character varying NOT NULL,
-	observacoes text NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_contas_pagar_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_contas_pagar_situacao_check CHECK (((situacao)::text = ANY ((ARRAY['PENDENTE'::character varying, 'PAGO'::character varying, 'PARCIAL'::character varying, 'CANCELADO'::character varying])::text[]))),
-	CONSTRAINT tb_contas_pagar_forma_pagamento_id_fkey FOREIGN KEY (forma_pagamento_id) REFERENCES public.tb_formas_pagamento(id),
-	CONSTRAINT tb_contas_pagar_fornecedor_id_fkey FOREIGN KEY (fornecedor_id) REFERENCES public.tb_fornecedores(id)
-);
-CREATE INDEX idx_contas_pagar_venc ON public.tb_contas_pagar USING btree (data_vencimento);
-
--- Table Triggers
-
-create trigger trg_contas_pagar_alt before
-update
-    on
-    public.tb_contas_pagar for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_contas_pagar_avulsa definition
-
--- Drop table
-
--- DROP TABLE public.tb_contas_pagar_avulsa;
-
-CREATE TABLE public.tb_contas_pagar_avulsa (
-	id bigserial NOT NULL,
-	numero_nota varchar(50) NULL,
-	modelo varchar(10) NULL,
-	serie varchar(10) NULL,
-	fornecedor_id int8 NOT NULL,
-	forma_pagamento_id int8 NOT NULL,
-	num_parcela int4 DEFAULT 1 NOT NULL,
-	valor_parcela numeric(15, 2) NOT NULL,
-	data_emissao date NOT NULL,
-	data_vencimento date NOT NULL,
-	data_pagamento date NULL,
-	valor_pago numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	juros numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	multa numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	desconto numeric(15, 2) DEFAULT 0.00 NOT NULL,
-	situacao varchar(20) DEFAULT 'PENDENTE'::character varying NOT NULL,
-	observacao text NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_contas_pagar_avulsa_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_contas_pagar_avulsa_situacao_check CHECK (((situacao)::text = ANY ((ARRAY['PENDENTE'::character varying, 'PAGO'::character varying, 'PARCIAL'::character varying, 'CANCELADO'::character varying])::text[]))),
-	CONSTRAINT tb_contas_pagar_avulsa_forma_pagamento_id_fkey FOREIGN KEY (forma_pagamento_id) REFERENCES public.tb_formas_pagamento(id),
-	CONSTRAINT tb_contas_pagar_avulsa_fornecedor_id_fkey FOREIGN KEY (fornecedor_id) REFERENCES public.tb_fornecedores(id)
-);
-CREATE INDEX idx_contas_pagar_avulsa_venc ON public.tb_contas_pagar_avulsa USING btree (data_vencimento);
-
--- Table Triggers
-
-create trigger trg_contas_pagar_avulsa_alt before
-update
-    on
-    public.tb_contas_pagar_avulsa for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_fornecedor_email definition
-
--- Drop table
-
--- DROP TABLE public.tb_fornecedor_email;
-
-CREATE TABLE public.tb_fornecedor_email (
-	id bigserial NOT NULL,
-	fornecedor_id int8 NOT NULL,
-	email varchar(255) NOT NULL,
-	tipo varchar(20) DEFAULT 'COMERCIAL'::character varying NULL,
-	principal bool DEFAULT false NOT NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_fornecedor_email_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_fornecedor_email_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['COMERCIAL'::character varying, 'FINANCEIRO'::character varying, 'FISCAL'::character varying, 'OUTRO'::character varying])::text[]))),
-	CONSTRAINT tb_fornecedor_email_fornecedor_id_fkey FOREIGN KEY (fornecedor_id) REFERENCES public.tb_fornecedores(id) ON DELETE CASCADE
-);
-
--- Table Triggers
-
-create trigger trg_fornecedor_email_alt before
-update
-    on
-    public.tb_fornecedor_email for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_fornecedor_telefone definition
-
--- Drop table
-
--- DROP TABLE public.tb_fornecedor_telefone;
-
-CREATE TABLE public.tb_fornecedor_telefone (
-	id bigserial NOT NULL,
-	fornecedor_id int8 NOT NULL,
-	telefone varchar(20) NOT NULL,
-	tipo varchar(20) DEFAULT 'COMERCIAL'::character varying NULL,
-	principal bool DEFAULT false NOT NULL,
-	ativo bool DEFAULT true NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_fornecedor_telefone_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_fornecedor_telefone_tipo_check CHECK (((tipo)::text = ANY ((ARRAY['COMERCIAL'::character varying, 'FINANCEIRO'::character varying, 'CELULAR'::character varying, 'OUTRO'::character varying])::text[]))),
-	CONSTRAINT tb_fornecedor_telefone_fornecedor_id_fkey FOREIGN KEY (fornecedor_id) REFERENCES public.tb_fornecedores(id) ON DELETE CASCADE
-);
-
--- Table Triggers
-
-create trigger trg_fornecedor_telefone_alt before
-update
-    on
-    public.tb_fornecedor_telefone for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_itens_nfe definition
-
--- Drop table
-
--- DROP TABLE public.tb_itens_nfe;
-
-CREATE TABLE public.tb_itens_nfe (
-	id bigserial NOT NULL,
-	nfe_id int8 NOT NULL,
-	produto_id int8 NOT NULL,
-	quantidade numeric(10, 3) NOT NULL,
-	valor_unitario numeric(10, 2) NOT NULL,
-	valor_total numeric(10, 2) NOT NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_itens_nfe_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_itens_nfe_nfe_id_fkey FOREIGN KEY (nfe_id) REFERENCES public.tb_nfe(id) ON DELETE CASCADE,
-	CONSTRAINT tb_itens_nfe_produto_id_fkey FOREIGN KEY (produto_id) REFERENCES public.tb_produtos(id)
-);
-
--- Table Triggers
-
-create trigger trg_itens_nfe_alt before
-update
-    on
-    public.tb_itens_nfe for each row execute function fn_atualiza_data_alteracao();
-
-
--- public.tb_movimentacoes_nfe definition
-
--- Drop table
-
--- DROP TABLE public.tb_movimentacoes_nfe;
-
-CREATE TABLE public.tb_movimentacoes_nfe (
-	id bigserial NOT NULL,
-	nfe_id int8 NOT NULL,
-	data_movimentacao timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	status varchar(50) NOT NULL,
-	descricao text NULL,
-	data_cadastro timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	data_alteracao timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
-	CONSTRAINT tb_movimentacoes_nfe_pkey PRIMARY KEY (id),
-	CONSTRAINT tb_movimentacoes_nfe_nfe_id_fkey FOREIGN KEY (nfe_id) REFERENCES public.tb_nfe(id) ON DELETE CASCADE
-);
-
--- Table Triggers
-
-create trigger trg_movimentacoes_nfe_alt before
-update
-    on
-    public.tb_movimentacoes_nfe for each row execute function fn_atualiza_data_alteracao();
-
-
-
--- DROP FUNCTION public.fn_atualiza_data_alteracao();
 
 CREATE OR REPLACE FUNCTION public.fn_atualiza_data_alteracao()
- RETURNS trigger
- LANGUAGE plpgsql
-AS $function$
+    RETURNS trigger
+    LANGUAGE plpgsql
+AS $$
 BEGIN
-    NEW.data_alteracao = CURRENT_TIMESTAMP;
+    NEW."dataAlteracao" = CURRENT_TIMESTAMP;
     RETURN NEW;
 END;
-$function$
-;
+$$;
+
+CREATE OR REPLACE FUNCTION public.fn_auditoria()
+    RETURNS trigger
+    LANGUAGE plpgsql
+AS $$
+DECLARE
+    v_registro_id int8;
+    v_usuario_id  int4;
+BEGIN
+    BEGIN
+        v_usuario_id := current_setting('app.usuario_id')::int4;
+    EXCEPTION WHEN OTHERS THEN
+        v_usuario_id := NULL;
+    END;
+
+    IF (TG_OP = 'INSERT') THEN
+        v_registro_id := NEW.id;
+        INSERT INTO public.tb_auditoria
+            ("tabela", "registroId", "operacao", "dadosDepois", "usuarioId")
+        VALUES
+            (TG_TABLE_NAME, v_registro_id, 'INSERT', to_jsonb(NEW), v_usuario_id);
+        RETURN NEW;
+
+    ELSIF (TG_OP = 'UPDATE') THEN
+        v_registro_id := NEW.id;
+        INSERT INTO public.tb_auditoria
+            ("tabela", "registroId", "operacao", "dadosAntes", "dadosDepois", "usuarioId")
+        VALUES
+            (TG_TABLE_NAME, v_registro_id, 'UPDATE', to_jsonb(OLD), to_jsonb(NEW), v_usuario_id);
+        RETURN NEW;
+
+    ELSIF (TG_OP = 'DELETE') THEN
+        v_registro_id := OLD.id;
+        INSERT INTO public.tb_auditoria
+            ("tabela", "registroId", "operacao", "dadosAntes", "usuarioId")
+        VALUES
+            (TG_TABLE_NAME, v_registro_id, 'DELETE', to_jsonb(OLD), v_usuario_id);
+        RETURN OLD;
+    END IF;
+END;
+$$;
+
+
+
+CREATE TABLE public.tb_auditoria (
+    "id"           bigserial     NOT NULL,
+    "tabela"       varchar(60)   NOT NULL,
+    "registroId"   int8          NOT NULL,
+    "operacao"     tipo_operacao NOT NULL,
+    "dadosAntes"   jsonb         NULL,   -- NULL em INSERT
+    "dadosDepois"  jsonb         NULL,   -- NULL em DELETE
+    "usuarioId"    int4          NULL,
+    "ip"           varchar(45)   NULL,
+    "dataOperacao" timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_auditoria_pkey PRIMARY KEY ("id")
+);
+CREATE INDEX idx_auditoria_registro ON public.tb_auditoria USING btree ("tabela", "registroId");
+CREATE INDEX idx_auditoria_usuario  ON public.tb_auditoria USING btree ("usuarioId");
+CREATE INDEX idx_auditoria_data     ON public.tb_auditoria USING btree ("dataOperacao");
+
+
+CREATE TABLE public.tb_perfis_usuario (
+    "id"            smallserial  NOT NULL,
+    "perfil"        varchar(30)  NOT NULL,
+    "descricao"     varchar(100) NULL,
+    "nivel"         int2         DEFAULT 0    NOT NULL,  -- 10=visualizador … 99=super-admin
+    "ativo"         bool         DEFAULT true NOT NULL,
+    "dataCadastro"  timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_perfis_usuario_pkey       PRIMARY KEY ("id"),
+    CONSTRAINT tb_perfis_usuario_perfil_key UNIQUE ("perfil")
+);
+CREATE TRIGGER trg_perfis_usuario_alt
+    BEFORE UPDATE ON public.tb_perfis_usuario
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+INSERT INTO public.tb_perfis_usuario ("perfil", "descricao", "nivel") VALUES
+    ('SUPER_ADMIN', 'Acesso total ao sistema, incluindo gestão de usuários e permissões', 99),
+    ('ADMIN',       'Administrador: cadastrar/editar/excluir registros e gerenciar usuários', 80),
+    ('OPERADOR',    'Pode cadastrar e editar registros, mas não excluir',                    50),
+    ('VISUALIZADOR','Somente leitura',                                                        10);
+
+
+CREATE TABLE public.tb_permissoes (
+    "id"            serial       NOT NULL,
+    "recurso"       varchar(50)  NOT NULL,
+    "acao"          varchar(50)  NOT NULL,
+    "descricao"     varchar(100) NULL,
+    "dataCadastro"  timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_permissoes_pkey             PRIMARY KEY ("id"),
+    CONSTRAINT tb_permissoes_recurso_acao_key UNIQUE ("recurso", "acao")
+);
+CREATE TRIGGER trg_permissoes_alt
+    BEFORE UPDATE ON public.tb_permissoes
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+INSERT INTO public.tb_permissoes ("recurso", "acao", "descricao") VALUES
+    -- Localidades
+    ('paises',   'visualizar', 'Visualizar lista de países'),
+    ('paises',   'criar',      'Cadastrar novo país'),
+    ('paises',   'editar',     'Editar país existente'),
+    ('paises',   'ativar',     'Ativar / inativar país'),
+    ('paises',   'excluir',    'Excluir país'),
+    ('estados',  'visualizar', 'Visualizar lista de estados'),
+    ('estados',  'criar',      'Cadastrar novo estado'),
+    ('estados',  'editar',     'Editar estado existente'),
+    ('estados',  'ativar',     'Ativar / inativar estado'),
+    ('estados',  'excluir',    'Excluir estado'),
+    ('cidades',  'visualizar', 'Visualizar lista de cidades'),
+    ('cidades',  'criar',      'Cadastrar nova cidade'),
+    ('cidades',  'editar',     'Editar cidade existente'),
+    ('cidades',  'ativar',     'Ativar / inativar cidade'),
+    ('cidades',  'excluir',    'Excluir cidade'),
+    -- Cadastros
+    ('clientes',       'visualizar', 'Visualizar clientes'),
+    ('clientes',       'criar',      'Cadastrar cliente'),
+    ('clientes',       'editar',     'Editar cliente'),
+    ('clientes',       'ativar',     'Ativar / inativar cliente'),
+    ('clientes',       'excluir',    'Excluir cliente'),
+    ('fornecedores',   'visualizar', 'Visualizar fornecedores'),
+    ('fornecedores',   'criar',      'Cadastrar fornecedor'),
+    ('fornecedores',   'editar',     'Editar fornecedor'),
+    ('fornecedores',   'ativar',     'Ativar / inativar fornecedor'),
+    ('fornecedores',   'excluir',    'Excluir fornecedor'),
+    ('funcionarios',   'visualizar', 'Visualizar funcionários'),
+    ('funcionarios',   'criar',      'Cadastrar funcionário'),
+    ('funcionarios',   'editar',     'Editar funcionário'),
+    ('funcionarios',   'ativar',     'Ativar / inativar funcionário'),
+    ('funcionarios',   'excluir',    'Excluir funcionário'),
+    ('transportadoras','visualizar', 'Visualizar transportadoras'),
+    ('transportadoras','criar',      'Cadastrar transportadora'),
+    ('transportadoras','editar',     'Editar transportadora'),
+    ('transportadoras','ativar',     'Ativar / inativar transportadora'),
+    ('transportadoras','excluir',    'Excluir transportadora'),
+    -- Produtos
+    ('produtos',   'visualizar', 'Visualizar produtos'),
+    ('produtos',   'criar',      'Cadastrar produto'),
+    ('produtos',   'editar',     'Editar produto'),
+    ('produtos',   'ativar',     'Ativar / inativar produto'),
+    ('produtos',   'excluir',    'Excluir produto'),
+    ('categorias', 'visualizar', 'Visualizar categorias'),
+    ('categorias', 'criar',      'Cadastrar categoria'),
+    ('categorias', 'editar',     'Editar categoria'),
+    ('categorias', 'ativar',     'Ativar / inativar categoria'),
+    ('categorias', 'excluir',    'Excluir categoria'),
+    ('marcas',     'visualizar', 'Visualizar marcas'),
+    ('marcas',     'criar',      'Cadastrar marca'),
+    ('marcas',     'editar',     'Editar marca'),
+    ('marcas',     'ativar',     'Ativar / inativar marca'),
+    ('marcas',     'excluir',    'Excluir marca'),
+    -- Financeiro
+    ('contas_receber', 'visualizar', 'Visualizar contas a receber'),
+    ('contas_receber', 'criar',      'Lançar conta a receber'),
+    ('contas_receber', 'editar',     'Editar conta a receber'),
+    ('contas_receber', 'receber',    'Registrar recebimento'),
+    ('contas_receber', 'cancelar',   'Cancelar conta a receber'),
+    ('contas_pagar',   'visualizar', 'Visualizar contas a pagar'),
+    ('contas_pagar',   'criar',      'Lançar conta a pagar'),
+    ('contas_pagar',   'editar',     'Editar conta a pagar'),
+    ('contas_pagar',   'pagar',      'Registrar pagamento'),
+    ('contas_pagar',   'cancelar',   'Cancelar conta a pagar'),
+    -- NF-e
+    ('notas_entrada', 'visualizar', 'Visualizar notas de entrada'),
+    ('notas_entrada', 'criar',      'Emitir nota de entrada'),
+    ('notas_entrada', 'editar',     'Editar nota de entrada'),
+    ('notas_entrada', 'cancelar',   'Cancelar nota de entrada'),
+    ('notas_saida',   'visualizar', 'Visualizar notas de saída'),
+    ('notas_saida',   'criar',      'Emitir nota de saída'),
+    ('notas_saida',   'editar',     'Editar nota de saída'),
+    ('notas_saida',   'cancelar',   'Cancelar nota de saída'),
+    -- Administração
+    ('usuarios',  'visualizar', 'Visualizar lista de usuários'),
+    ('usuarios',  'criar',      'Cadastrar novo usuário'),
+    ('usuarios',  'editar',     'Editar usuário existente'),
+    ('usuarios',  'ativar',     'Ativar / inativar usuário'),
+    ('usuarios',  'excluir',    'Excluir usuário'),
+    ('auditoria', 'visualizar', 'Visualizar log de auditoria');
+
+
+CREATE TABLE public.tb_perfil_permissoes (
+    "perfilId"     int2        NOT NULL,
+    "permissaoId"  int4        NOT NULL,
+    "dataCadastro" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_perfil_permissoes_pkey PRIMARY KEY ("perfilId", "permissaoId"),
+    CONSTRAINT tb_perfil_permissoes_perfilId_fkey
+        FOREIGN KEY ("perfilId")    REFERENCES public.tb_perfis_usuario("id") ON DELETE CASCADE,
+    CONSTRAINT tb_perfil_permissoes_permissaoId_fkey
+        FOREIGN KEY ("permissaoId") REFERENCES public.tb_permissoes("id")     ON DELETE CASCADE
+);
+
+INSERT INTO public.tb_perfil_permissoes ("perfilId", "permissaoId")
+SELECT p.id, pm.id
+FROM   public.tb_perfis_usuario p
+CROSS  JOIN public.tb_permissoes pm
+WHERE  p.perfil IN ('SUPER_ADMIN', 'ADMIN');
+
+INSERT INTO public.tb_perfil_permissoes ("perfilId", "permissaoId")
+SELECT p.id, pm.id
+FROM   public.tb_perfis_usuario p
+CROSS  JOIN public.tb_permissoes pm
+WHERE  p.perfil = 'OPERADOR'
+  AND  pm.acao    NOT IN ('excluir', 'cancelar')
+  AND  pm.recurso NOT IN ('usuarios', 'auditoria');
+
+INSERT INTO public.tb_perfil_permissoes ("perfilId", "permissaoId")
+SELECT p.id, pm.id
+FROM   public.tb_perfis_usuario p
+CROSS  JOIN public.tb_permissoes pm
+WHERE  p.perfil = 'VISUALIZADOR'
+  AND  pm.acao  = 'visualizar';
+
+CREATE TABLE public.tb_categorias (
+    "id"            serial      NOT NULL,
+    "categoria"     varchar(50) NOT NULL,
+    "ativo"         bool        DEFAULT true NOT NULL,
+    "dataCadastro"  timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_categorias_pkey PRIMARY KEY ("id")
+);
+CREATE INDEX idx_tb_categorias_categoria ON public.tb_categorias USING btree ("categoria");
+CREATE TRIGGER trg_categorias_alt
+    BEFORE UPDATE ON public.tb_categorias
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_marcas (
+    "id"            serial      NOT NULL,
+    "marca"         varchar(50) NOT NULL,
+    "ativo"         bool        DEFAULT true NOT NULL,
+    "dataCadastro"  timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_marcas_pkey PRIMARY KEY ("id")
+);
+CREATE INDEX idx_tb_marcas_marca ON public.tb_marcas USING btree ("marca");
+CREATE TRIGGER trg_marcas_alt
+    BEFORE UPDATE ON public.tb_marcas
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_unidades_medida (
+    "id"            smallserial NOT NULL,
+    "unidadeMedida" varchar(50) NOT NULL,
+    "ativo"         bool        DEFAULT true NOT NULL,
+    "dataCadastro"  timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_unidades_medida_pkey PRIMARY KEY ("id")
+);
+CREATE INDEX idx_tb_unidades_medida_nome ON public.tb_unidades_medida USING btree ("unidadeMedida");
+CREATE TRIGGER trg_unidades_medida_alt
+    BEFORE UPDATE ON public.tb_unidades_medida
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_formas_pagamento (
+    "id"             smallserial  NOT NULL,
+    "formaPagamento" varchar(50)  NOT NULL,
+    "descricao"      varchar(100) NOT NULL,
+    "ativo"          bool         DEFAULT true NOT NULL,
+    "dataCadastro"   timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"  timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_formas_pagamento_pkey PRIMARY KEY ("id")
+);
+CREATE TRIGGER trg_formas_pagamento_alt
+    BEFORE UPDATE ON public.tb_formas_pagamento
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_condicoes_pagamento (
+    "id"                  smallserial  NOT NULL,
+    "condicaoPagamento"   varchar(100) NOT NULL,
+    "numeroParcelas"      int2         DEFAULT 1    NOT NULL,
+    "diasPrimeiraParcela" int2         DEFAULT 0    NOT NULL,
+    "diasEntreParcelas"   int2         DEFAULT 0    NOT NULL,
+    "percentualJuros"     numeric(5,2) DEFAULT 0.00 NOT NULL,
+    "percentualMulta"     numeric(5,2) DEFAULT 0.00 NOT NULL,
+    "percentualDesconto"  numeric(5,2) DEFAULT 0.00 NOT NULL,
+    "ativo"               bool         DEFAULT true NOT NULL,
+    "dataCadastro"        timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_condicoes_pagamento_pkey PRIMARY KEY ("id")
+);
+CREATE INDEX idx_tb_condicoes_pagamento_nome
+    ON public.tb_condicoes_pagamento USING btree ("condicaoPagamento");
+CREATE TRIGGER trg_condicoes_pagamento_alt
+    BEFORE UPDATE ON public.tb_condicoes_pagamento
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_parcelas_condicao_pagamento (
+    "id"                  serial       NOT NULL,
+    "condicaoPagamentoId" int2         NOT NULL,
+    "numero"              int2         NOT NULL,
+    "dias"                int2         NOT NULL,
+    "percentual"          numeric(5,2) NOT NULL,
+    "formaPagamentoId"    int2         NOT NULL,
+    "dataCadastro"        timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_parcelas_condicao_pagamento_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_parcelas_condicao_pagamento_condicaoPagamentoId_fkey
+        FOREIGN KEY ("condicaoPagamentoId")
+        REFERENCES public.tb_condicoes_pagamento("id") ON DELETE CASCADE,
+    CONSTRAINT tb_parcelas_condicao_pagamento_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id")
+);
+CREATE TRIGGER trg_parcelas_condicao_alt
+    BEFORE UPDATE ON public.tb_parcelas_condicao_pagamento
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_funcoes_funcionario (
+    "id"                smallserial   NOT NULL,
+    "funcaoFuncionario" varchar(50)   NOT NULL,
+    "descricao"         varchar(150)  NULL,
+    "salarioBase"       numeric(10,2) DEFAULT 0.00 NOT NULL,
+    "cargaHoraria"      numeric(5,2)  NOT NULL,
+    "requerCnh"         bool          DEFAULT false NOT NULL,
+    "observacao"        varchar(150)  NULL,
+    "ativo"             bool          DEFAULT true NOT NULL,
+    "dataCadastro"      timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"     timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_funcoes_funcionario_pkey PRIMARY KEY ("id")
+);
+CREATE INDEX idx_tb_funcoes_ativo ON public.tb_funcoes_funcionario USING btree ("ativo");
+CREATE TRIGGER trg_funcoes_funcionario_alt
+    BEFORE UPDATE ON public.tb_funcoes_funcionario
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_modalidades_nfe (
+    "id"            smallserial NOT NULL,
+    "codigo"        varchar(10) NOT NULL,
+    "descricao"     varchar(50) NOT NULL,
+    "ativo"         bool        DEFAULT true NOT NULL,
+    "dataCadastro"  timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_modalidades_nfe_pkey       PRIMARY KEY ("id"),
+    CONSTRAINT tb_modalidades_nfe_codigo_key UNIQUE ("codigo")
+);
+CREATE TRIGGER trg_modalidades_nfe_alt
+    BEFORE UPDATE ON public.tb_modalidades_nfe
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_veiculos (
+    "id"            serial        NOT NULL,
+    "placa"         varchar(8)    NOT NULL,
+    "modelo"        varchar(50)   NOT NULL,
+    "marca"         varchar(50)   NOT NULL,
+    "ano"           int2          NOT NULL,
+    "capacidade"    numeric(10,2) NULL,
+    "ativo"         bool          DEFAULT true NOT NULL,
+    "dataCadastro"  timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_veiculos_pkey      PRIMARY KEY ("id"),
+    CONSTRAINT tb_veiculos_placa_key UNIQUE ("placa")
+);
+CREATE TRIGGER trg_veiculos_alt
+    BEFORE UPDATE ON public.tb_veiculos
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+-- =============================================================
+-- LOCALIZAÇÃO
+-- FKs para tb_usuarios adicionadas via ALTER TABLE ao final.
+-- =============================================================
+
+CREATE TABLE public.tb_paises (
+    "id"                 smallserial NOT NULL,
+    "pais"               varchar(50) NOT NULL,
+    "codigo"             varchar(5)  NOT NULL,
+    "sigla"              varchar(3)  NOT NULL,
+    "moeda"              varchar(3)  NOT NULL,
+    "nacionalidade"      varchar(50) NOT NULL,
+    "ativo"              bool        DEFAULT true NOT NULL,
+    "dataCadastro"       timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"      timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "usuarioCadastroId"  int4        NULL,
+    "usuarioAlteracaoId" int4        NULL,
+    CONSTRAINT tb_paises_pkey              PRIMARY KEY ("id"),
+    CONSTRAINT tb_paises_pais_key          UNIQUE ("pais"),
+    CONSTRAINT tb_paises_sigla_key         UNIQUE ("sigla"),
+    CONSTRAINT tb_paises_codigo_key        UNIQUE ("codigo"),
+    CONSTRAINT tb_paises_nacionalidade_key UNIQUE ("nacionalidade")
+);
+CREATE INDEX idx_tb_paises_nacionalidade ON public.tb_paises USING btree ("nacionalidade");
+CREATE TRIGGER trg_paises_alt
+    BEFORE UPDATE ON public.tb_paises
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+CREATE TRIGGER trg_paises_auditoria
+    AFTER INSERT OR UPDATE OR DELETE ON public.tb_paises
+    FOR EACH ROW EXECUTE FUNCTION fn_auditoria();
+
+
+CREATE TABLE public.tb_estados (
+    "id"                 smallserial NOT NULL,
+    "estado"             varchar(50) NOT NULL,
+    "uf"                 varchar(2)  NOT NULL,
+    "paisId"             int2        NOT NULL,
+    "ativo"              bool        DEFAULT true NOT NULL,
+    "dataCadastro"       timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"      timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "usuarioCadastroId"  int4        NULL,
+    "usuarioAlteracaoId" int4        NULL,
+    CONSTRAINT tb_estados_pkey              PRIMARY KEY ("id"),
+    CONSTRAINT tb_estados_uf_paisId_key     UNIQUE ("uf", "paisId"),
+    CONSTRAINT tb_estados_estado_paisId_key UNIQUE ("estado", "paisId"),
+    CONSTRAINT tb_estados_paisId_fkey
+        FOREIGN KEY ("paisId") REFERENCES public.tb_paises("id")
+);
+CREATE TRIGGER trg_estados_alt
+    BEFORE UPDATE ON public.tb_estados
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+CREATE TRIGGER trg_estados_auditoria
+    AFTER INSERT OR UPDATE OR DELETE ON public.tb_estados
+    FOR EACH ROW EXECUTE FUNCTION fn_auditoria();
+
+
+CREATE TABLE public.tb_cidades (
+    "id"                 serial      NOT NULL,
+    "cidade"             varchar(60) NOT NULL,
+    "codigoIbge"         varchar(7)  NOT NULL,
+    "estadoId"           int2        NOT NULL,
+    "ativo"              bool        DEFAULT true NOT NULL,
+    "dataCadastro"       timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"      timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "usuarioCadastroId"  int4        NULL,
+    "usuarioAlteracaoId" int4        NULL,
+    CONSTRAINT tb_cidades_pkey                PRIMARY KEY ("id"),
+    CONSTRAINT tb_cidades_codigoIbge_key      UNIQUE ("codigoIbge"),
+    CONSTRAINT tb_cidades_cidade_estadoId_key UNIQUE ("cidade", "estadoId"),
+    CONSTRAINT tb_cidades_estadoId_fkey
+        FOREIGN KEY ("estadoId") REFERENCES public.tb_estados("id")
+);
+CREATE TRIGGER trg_cidades_alt
+    BEFORE UPDATE ON public.tb_cidades
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+CREATE TRIGGER trg_cidades_auditoria
+    AFTER INSERT OR UPDATE OR DELETE ON public.tb_cidades
+    FOR EACH ROW EXECUTE FUNCTION fn_auditoria();
+
+CREATE TABLE public.tb_produtos (
+    "id"               serial        NOT NULL,
+    "produto"          varchar(100)  NOT NULL,
+    "codigoBarras"     varchar(20)   NULL,
+    "referencia"       varchar(30)   NULL,
+    "marcaId"          int4          NOT NULL,
+    "unidadeMedidaId"  int2          NOT NULL,
+    "categoriaId"      int4          NOT NULL,
+    "valorCompra"      numeric(10,2) NOT NULL,
+    "valorVenda"       numeric(10,2) NOT NULL,
+    "quantidade"       int4          DEFAULT 0 NOT NULL,
+    "quantidadeMinima" int4          DEFAULT 1 NOT NULL,
+    "percentualLucro"  numeric(5,2)  DEFAULT 0.00 NOT NULL,
+    "descricao"        text          NULL,
+    "observacoes"      varchar(150)  NULL,
+    "ativo"            bool          DEFAULT true NOT NULL,
+    "dataCadastro"     timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"    timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_produtos_pkey              PRIMARY KEY ("id"),
+    CONSTRAINT tb_produtos_valorCompra_check CHECK ("valorCompra" >= 0),
+    CONSTRAINT tb_produtos_valorVenda_check  CHECK ("valorVenda"  >= 0),
+    CONSTRAINT tb_produtos_categoriaId_fkey
+        FOREIGN KEY ("categoriaId")    REFERENCES public.tb_categorias("id"),
+    CONSTRAINT tb_produtos_marcaId_fkey
+        FOREIGN KEY ("marcaId")        REFERENCES public.tb_marcas("id"),
+    CONSTRAINT tb_produtos_unidadeMedidaId_fkey
+        FOREIGN KEY ("unidadeMedidaId") REFERENCES public.tb_unidades_medida("id")
+);
+CREATE INDEX idx_tb_produtos_ativo_categoria
+    ON public.tb_produtos USING btree ("ativo", "categoriaId");
+CREATE TRIGGER trg_produtos_alt
+    BEFORE UPDATE ON public.tb_produtos
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+CREATE TABLE public.tb_clientes (
+    "id"                  serial        NOT NULL,
+    "cliente"             varchar(100)  NOT NULL,
+    "apelido"             varchar(50)   NULL,
+    "cpfCnpj"             varchar(14)   NOT NULL,
+    "rgInscricaoEstadual" varchar(20)   NULL,
+    "email"               varchar(80)   NULL,
+    "telefone"            varchar(15)   NULL,
+    "cep"                 varchar(9)    NULL,
+    "endereco"            varchar(100)  NULL,
+    "numero"              varchar(10)   NULL,
+    "complemento"         varchar(50)   NULL,
+    "bairro"              varchar(50)   NULL,
+    "cidadeId"            int4          NOT NULL,
+    "condicaoPagamentoId" int2          NULL,
+    "limiteCredito"       numeric(10,2) DEFAULT 0.00 NOT NULL,
+    "dataNascimento"      date          NULL,
+    "tipo"                varchar(1)    NOT NULL,
+    "sexo"                varchar(1)    NULL,
+    "observacao"          varchar(150)  NULL,
+    "ativo"               bool          DEFAULT true NOT NULL,
+    "dataCadastro"        timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_clientes_pkey         PRIMARY KEY ("id"),
+    CONSTRAINT tb_clientes_cpfCnpj_key  UNIQUE ("cpfCnpj"),
+    CONSTRAINT tb_clientes_tipo_check   CHECK ("tipo" IN ('F','J')),
+    CONSTRAINT tb_clientes_sexo_check   CHECK ("sexo" IS NULL OR "sexo" IN ('M','F','O')),
+    CONSTRAINT tb_clientes_cidadeId_fkey
+        FOREIGN KEY ("cidadeId") REFERENCES public.tb_cidades("id"),
+    CONSTRAINT tb_clientes_condicaoPagamentoId_fkey
+        FOREIGN KEY ("condicaoPagamentoId") REFERENCES public.tb_condicoes_pagamento("id")
+);
+CREATE INDEX idx_clientes_cidadeId
+    ON public.tb_clientes USING btree ("cidadeId");
+CREATE INDEX idx_clientes_condicaoPagamentoId
+    ON public.tb_clientes USING btree ("condicaoPagamentoId");
+CREATE INDEX idx_tb_clientes_ativo
+    ON public.tb_clientes USING btree ("ativo");
+CREATE INDEX idx_tb_clientes_cpfCnpj
+    ON public.tb_clientes USING btree ("cpfCnpj");
+CREATE TRIGGER trg_clientes_alt
+    BEFORE UPDATE ON public.tb_clientes
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+CREATE TABLE public.tb_funcionarios (
+    "id"                  serial        NOT NULL,
+    "funcionario"         varchar(100)  NOT NULL,
+    "apelido"             varchar(50)   NULL,
+    "cpfCnpj"             varchar(14)   NOT NULL,
+    "rgInscricaoEstadual" varchar(20)   NULL,
+    "telefone"            varchar(15)   NOT NULL,
+    "email"               varchar(80)   NOT NULL,
+    "cep"                 varchar(9)    NOT NULL,
+    "endereco"            varchar(100)  NOT NULL,
+    "numero"              varchar(10)   NOT NULL,
+    "complemento"         varchar(50)   NULL,
+    "bairro"              varchar(50)   NOT NULL,
+    "cidadeId"            int4          NOT NULL,
+    "funcaoFuncionarioId" int2          NOT NULL,
+    "dataNascimento"      date          NOT NULL,
+    "dataAdmissao"        date          NOT NULL,
+    "dataDemissao"        date          NULL,
+    "cnh"                 varchar(11)   NULL,
+    "dataValidadeCnh"     date          NULL,
+    "sexo"                varchar(1)    NOT NULL,
+    "estadoCivil"         varchar(20)   NOT NULL,
+    "salario"             numeric(10,2) NOT NULL,
+    "tipo"                varchar(20)   DEFAULT 'INTERNO' NOT NULL,
+    "observacao"          varchar(150)  NULL,
+    "ativo"               bool          DEFAULT true NOT NULL,
+    "dataCadastro"        timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_funcionarios_pkey        PRIMARY KEY ("id"),
+    CONSTRAINT tb_funcionarios_cpfCnpj_key UNIQUE ("cpfCnpj"),
+    CONSTRAINT tb_funcionarios_tipo_check
+        CHECK ("tipo" IN ('INTERNO','EXTERNO','TERCEIRIZADO')),
+    CONSTRAINT tb_funcionarios_sexo_check
+        CHECK ("sexo" IN ('M','F','O')),
+    CONSTRAINT tb_funcionarios_estadoCivil_check
+        CHECK ("estadoCivil" IN ('SOLTEIRO','CASADO','DIVORCIADO','VIUVO','UNIAO_ESTAVEL','OUTRO')),
+    CONSTRAINT tb_funcionarios_cidadeId_fkey
+        FOREIGN KEY ("cidadeId") REFERENCES public.tb_cidades("id"),
+    CONSTRAINT tb_funcionarios_funcaoFuncionarioId_fkey
+        FOREIGN KEY ("funcaoFuncionarioId") REFERENCES public.tb_funcoes_funcionario("id")
+);
+CREATE INDEX idx_tb_funcionarios_ativo
+    ON public.tb_funcionarios USING btree ("ativo");
+CREATE TRIGGER trg_funcionarios_alt
+    BEFORE UPDATE ON public.tb_funcionarios
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+CREATE TABLE public.tb_transportadoras (
+    "id"                  serial        NOT NULL,
+    "razaoSocial"         varchar(100)  NOT NULL,
+    "nomeFantasia"        varchar(80)   NULL,
+    "cnpj"                varchar(14)   NOT NULL,
+    "rgIe"                varchar(20)   NULL,
+    "email"               varchar(80)   NULL,
+    "telefone"            varchar(15)   NULL,
+    "cep"                 varchar(9)    NULL,
+    "endereco"            varchar(100)  NULL,
+    "numero"              varchar(10)   NULL,
+    "complemento"         varchar(50)   NULL,
+    "bairro"              varchar(50)   NULL,
+    "cidadeId"            int4          NOT NULL,
+    "condicaoPagamentoId" int2          NOT NULL,
+    "tipo"                varchar(1)    DEFAULT 'J' NOT NULL,
+    "observacao"          varchar(150)  NULL,
+    "ativo"               bool          DEFAULT true NOT NULL,
+    "dataCadastro"        timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_transportadoras_pkey      PRIMARY KEY ("id"),
+    CONSTRAINT tb_transportadoras_cnpj_key  UNIQUE ("cnpj"),
+    CONSTRAINT tb_transportadoras_tipo_check CHECK ("tipo" IN ('F','J')),
+    CONSTRAINT tb_transportadoras_cidadeId_fkey
+        FOREIGN KEY ("cidadeId") REFERENCES public.tb_cidades("id"),
+    CONSTRAINT tb_transportadoras_condicaoPagamentoId_fkey
+        FOREIGN KEY ("condicaoPagamentoId") REFERENCES public.tb_condicoes_pagamento("id")
+);
+CREATE TRIGGER trg_transportadoras_alt
+    BEFORE UPDATE ON public.tb_transportadoras
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_transportadora_emails (
+    "idEmail"  serial      NOT NULL,
+    "codTrans" int4        NOT NULL,
+    "email"    varchar(80) NOT NULL,
+    CONSTRAINT tb_transportadora_emails_pkey PRIMARY KEY ("idEmail"),
+    CONSTRAINT tb_transportadora_emails_codTrans_fkey
+        FOREIGN KEY ("codTrans") REFERENCES public.tb_transportadoras("id") ON DELETE CASCADE
+);
+
+
+CREATE TABLE public.tb_transportadora_telefones (
+    "idTelefone" serial      NOT NULL,
+    "codTrans"   int4        NOT NULL,
+    "telefone"   varchar(15) NOT NULL,
+    CONSTRAINT tb_transportadora_telefones_pkey PRIMARY KEY ("idTelefone"),
+    CONSTRAINT tb_transportadora_telefones_codTrans_fkey
+        FOREIGN KEY ("codTrans") REFERENCES public.tb_transportadoras("id") ON DELETE CASCADE
+);
+
+
+CREATE TABLE public.tb_transportadora_veiculo (
+    "transportadoraId" int4 NOT NULL,
+    "veiculoId"        int4 NOT NULL,
+    CONSTRAINT tb_transportadora_veiculo_pkey PRIMARY KEY ("transportadoraId", "veiculoId"),
+    CONSTRAINT tb_transportadora_veiculo_transportadoraId_fkey
+        FOREIGN KEY ("transportadoraId") REFERENCES public.tb_transportadoras("id") ON DELETE CASCADE,
+    CONSTRAINT tb_transportadora_veiculo_veiculoId_fkey
+        FOREIGN KEY ("veiculoId") REFERENCES public.tb_veiculos("id") ON DELETE CASCADE
+);
+
+
+CREATE TABLE public.tb_transp_itens (
+    "id"               serial      NOT NULL,
+    "codigo"           varchar(20) NOT NULL,
+    "descricao"        varchar(80) NULL,
+    "transportadoraId" int4        NOT NULL,
+    "codigoTransp"     varchar(20) NULL,
+    "ativo"            bool        DEFAULT true NOT NULL,
+    "dataCadastro"     timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"    timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_transp_itens_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_transp_itens_transportadoraId_fkey
+        FOREIGN KEY ("transportadoraId") REFERENCES public.tb_transportadoras("id")
+);
+CREATE TRIGGER trg_transp_itens_alt
+    BEFORE UPDATE ON public.tb_transp_itens
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_fornecedores (
+    "id"                  serial        NOT NULL,
+    "fornecedor"          varchar(100)  NOT NULL,
+    "apelido"             varchar(50)   NULL,
+    "cpfCnpj"             varchar(14)   NOT NULL,
+    "rgInscricaoEstadual" varchar(20)   NULL,
+    "cep"                 varchar(9)    NULL,
+    "endereco"            varchar(100)  NULL,
+    "numero"              varchar(10)   NULL,
+    "complemento"         varchar(50)   NULL,
+    "bairro"              varchar(50)   NULL,
+    "cidadeId"            int4          NOT NULL,
+    "condicaoPagamentoId" int2          NOT NULL,
+    "transportadoraId"    int4          NULL,
+    "tipo"                varchar(1)    NOT NULL,
+    "limiteCredito"       numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "observacoes"         varchar(150)  NULL,
+    "ativo"               bool          DEFAULT true NOT NULL,
+    "dataCadastro"        timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_fornecedores_pkey        PRIMARY KEY ("id"),
+    CONSTRAINT tb_fornecedores_cpfCnpj_key UNIQUE ("cpfCnpj"),
+    CONSTRAINT tb_fornecedores_tipo_check  CHECK ("tipo" IN ('F','J')),
+    CONSTRAINT tb_fornecedores_cidadeId_fkey
+        FOREIGN KEY ("cidadeId") REFERENCES public.tb_cidades("id"),
+    CONSTRAINT tb_fornecedores_condicaoPagamentoId_fkey
+        FOREIGN KEY ("condicaoPagamentoId") REFERENCES public.tb_condicoes_pagamento("id"),
+    CONSTRAINT tb_fornecedores_transportadoraId_fkey
+        FOREIGN KEY ("transportadoraId") REFERENCES public.tb_transportadoras("id")
+);
+
+
+CREATE TABLE public.tb_fornecedor_email (
+    "id"            serial      NOT NULL,
+    "fornecedorId"  int4        NOT NULL,
+    "email"         varchar(80) NOT NULL,
+    "tipo"          varchar(20) DEFAULT 'COMERCIAL' NULL,
+    "principal"     bool        DEFAULT false NOT NULL,
+    "ativo"         bool        DEFAULT true  NOT NULL,
+    "dataCadastro"  timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_fornecedor_email_pkey      PRIMARY KEY ("id"),
+    CONSTRAINT tb_fornecedor_email_tipo_check
+        CHECK ("tipo" IN ('COMERCIAL','FINANCEIRO','FISCAL','OUTRO')),
+    CONSTRAINT tb_fornecedor_email_fornecedorId_fkey
+        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id") ON DELETE CASCADE
+);
+CREATE TRIGGER trg_fornecedor_email_alt
+    BEFORE UPDATE ON public.tb_fornecedor_email
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_fornecedor_telefone (
+    "id"            serial      NOT NULL,
+    "fornecedorId"  int4        NOT NULL,
+    "telefone"      varchar(15) NOT NULL,
+    "tipo"          varchar(20) DEFAULT 'COMERCIAL' NULL,
+    "principal"     bool        DEFAULT false NOT NULL,
+    "ativo"         bool        DEFAULT true  NOT NULL,
+    "dataCadastro"  timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_fornecedor_telefone_pkey      PRIMARY KEY ("id"),
+    CONSTRAINT tb_fornecedor_telefone_tipo_check
+        CHECK ("tipo" IN ('COMERCIAL','FINANCEIRO','CELULAR','OUTRO')),
+    CONSTRAINT tb_fornecedor_telefone_fornecedorId_fkey
+        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id") ON DELETE CASCADE
+);
+CREATE TRIGGER trg_fornecedor_telefone_alt
+    BEFORE UPDATE ON public.tb_fornecedor_telefone
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_produto_fornecedor (
+    "id"            serial        NOT NULL,
+    "produtoId"     int4          NOT NULL,
+    "fornecedorId"  int4          NOT NULL,
+    "codigoProd"    varchar(30)   NULL,
+    "custo"         numeric(10,2) NULL,
+    "ativo"         bool          DEFAULT true NOT NULL,
+    "dataCadastro"  timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_produto_fornecedor_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_produto_fornecedor_fornecedorId_fkey
+        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id") ON DELETE CASCADE,
+    CONSTRAINT tb_produto_fornecedor_produtoId_fkey
+        FOREIGN KEY ("produtoId") REFERENCES public.tb_produtos("id") ON DELETE CASCADE
+);
+CREATE TRIGGER trg_produto_fornecedor_alt
+    BEFORE UPDATE ON public.tb_produto_fornecedor
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+CREATE TABLE public.tb_usuarios (
+    "id"              serial           NOT NULL,
+    "usuario"         varchar(50)      NOT NULL,
+    "nome"            varchar(100)     NOT NULL,
+    "email"           varchar(80)      NOT NULL,
+    "senhaHash"       varchar(255)     NOT NULL,
+    "perfilId"        int2             NOT NULL,
+    "funcionarioId"   int4             NULL,
+    "situacao"        situacao_usuario DEFAULT 'ATIVO' NOT NULL,
+    "tentativasLogin" int2             DEFAULT 0    NOT NULL,
+    "ultimoLogin"     timestamptz      NULL,
+    "tokenResetSenha" varchar(255)     NULL,
+    "expiracaoToken"  timestamptz      NULL,
+    "fotoPerfil"      varchar(255)     NULL,
+    "observacao"      varchar(150)     NULL,
+    "ativo"           bool             DEFAULT true NOT NULL,
+    "dataCadastro"    timestamptz      DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"   timestamptz      DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_usuarios_pkey             PRIMARY KEY ("id"),
+    CONSTRAINT tb_usuarios_email_key        UNIQUE ("email"),
+    CONSTRAINT tb_usuarios_usuario_key      UNIQUE ("usuario"),
+    CONSTRAINT tb_usuarios_tentativas_check CHECK ("tentativasLogin" >= 0),
+    CONSTRAINT tb_usuarios_funcionarioId_fkey
+        FOREIGN KEY ("funcionarioId") REFERENCES public.tb_funcionarios("id") ON DELETE SET NULL,
+    CONSTRAINT tb_usuarios_perfilId_fkey
+        FOREIGN KEY ("perfilId") REFERENCES public.tb_perfis_usuario("id")
+);
+CREATE INDEX idx_tb_usuarios_ativo    ON public.tb_usuarios USING btree ("ativo");
+CREATE INDEX idx_tb_usuarios_email    ON public.tb_usuarios USING btree ("email");
+CREATE INDEX idx_tb_usuarios_situacao ON public.tb_usuarios USING btree ("situacao");
+CREATE TRIGGER trg_usuarios_alt
+    BEFORE UPDATE ON public.tb_usuarios
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_usuarios_permissoes (
+    "usuarioId"    int4        NOT NULL,
+    "permissaoId"  int4        NOT NULL,
+    "tipo"         varchar(10) DEFAULT 'CONCEDER' NOT NULL,
+    "dataCadastro" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_usuarios_permissoes_pkey      PRIMARY KEY ("usuarioId", "permissaoId"),
+    CONSTRAINT tb_usuarios_permissoes_tipo_check CHECK ("tipo" IN ('CONCEDER','NEGAR')),
+    CONSTRAINT tb_usuarios_permissoes_permissaoId_fkey
+        FOREIGN KEY ("permissaoId") REFERENCES public.tb_permissoes("id") ON DELETE CASCADE,
+    CONSTRAINT tb_usuarios_permissoes_usuarioId_fkey
+        FOREIGN KEY ("usuarioId") REFERENCES public.tb_usuarios("id") ON DELETE CASCADE
+);
+
+
+CREATE TABLE public.tb_log_acesso (
+    "id"           bigserial    NOT NULL,
+    "usuarioId"    int4         NULL,
+    "loginTentado" varchar(50)  NULL,
+    "sucesso"      bool         NOT NULL,
+    "ipOrigem"     varchar(45)  NULL,
+    "userAgent"    varchar(255) NULL,
+    "observacao"   varchar(150) NULL,
+    "dataAcesso"   timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_log_acesso_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_log_acesso_usuarioId_fkey
+        FOREIGN KEY ("usuarioId") REFERENCES public.tb_usuarios("id") ON DELETE SET NULL
+);
+CREATE INDEX idx_tb_log_acesso_data    ON public.tb_log_acesso USING btree ("dataAcesso");
+CREATE INDEX idx_tb_log_acesso_usuario ON public.tb_log_acesso USING btree ("usuarioId");
+
+
+CREATE TABLE public.tb_refresh_tokens (
+    "id"           bigserial    NOT NULL,
+    "usuarioId"    int4         NOT NULL,
+    "token"        varchar(255) NOT NULL,
+    "expiracao"    timestamptz  NOT NULL,
+    "revogado"     bool         DEFAULT false NOT NULL,
+    "ipOrigem"     varchar(45)  NULL,
+    "userAgent"    varchar(255) NULL,
+    "dataCadastro" timestamptz  DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_refresh_tokens_pkey      PRIMARY KEY ("id"),
+    CONSTRAINT tb_refresh_tokens_token_key UNIQUE ("token"),
+    CONSTRAINT tb_refresh_tokens_usuarioId_fkey
+        FOREIGN KEY ("usuarioId") REFERENCES public.tb_usuarios("id") ON DELETE CASCADE
+);
+CREATE INDEX idx_tb_refresh_tokens_expiracao ON public.tb_refresh_tokens USING btree ("expiracao");
+CREATE INDEX idx_tb_refresh_tokens_usuario   ON public.tb_refresh_tokens USING btree ("usuarioId");
+
+CREATE TABLE public.tb_notas_entrada (
+    "numero"              varchar(20)   NOT NULL,
+    "modelo"              varchar(2)    DEFAULT '55'  NOT NULL,
+    "serie"               varchar(3)    DEFAULT '1'   NOT NULL,
+    "fornecedorId"        int4          NOT NULL,
+    "condicaoPagamentoId" int2          NOT NULL,
+    "formaPagamentoId"    int2          NOT NULL,
+    "transportadoraId"    int4          NULL,
+    "dataEmissao"         date          DEFAULT CURRENT_DATE NOT NULL,
+    "dataChegada"         date          NULL,
+    "tipoFrete"           varchar(3)    DEFAULT 'CIF' NOT NULL,
+    "valorProdutos"       numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "valorFrete"          numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "valorSeguro"         numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "outrasDespesas"      numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "valorDesconto"       numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "valorTotal"          numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "placaVeiculo"        varchar(8)    NULL,
+    "observacoes"         text          NULL,
+    "situacao"            varchar(20)   DEFAULT 'PENDENTE' NOT NULL,
+    "dataCadastro"        timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_notas_entrada_pkey
+        PRIMARY KEY ("numero", "modelo", "serie", "fornecedorId"),
+    CONSTRAINT tb_notas_entrada_situacao_check
+        CHECK ("situacao" IN ('PENDENTE','CONFIRMADA','CANCELADA')),
+    CONSTRAINT tb_notas_entrada_tipoFrete_check
+        CHECK ("tipoFrete" IN ('CIF','FOB','SEM')),
+    CONSTRAINT tb_notas_entrada_dataChegada_check
+        CHECK ("dataChegada" IS NULL OR "dataChegada" >= "dataEmissao"),
+    CONSTRAINT tb_notas_entrada_valorProdutos_check  CHECK ("valorProdutos"  >= 0),
+    CONSTRAINT tb_notas_entrada_valorFrete_check     CHECK ("valorFrete"     >= 0),
+    CONSTRAINT tb_notas_entrada_valorSeguro_check    CHECK ("valorSeguro"    >= 0),
+    CONSTRAINT tb_notas_entrada_outrasDespesas_check CHECK ("outrasDespesas" >= 0),
+    CONSTRAINT tb_notas_entrada_valorDesconto_check  CHECK ("valorDesconto"  >= 0),
+    CONSTRAINT tb_notas_entrada_valorTotal_check     CHECK ("valorTotal"     >= 0),
+    CONSTRAINT tb_notas_entrada_condicaoPagamentoId_fkey
+        FOREIGN KEY ("condicaoPagamentoId") REFERENCES public.tb_condicoes_pagamento("id"),
+    CONSTRAINT tb_notas_entrada_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
+    CONSTRAINT tb_notas_entrada_fornecedorId_fkey
+        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id"),
+    CONSTRAINT tb_notas_entrada_transportadoraId_fkey
+        FOREIGN KEY ("transportadoraId") REFERENCES public.tb_transportadoras("id")
+);
+CREATE TRIGGER trg_notas_entrada_alt
+    BEFORE UPDATE ON public.tb_notas_entrada
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_produtos_nota_entrada (
+    "notaNumero"         varchar(20)   NOT NULL,
+    "notaModelo"         varchar(2)    NOT NULL,
+    "notaSerie"          varchar(3)    NOT NULL,
+    "fornecedorId"       int4          NOT NULL,
+    "produtoId"          int4          NOT NULL,
+    "sequencia"          int2          DEFAULT 1    NOT NULL,
+    "quantidade"         numeric(15,4) NOT NULL,
+    "valorUnitario"      numeric(15,4) NOT NULL,
+    "valorDesconto"      numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "percentualDesconto" numeric(5,2)  DEFAULT 0.00   NOT NULL,
+    "valorTotal"         numeric(15,4) NOT NULL,
+    "rateioFrete"        numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "rateioSeguro"       numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "rateioOutras"       numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "custoPrecoFinal"    numeric(15,4) NULL,
+    "dataCadastro"       timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"      timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_produtos_nota_entrada_pkey
+        PRIMARY KEY ("notaNumero", "notaModelo", "notaSerie", "fornecedorId", "produtoId", "sequencia"),
+    CONSTRAINT tb_produtos_nota_entrada_sequencia_check
+        CHECK ("sequencia" > 0),
+    CONSTRAINT tb_produtos_nota_entrada_quantidade_check
+        CHECK ("quantidade" > 0),
+    CONSTRAINT tb_produtos_nota_entrada_valorUnitario_check
+        CHECK ("valorUnitario" >= 0),
+    CONSTRAINT tb_produtos_nota_entrada_valorDesconto_check
+        CHECK ("valorDesconto" >= 0),
+    CONSTRAINT tb_produtos_nota_entrada_valorTotal_check
+        CHECK ("valorTotal" >= 0),
+    CONSTRAINT tb_produtos_nota_entrada_percentualDesconto_check
+        CHECK ("percentualDesconto" >= 0 AND "percentualDesconto" <= 100),
+    CONSTRAINT tb_produtos_nota_entrada_nota_fkey
+        FOREIGN KEY ("notaNumero", "notaModelo", "notaSerie", "fornecedorId")
+        REFERENCES public.tb_notas_entrada("numero", "modelo", "serie", "fornecedorId") ON DELETE CASCADE,
+    CONSTRAINT tb_produtos_nota_entrada_produtoId_fkey
+        FOREIGN KEY ("produtoId") REFERENCES public.tb_produtos("id")
+);
+CREATE TRIGGER trg_produtos_nota_entrada_alt
+    BEFORE UPDATE ON public.tb_produtos_nota_entrada
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_notas_saida (
+    "numero"              varchar(20)   NOT NULL,
+    "modelo"              varchar(2)    DEFAULT '55'  NOT NULL,
+    "serie"               varchar(3)    DEFAULT '1'   NOT NULL,
+    "clienteId"           int4          NOT NULL,
+    "condicaoPagamentoId" int2          NOT NULL,
+    "formaPagamentoId"    int2          NOT NULL,
+    "transportadoraId"    int4          NULL,
+    "dataEmissao"         date          DEFAULT CURRENT_DATE NOT NULL,
+    "dataSaida"           date          NULL,
+    "tipoFrete"           varchar(3)    DEFAULT 'CIF' NOT NULL,
+    "valorProdutos"       numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "valorFrete"          numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "valorSeguro"         numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "outrasDespesas"      numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "valorDesconto"       numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "valorTotal"          numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "placaVeiculo"        varchar(8)    NULL,
+    "observacoes"         text          NULL,
+    "situacao"            varchar(20)   DEFAULT 'PENDENTE' NOT NULL,
+    "dataCadastro"        timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_notas_saida_pkey
+        PRIMARY KEY ("numero", "modelo", "serie", "clienteId"),
+    CONSTRAINT tb_notas_saida_situacao_check
+        CHECK ("situacao" IN ('PENDENTE','CONFIRMADA','CANCELADA')),
+    CONSTRAINT tb_notas_saida_tipoFrete_check
+        CHECK ("tipoFrete" IN ('CIF','FOB','SEM')),
+    CONSTRAINT tb_notas_saida_dataSaida_check
+        CHECK ("dataSaida" IS NULL OR "dataSaida" >= "dataEmissao"),
+    CONSTRAINT tb_notas_saida_valorProdutos_check  CHECK ("valorProdutos"  >= 0),
+    CONSTRAINT tb_notas_saida_valorFrete_check     CHECK ("valorFrete"     >= 0),
+    CONSTRAINT tb_notas_saida_valorSeguro_check    CHECK ("valorSeguro"    >= 0),
+    CONSTRAINT tb_notas_saida_outrasDespesas_check CHECK ("outrasDespesas" >= 0),
+    CONSTRAINT tb_notas_saida_valorDesconto_check  CHECK ("valorDesconto"  >= 0),
+    CONSTRAINT tb_notas_saida_valorTotal_check     CHECK ("valorTotal"     >= 0),
+    CONSTRAINT tb_notas_saida_clienteId_fkey
+        FOREIGN KEY ("clienteId") REFERENCES public.tb_clientes("id"),
+    CONSTRAINT tb_notas_saida_condicaoPagamentoId_fkey
+        FOREIGN KEY ("condicaoPagamentoId") REFERENCES public.tb_condicoes_pagamento("id"),
+    CONSTRAINT tb_notas_saida_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
+    CONSTRAINT tb_notas_saida_transportadoraId_fkey
+        FOREIGN KEY ("transportadoraId") REFERENCES public.tb_transportadoras("id")
+);
+CREATE TRIGGER trg_notas_saida_alt
+    BEFORE UPDATE ON public.tb_notas_saida
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_produtos_nota_saida (
+    "notaNumero"         varchar(20)   NOT NULL,
+    "notaModelo"         varchar(2)    NOT NULL,
+    "notaSerie"          varchar(3)    NOT NULL,
+    "clienteId"          int4          NOT NULL,
+    "produtoId"          int4          NOT NULL,
+    "sequencia"          int2          NOT NULL,
+    "quantidade"         numeric(15,4) NOT NULL,
+    "valorUnitario"      numeric(15,4) NOT NULL,
+    "valorDesconto"      numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "percentualDesconto" numeric(5,2)  DEFAULT 0.00   NOT NULL,
+    "valorTotal"         numeric(15,4) NOT NULL,
+    "rateioFrete"        numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "rateioSeguro"       numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "rateioOutras"       numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "custoPrecoFinal"    numeric(15,4) DEFAULT 0.0000 NOT NULL,
+    "dataCadastro"       timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"      timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_produtos_nota_saida_pkey
+        PRIMARY KEY ("notaNumero", "notaModelo", "notaSerie", "clienteId", "produtoId", "sequencia"),
+    CONSTRAINT tb_produtos_nota_saida_quantidade_check
+        CHECK ("quantidade" > 0),
+    CONSTRAINT tb_produtos_nota_saida_valorUnitario_check
+        CHECK ("valorUnitario" >= 0),
+    CONSTRAINT tb_produtos_nota_saida_valorDesconto_check
+        CHECK ("valorDesconto" >= 0),
+    CONSTRAINT tb_produtos_nota_saida_percentualDesconto_check
+        CHECK ("percentualDesconto" >= 0 AND "percentualDesconto" <= 100),
+    CONSTRAINT tb_produtos_nota_saida_nota_fkey
+        FOREIGN KEY ("notaNumero", "notaModelo", "notaSerie", "clienteId")
+        REFERENCES public.tb_notas_saida("numero", "modelo", "serie", "clienteId") ON DELETE CASCADE,
+    CONSTRAINT tb_produtos_nota_saida_produtoId_fkey
+        FOREIGN KEY ("produtoId") REFERENCES public.tb_produtos("id")
+);
+CREATE TRIGGER trg_produtos_nota_saida_alt
+    BEFORE UPDATE ON public.tb_produtos_nota_saida
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_nfe (
+    "id"                  bigserial     NOT NULL,
+    "numero"              varchar(50)   NOT NULL,
+    "serie"               varchar(3)    NOT NULL,
+    "chaveAcesso"         varchar(44)   NULL,
+    "dataEmissao"         timestamptz   NOT NULL,
+    "clienteId"           int4          NOT NULL,
+    "formaPagamentoId"    int2          NOT NULL,
+    "condicaoPagamentoId" int2          NOT NULL,
+    "transportadoraId"    int4          NULL,
+    "veiculoId"           int4          NULL,
+    "modalidadeId"        int2          NOT NULL,
+    "valorTotal"          numeric(10,2) NOT NULL,
+    "cancelada"           bool          DEFAULT false NOT NULL,
+    "dataCadastro"        timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_nfe_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_nfe_clienteId_fkey
+        FOREIGN KEY ("clienteId") REFERENCES public.tb_clientes("id"),
+    CONSTRAINT tb_nfe_condicaoPagamentoId_fkey
+        FOREIGN KEY ("condicaoPagamentoId") REFERENCES public.tb_condicoes_pagamento("id"),
+    CONSTRAINT tb_nfe_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
+    CONSTRAINT tb_nfe_modalidadeId_fkey
+        FOREIGN KEY ("modalidadeId") REFERENCES public.tb_modalidades_nfe("id"),
+    CONSTRAINT tb_nfe_transportadoraId_fkey
+        FOREIGN KEY ("transportadoraId") REFERENCES public.tb_transportadoras("id"),
+    CONSTRAINT tb_nfe_veiculoId_fkey
+        FOREIGN KEY ("veiculoId") REFERENCES public.tb_veiculos("id")
+);
+CREATE TRIGGER trg_nfe_alt
+    BEFORE UPDATE ON public.tb_nfe
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_itens_nfe (
+    "id"            bigserial     NOT NULL,
+    "nfeId"         int8          NOT NULL,
+    "produtoId"     int4          NOT NULL,
+    "quantidade"    numeric(10,3) NOT NULL,
+    "valorUnitario" numeric(10,2) NOT NULL,
+    "valorTotal"    numeric(10,2) NOT NULL,
+    "dataCadastro"  timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_itens_nfe_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_itens_nfe_nfeId_fkey
+        FOREIGN KEY ("nfeId") REFERENCES public.tb_nfe("id") ON DELETE CASCADE,
+    CONSTRAINT tb_itens_nfe_produtoId_fkey
+        FOREIGN KEY ("produtoId") REFERENCES public.tb_produtos("id")
+);
+CREATE TRIGGER trg_itens_nfe_alt
+    BEFORE UPDATE ON public.tb_itens_nfe
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_movimentacoes_nfe (
+    "id"               bigserial   NOT NULL,
+    "nfeId"            int8        NOT NULL,
+    "dataMovimentacao" timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "status"           varchar(30) NOT NULL,
+    "descricao"        text        NULL,
+    "dataCadastro"     timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"    timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_movimentacoes_nfe_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_movimentacoes_nfe_nfeId_fkey
+        FOREIGN KEY ("nfeId") REFERENCES public.tb_nfe("id") ON DELETE CASCADE
+);
+CREATE TRIGGER trg_movimentacoes_nfe_alt
+    BEFORE UPDATE ON public.tb_movimentacoes_nfe
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+CREATE TABLE public.tb_contas_receber (
+    "id"               bigserial     NOT NULL,
+    "notaNumero"       varchar(20)   NOT NULL,
+    "notaModelo"       varchar(2)    NOT NULL,
+    "notaSerie"        varchar(3)    NOT NULL,
+    "clienteId"        int4          NOT NULL,
+    "formaPagamentoId" int2          NOT NULL,
+    "numeroParcela"    int2          NOT NULL,
+    "totalParcelas"    int2          NOT NULL,
+    "valorOriginal"    numeric(15,2) NOT NULL,
+    "valorRecebido"    numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorDesconto"    numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorJuros"       numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorMulta"       numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorTotal"       numeric(15,2) NOT NULL,
+    "dataEmissao"      date          NOT NULL,
+    "dataVencimento"   date          NOT NULL,
+    "dataRecebimento"  date          NULL,
+    "situacao"         varchar(20)   DEFAULT 'PENDENTE' NOT NULL,
+    "observacoes"      text          NULL,
+    "dataCadastro"     timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"    timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_contas_receber_pkey         PRIMARY KEY ("id"),
+    CONSTRAINT tb_contas_receber_situacao_check
+        CHECK ("situacao" IN ('PENDENTE','RECEBIDO','PARCIAL','CANCELADO')),
+    CONSTRAINT tb_contas_receber_clienteId_fkey
+        FOREIGN KEY ("clienteId") REFERENCES public.tb_clientes("id"),
+    CONSTRAINT tb_contas_receber_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id")
+);
+CREATE INDEX idx_contas_receber_venc ON public.tb_contas_receber USING btree ("dataVencimento");
+CREATE TRIGGER trg_contas_receber_alt
+    BEFORE UPDATE ON public.tb_contas_receber
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_contas_pagar (
+    "id"               bigserial     NOT NULL,
+    "notaNumero"       varchar(20)   NOT NULL,
+    "notaModelo"       varchar(2)    NOT NULL,
+    "notaSerie"        varchar(3)    NOT NULL,
+    "fornecedorId"     int4          NOT NULL,
+    "formaPagamentoId" int2          NOT NULL,
+    "numeroParcela"    int2          NOT NULL,
+    "totalParcelas"    int2          NOT NULL,
+    "valorOriginal"    numeric(15,2) NOT NULL,
+    "valorPago"        numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorDesconto"    numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorJuros"       numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorMulta"       numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorTotal"       numeric(15,2) NOT NULL,
+    "dataEmissao"      date          NOT NULL,
+    "dataVencimento"   date          NOT NULL,
+    "dataPagamento"    date          NULL,
+    "situacao"         varchar(20)   DEFAULT 'PENDENTE' NOT NULL,
+    "observacoes"      text          NULL,
+    "dataCadastro"     timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"    timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_contas_pagar_pkey         PRIMARY KEY ("id"),
+    CONSTRAINT tb_contas_pagar_situacao_check
+        CHECK ("situacao" IN ('PENDENTE','PAGO','PARCIAL','CANCELADO')),
+    CONSTRAINT tb_contas_pagar_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
+    CONSTRAINT tb_contas_pagar_fornecedorId_fkey
+        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id")
+);
+CREATE INDEX idx_contas_pagar_venc ON public.tb_contas_pagar USING btree ("dataVencimento");
+CREATE TRIGGER trg_contas_pagar_alt
+    BEFORE UPDATE ON public.tb_contas_pagar
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+
+CREATE TABLE public.tb_contas_pagar_avulsa (
+    "id"               bigserial     NOT NULL,
+    "numeroNota"       varchar(50)   NULL,
+    "modelo"           varchar(2)    NULL,
+    "serie"            varchar(3)    NULL,
+    "fornecedorId"     int4          NOT NULL,
+    "formaPagamentoId" int2          NOT NULL,
+    "numeroParcela"    int2          DEFAULT 1    NOT NULL,
+    "valorParcela"     numeric(15,2) NOT NULL,
+    "dataEmissao"      date          NOT NULL,
+    "dataVencimento"   date          NOT NULL,
+    "dataPagamento"    date          NULL,
+    "valorPago"        numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorJuros"       numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorMulta"       numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorDesconto"    numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "situacao"         varchar(20)   DEFAULT 'PENDENTE' NOT NULL,
+    "observacao"       text          NULL,
+    "dataCadastro"     timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"    timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_contas_pagar_avulsa_pkey         PRIMARY KEY ("id"),
+    CONSTRAINT tb_contas_pagar_avulsa_situacao_check
+        CHECK ("situacao" IN ('PENDENTE','PAGO','PARCIAL','CANCELADO')),
+    CONSTRAINT tb_contas_pagar_avulsa_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
+    CONSTRAINT tb_contas_pagar_avulsa_fornecedorId_fkey
+        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id")
+);
+CREATE INDEX idx_contas_pagar_avulsa_venc
+    ON public.tb_contas_pagar_avulsa USING btree ("dataVencimento");
+CREATE TRIGGER trg_contas_pagar_avulsa_alt
+    BEFORE UPDATE ON public.tb_contas_pagar_avulsa
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+ALTER TABLE public.tb_auditoria
+    ADD CONSTRAINT tb_auditoria_usuarioId_fkey
+        FOREIGN KEY ("usuarioId") REFERENCES public.tb_usuarios("id") ON DELETE SET NULL;
+
+ALTER TABLE public.tb_paises
+    ADD CONSTRAINT tb_paises_usuarioCadastroId_fkey
+        FOREIGN KEY ("usuarioCadastroId")  REFERENCES public.tb_usuarios("id") ON DELETE SET NULL,
+    ADD CONSTRAINT tb_paises_usuarioAlteracaoId_fkey
+        FOREIGN KEY ("usuarioAlteracaoId") REFERENCES public.tb_usuarios("id") ON DELETE SET NULL;
+
+ALTER TABLE public.tb_estados
+    ADD CONSTRAINT tb_estados_usuarioCadastroId_fkey
+        FOREIGN KEY ("usuarioCadastroId")  REFERENCES public.tb_usuarios("id") ON DELETE SET NULL,
+    ADD CONSTRAINT tb_estados_usuarioAlteracaoId_fkey
+        FOREIGN KEY ("usuarioAlteracaoId") REFERENCES public.tb_usuarios("id") ON DELETE SET NULL;
+
+ALTER TABLE public.tb_cidades
+    ADD CONSTRAINT tb_cidades_usuarioCadastroId_fkey
+        FOREIGN KEY ("usuarioCadastroId")  REFERENCES public.tb_usuarios("id") ON DELETE SET NULL,
+    ADD CONSTRAINT tb_cidades_usuarioAlteracaoId_fkey
+        FOREIGN KEY ("usuarioAlteracaoId") REFERENCES public.tb_usuarios("id") ON DELETE SET NULL;
+
+
+CREATE OR REPLACE VIEW public.vw_permissoes_usuario AS
+SELECT DISTINCT
+    u.id    AS "usuarioId",
+    p.recurso,
+    p.acao
+FROM   public.tb_usuarios u
+JOIN   public.tb_perfil_permissoes pp ON pp."perfilId"    = u."perfilId"
+JOIN   public.tb_permissoes        p  ON p.id             = pp."permissaoId"
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM   public.tb_usuarios_permissoes up2
+    WHERE  up2."usuarioId"   = u.id
+      AND  up2."permissaoId" = p.id
+      AND  up2.tipo          = 'NEGAR'
+)
+
+UNION
+
+SELECT
+    up."usuarioId",
+    p.recurso,
+    p.acao
+FROM   public.tb_usuarios_permissoes up
+JOIN   public.tb_permissoes p ON p.id = up."permissaoId"
+WHERE  up.tipo = 'CONCEDER';
+
+INSERT INTO public.tb_usuarios
+    ("usuario", "nome", "email", "senhaHash", "perfilId")
+SELECT
+    'admin',
+    'Administrador',
+    'admin@pratica.local',
+    '$2b$12$1m.4RhqgtEZS3j1rVyVNfO/PSnZjY5tYfKJag1rtkVdP1wCvD05Sa',
+    id
+FROM public.tb_perfis_usuario
+WHERE "perfil" = 'SUPER_ADMIN';
