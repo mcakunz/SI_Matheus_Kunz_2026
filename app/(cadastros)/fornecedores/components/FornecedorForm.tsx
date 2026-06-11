@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useForm, useFieldArray } from "react-hook-form"
+import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarFornecedor } from "../actions"
@@ -28,6 +28,9 @@ import {
 import { validarIE, validarRG } from "@/lib/utils/validacoes"
 import { mascaraCPF, mascaraCNPJ, mascaraTelefone } from "@/lib/utils/mascaras"
 import { useEndereco } from "@/lib/hooks/useEndereco"
+import { PaisLookup } from "@/components/ui/PaisLookup"
+import { EstadoLookup } from "@/components/ui/EstadoLookup"
+import { CidadeLookup } from "@/components/ui/CidadeLookup"
 
 
 const fornecedorEmailSchema = z.object({
@@ -110,13 +113,13 @@ const schema = z.object({
 type FormData = z.infer<typeof schema>
 
 interface FornecedorFormProps {
-    fornecedor?:        FornecedorView | null
-    emailsIniciais?:    FornecedorEmail[]
-    telefonesIniciais?: FornecedorTelefone[]
-    listaCidades:       CidadeSelect[]
-    listaEstados:       EstadoSelect[]
-    listaPaises:        PaisSelect[]
-    listaCondicoes:     CondicaoPagamentoSelect[]
+    fornecedor?:          FornecedorView | null
+    emailsIniciais?:      FornecedorEmail[]
+    telefonesIniciais?:   FornecedorTelefone[]
+    listaCidades:         CidadeSelect[]
+    listaEstados:         EstadoSelect[]
+    listaPaises:          PaisSelect[]
+    listaCondicoes:       CondicaoPagamentoSelect[]
     listaTransportadoras: TransportadoraSelect[]
 }
 
@@ -132,6 +135,9 @@ export function FornecedorForm({
 }: FornecedorFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+
+    const cidadeInicial = listaCidades.find(c => c.id === fornecedor?.cidadeId)
+    const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
 
     const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -173,22 +179,22 @@ export function FornecedorForm({
         },
     })
 
-    const cidadeInicial = listaCidades.find(c => c.id === fornecedor?.cidadeId)
-    const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
-
     const {
-        paisSelecionado, setPaisSelecionado,
+        paisSelecionado,
         estadoSelecionado,
-        handlePaisChange, handleEstadoChange,
-    } = useEndereco(setValue, estadoInicial?.paisId ?? '', estadoInicial?.id ?? '')
-
-    const estadosFiltrados = paisSelecionado
-        ? listaEstados.filter(e => e.paisId === paisSelecionado)
-        : listaEstados
-
-    const cidadesFiltradas = estadoSelecionado
-        ? listaCidades.filter(c => c.estadoId === estadoSelecionado)
-        : listaCidades
+        listaPaises:      paisesAtualizados,
+        estadosFiltrados,
+        cidadesFiltradas,
+        handlePaisChange,
+        handleEstadoChange,
+    } = useEndereco(
+        setValue,
+        estadoInicial?.paisId ?? '',
+        estadoInicial?.id     ?? '',
+        listaPaises,
+        listaEstados,
+        listaCidades,
+    )
 
     const tipoPessoa = watch("tipo")
     const isPF = tipoPessoa === "F"
@@ -356,38 +362,34 @@ export function FornecedorForm({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                     <div>
                         <FormLabel required>País</FormLabel>
-                        <FormSelect value={paisSelecionado} onChange={handlePaisChange}>
-                            <option value="">Selecione o país...</option>
-                            {listaPaises.map(p => (
-                                <option key={p.id} value={p.id}>{p.pais}</option>
-                            ))}
-                        </FormSelect>
+                        <PaisLookup
+                            paises={paisesAtualizados}
+                            value={String(paisSelecionado)}
+                            onChange={handlePaisChange}
+                        />
                     </div>
                     <div>
                         <FormLabel required>Estado</FormLabel>
-                        <FormSelect
-                            value={estadoSelecionado}
+                        <EstadoLookup
+                            estados={estadosFiltrados}
+                            value={String(estadoSelecionado)}
                             onChange={handleEstadoChange}
-                            disabled={!paisSelecionado}
-                        >
-                            <option value="">Selecione o estado...</option>
-                            {estadosFiltrados.map(e => (
-                                <option key={e.id} value={e.id}>{e.estado}</option>
-                            ))}
-                        </FormSelect>
+                        />
                     </div>
                     <div>
                         <FormLabel required>Cidade</FormLabel>
-                        <FormSelect
-                            {...register('cidadeId')}
-                            disabled={!estadoSelecionado}
-                        >
-                            <option value="">Selecione a cidade...</option>
-                            {cidadesFiltradas.map(c => (
-                                <option key={c.id} value={c.id}>{c.cidade}</option>
-                            ))}
-                        </FormSelect>
-                        <Erro campo="cidadeId" />
+                        <Controller
+                            name="cidadeId"
+                            control={control}
+                            render={({ field }) => (
+                                <CidadeLookup
+                                    cidades={cidadesFiltradas}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={errors.cidadeId?.message}
+                                />
+                            )}
+                        />
                     </div>
                 </div>
             </div>
@@ -617,7 +619,7 @@ export function FornecedorForm({
                 <button
                     type="button"
                     onClick={() => router.push("/fornecedores")}
-                    className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                    className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate:900 transition-colors"
                 >
                     Cancelar
                 </button>

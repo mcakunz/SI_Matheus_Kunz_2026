@@ -74,7 +74,7 @@ export async function salvarPais(formData: FormData) {
     revalidatePath('/paises')
 }
 
-export async function salvarPaisComRetorno(formData: FormData) {
+export async function salvarPaisComRetorno(formData: FormData): Promise<{ id: number; pais: string }> {
     //await exigirPermissao('paises', 'criar')
     const sessao = await obterSessao()
 
@@ -104,6 +104,7 @@ export async function salvarPaisComRetorno(formData: FormData) {
         return inserted!
     } catch (error: any) {
         tratarErroDB(error)
+        throw error
     }
 }
 

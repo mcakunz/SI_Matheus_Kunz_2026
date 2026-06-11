@@ -6,7 +6,14 @@ import { z } from "zod"
 
 import { validarRG, validarIE } from "@/lib/utils/validacoes"
 import { nullableString,parseJsonField } from "@/lib/utils/helpers"
+import { DBErrorLabels, tratarErroDB } from "@/components/errors"
 
+const FORNECEDOR_DB_ERROR_LABELS: DBErrorLabels = {
+    unique: {
+        cpfCnpj: "este CPF/CNPJ",
+    },
+    foreignKey: "Este fornecedor não pode ser excluído pois possui produtos ou contas vinculadas.",
+}
 
 const fornecedorEmailSchema = z.object({
     id:        z.number().optional(),
@@ -182,8 +189,7 @@ export async function salvarFornecedor(formData: FormData) {
         await client.query('COMMIT')
     } catch (error: any) {
         await client.query('ROLLBACK')
-        if (error.code === '23505') throw new Error("Já existe um fornecedor cadastrado com este CPF/CNPJ.")
-        throw new Error(error.message)
+            tratarErroDB(error, FORNECEDOR_DB_ERROR_LABELS)
     } finally {
         client.release()
     }
@@ -199,7 +205,7 @@ export async function alternarStatusFornecedor(id: number, statusAtual: boolean)
             [!statusAtual, id]
         )
     } catch (error: any) {
-        throw new Error(error.message)
+        tratarErroDB(error)
     }
 
     revalidatePath('/fornecedores')
@@ -209,10 +215,7 @@ export async function excluirFornecedor(id: number) {
     try {
         await pool.query(`DELETE FROM tb_fornecedores WHERE id = $1`, [id])
     } catch (error: any) {
-        if (error.code === '23503') {
-            throw new Error("Este fornecedor não pode ser excluído pois possui produtos ou contas vinculadas.")
-        }
-        throw new Error(error.message)
+        tratarErroDB(error, FORNECEDOR_DB_ERROR_LABELS)
     }
 
     revalidatePath('/fornecedores')

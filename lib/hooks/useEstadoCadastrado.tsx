@@ -5,6 +5,7 @@ const CANAL = "estado-cadastrado"
 export type EstadoCadastradoEvent = {
     id: number
     estado: string
+    paisId: number
 }
 
 export function emitirEstadoCadastrado(estado: EstadoCadastradoEvent) {

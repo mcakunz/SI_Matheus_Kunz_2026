@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -15,6 +15,7 @@ import { FormLabel } from "@/app/components/ui/FormLabel"
 import { EstadoComPais, PaisSelect } from "@/lib/types"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { PaisLookup } from "@/components/ui/PaisLookup"
+import { usePaisCadastrado } from "@/lib/hooks/usePaisCadastrado"
 
 const schema = z.object({
     estado:  z.string().min(2, "O nome do estado deve ter no mínimo 2 caracteres.").max(100),
@@ -38,7 +39,7 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
 
     const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
-    const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             estado:  estado?.estado              ?? '',
@@ -47,6 +48,15 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
             ativo:   estado ? estado.ativo        : true,
         }
     })
+
+    const handlePaisCriado = useCallback((novoPais: PaisSelect) => {
+        setListaPaises(prev =>
+            [...prev, novoPais].sort((a, b) => a.pais.localeCompare(b.pais, 'pt-BR'))
+        )
+        setValue('pais_id', String(novoPais.id))
+    }, [setValue])
+
+    usePaisCadastrado(handlePaisCriado)
 
     const onSubmit = async (data: FormData) => {
         setLoading(true)
@@ -63,7 +73,7 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
             if (abertoPorLookup && !estado?.id) {
                 const resultado = await salvarEstadoComRetorno(formData)
                 toast.success("Estado cadastrado com sucesso!")
-                emitirEstadoCadastrado({ id: resultado.id, estado: resultado.estado })
+                emitirEstadoCadastrado({ id: resultado.id, estado: resultado.estado, paisId: resultado.paisId })
             } else {
                 await salvarEstado(formData)
                 toast.success(estado ? "Estado atualizado com sucesso!" : "Estado cadastrado com sucesso!")
@@ -74,12 +84,6 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
         } finally {
             setLoading(false)
         }
-    }
-
-    const handlePaisCriado = (novoPais: PaisSelect) => {
-        setListaPaises(prev =>
-            [...prev, novoPais].sort((a, b) => a.pais.localeCompare(b.pais, 'pt-BR'))
-        )
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -133,7 +137,6 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
                                 paises={listaPaises}
                                 value={field.value}
                                 onChange={field.onChange}
-                                onPaisCreated={handlePaisCriado}
                                 required
                                 error={errors.pais_id?.message}
                             />

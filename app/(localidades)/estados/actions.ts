@@ -70,10 +70,10 @@ export async function salvarEstadoComRetorno(formData: FormData) {
     const { ativo, estado, uf, paisId } = validacao.data
 
     try {
-        const result = await pool.query<{ id: number; estado: string }>(
+        const result = await pool.query<{ id: number; estado: string; paisId: number }>(
             `INSERT INTO tb_estados (estado, uf, "paisId", ativo)
-             VALUES ($1, $2, $3, $4)
-             RETURNING id, estado`,
+            VALUES ($1, $2, $3, $4)
+            RETURNING id, estado, "paisId"`, 
             [estado, uf, paisId, ativo]
         )
 

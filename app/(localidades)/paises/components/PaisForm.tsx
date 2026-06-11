@@ -66,7 +66,7 @@ export function PaisForm({ pais }: PaisFormProps) {
             if (abertoPorLookup && !pais) {
                 const novo = await salvarPaisComRetorno(formData)
                 toast.success("País cadastrado com sucesso!")
-                setTimeout(() => emitirPaisCadastrado(novo), 800)
+                emitirPaisCadastrado(novo)
             } else {
                 await salvarPais(formData)
                 toast.success(pais ? "País atualizado com sucesso!" : "País cadastrado com sucesso!")

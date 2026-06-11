@@ -26,13 +26,6 @@ export function PaisLookup({ paises, value, onChange, onPaisCreated, required, e
         ? paises.filter(p => p.pais.toLowerCase().includes(busca.toLowerCase()))
         : paises
 
-    const handlePaisCadastrado = useCallback((novoPais: PaisSelect) => {
-        onPaisCreated?.(novoPais)
-        onChange(String(novoPais.id))
-    }, [onPaisCreated, onChange])
-
-    usePaisCadastrado(handlePaisCadastrado)
-
     useEffect(() => {
         function onClickOutside(e: MouseEvent) {
             if (containerRef.current && !containerRef.current.contains(e.target as Node)) {

@@ -1,11 +1,11 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useCallback, useState } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { salvarCidade } from "../actions"
+import { salvarCidade, salvarCidadeComRetorno } from "../actions"
 import toast from "react-hot-toast"
 
 import { Button } from "@/app/components/ui/Button"
@@ -14,6 +14,8 @@ import { FormLabel } from "@/app/components/ui/FormLabel"
 import { CidadeComEstado, EstadoSelect } from "@/lib/types"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { EstadoLookup } from "@/components/ui/EstadoLookup"
+import { useEstadoCadastrado } from "@/lib/hooks/useEstadoCadastrado"
+import { emitirCidadeCadastrada } from "@/lib/hooks/useCidadeCadastrada"
 
 const schema = z.object({
     cidade:      z.string().min(2, "O nome da cidade deve ter no mínimo 2 caracteres.").max(100),
@@ -34,7 +36,10 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
     const [loading, setLoading] = useState(false)
     const [listaEstados, setListaEstados] = useState<EstadoSelect[]>(listaEstadosIniciais)
 
-    const { register, handleSubmit, control, formState: { errors } } = useForm<FormData>({
+    const searchParams    = useSearchParams()
+    const abertoPorLookup = searchParams.get('origem') === 'lookup'
+
+    const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             cidade:      cidade?.cidade                ?? '',
@@ -56,9 +61,15 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
         })
 
         try {
-            await salvarCidade(formData)
-            toast.success(cidade ? "Cidade atualizada com sucesso!" : "Cidade cadastrada com sucesso!")
-            router.push("/cidades")
+            if (abertoPorLookup && !cidade?.id) {
+                const resultado = await salvarCidadeComRetorno(formData)
+                toast.success("Cidade cadastrada com sucesso!")
+                emitirCidadeCadastrada({ id: resultado.id, cidade: resultado.cidade, estadoId: resultado.estadoId })
+            } else {
+                await salvarCidade(formData)
+                toast.success(cidade ? "Cidade atualizada com sucesso!" : "Cidade cadastrada com sucesso!")
+                router.push("/cidades")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {
@@ -66,11 +77,14 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
         }
     }
 
-    const handleEstadoCriado = (novoEstado: EstadoSelect) => {
+    const handleEstadoCriado = useCallback((novoEstado: EstadoSelect) => {
         setListaEstados(prev =>
             [...prev, novoEstado].sort((a, b) => a.estado.localeCompare(b.estado, 'pt-BR'))
         )
-    }
+        setValue('estado_id', String(novoEstado.id))
+    }, [setValue])
+
+    useEstadoCadastrado(handleEstadoCriado)
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
         errors[campo] ? <p className="text-xs text-red-500 mt-1">{errors[campo]?.message}</p> : null
@@ -126,7 +140,6 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
                                 estados={listaEstados}
                                 value={field.value}
                                 onChange={field.onChange}
-                                onEstadoCreated={handleEstadoCriado}
                                 required
                                 error={errors.estado_id?.message}
                             />
@@ -156,7 +169,7 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/cidades")}
+                    onClick={() => abertoPorLookup ? window.close() : router.push("/cidades")}
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

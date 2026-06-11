@@ -1,6 +1,6 @@
 "use server"
 
-import { DBErrorLabels } from "@/components/errors"
+import { DBErrorLabels, tratarErroDB } from "@/components/errors"
 import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
@@ -50,10 +50,37 @@ export async function salvarCidade(formData: FormData) {
             )
         }
     } catch (error: any) {
-        throw new Error(error.message)
+        tratarErroDB(error, CIDADE_DB_ERROR_LABELS)
     }
 
     revalidatePath('/cidades')
+}
+
+export async function salvarCidadeComRetorno(formData: FormData): Promise<{ id: number; cidade: string; estadoId: number }> {
+    const dados = {
+        ativo:      formData.get('ativo') === 'true',
+        cidade:     (formData.get('cidade') as string).trim(),
+        codigoIbge: (formData.get('codigo_ibge') as string).trim(),
+        estadoId:   formData.get('estado_id'),
+    }
+
+    const validacao = cidadeSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+
+    const { ativo, cidade, codigoIbge, estadoId } = validacao.data
+
+    try {
+        const result = await pool.query<{ id: number; cidade: string; estadoId: number }>(
+            `INSERT INTO tb_cidades (cidade, "codigoIbge", "estadoId", ativo)
+             VALUES ($1, $2, $3, $4)
+             RETURNING id, cidade, "estadoId"`,
+            [cidade, codigoIbge, estadoId, ativo]
+        )
+        revalidatePath('/cidades')
+        return result.rows[0]
+    } catch (error: any) {
+        throw new Error(error.message)
+    }
 }
 
 export async function alternarStatusCidade(id: number, statusAtual: boolean) {
@@ -63,7 +90,7 @@ export async function alternarStatusCidade(id: number, statusAtual: boolean) {
             [!statusAtual, id]
         )
     } catch (error: any) {
-        throw new Error(error.message)
+        tratarErroDB(error)
     }
 
     revalidatePath('/cidades')

@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { useForm } from "react-hook-form"
+import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarCliente } from "../actions"
@@ -16,6 +16,11 @@ import { FormSwitch } from "@/components/ui/FormSwitch"
 import { ClienteView, CidadeSelect, PaisSelect, EstadoSelect, CondicaoPagamentoSelect } from "@/lib/types"
 import { mascaraCNPJ, mascaraCPF, mascaraTelefone } from "@/lib/utils/mascaras"
 import { validarIE, validarRG } from "@/lib/utils/validacoes"
+import { useEndereco } from "@/lib/hooks/useEndereco"
+import { PaisLookup } from "@/components/ui/PaisLookup"
+import { EstadoLookup } from "@/components/ui/EstadoLookup"
+import { CidadeLookup } from "@/components/ui/CidadeLookup"
+
 const schema = z.object({
     tipo:                z.enum(['F', 'J']),
     ativo:               z.boolean(),
@@ -71,21 +76,10 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
-    const cidadeInicial  = listaCidades.find(c => c.id === cliente?.cidadeId)
-    const estadoInicial  = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
+    const cidadeInicial = listaCidades.find(c => c.id === cliente?.cidadeId)
+    const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
 
-    const [paisSelecionado,   setPaisSelecionado]   = useState<number | ''>(estadoInicial?.paisId   ?? '')
-    const [estadoSelecionado, setEstadoSelecionado] = useState<number | ''>(estadoInicial?.id       ?? '')
-
-    const estadosFiltrados = paisSelecionado
-        ? listaEstados.filter(e => e.paisId === paisSelecionado)
-        : listaEstados
-
-    const cidadesFiltradas = estadoSelecionado
-        ? listaCidades.filter(c => c.estadoId === estadoSelecionado)
-        : listaCidades
-
-    const { register, handleSubmit, watch, setValue, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             tipo:                (cliente?.tipo as 'F' | 'J') ?? 'F',
@@ -114,23 +108,32 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
         }
     })
 
+    const {
+        paisSelecionado,
+        estadoSelecionado,
+        listaPaises:     paisesAtualizados,
+        estadosFiltrados,
+        cidadesFiltradas,
+        handlePaisChange,
+        handleEstadoChange,
+    } = useEndereco(
+        setValue,
+        estadoInicial?.paisId  ?? '',
+        estadoInicial?.id      ?? '',
+        listaPaises,
+        listaEstados,
+        listaCidades,
+    )
+
     const tipoPessoa = watch("tipo")
     const isPF = tipoPessoa === "F"
+    
 
-    const handlePaisChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const val = e.target.value ? Number(e.target.value) : ''
-        setPaisSelecionado(val)
-        setEstadoSelecionado('')
-        setValue('cidadeId', '')
-    }
 
-    const handleEstadoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const val = e.target.value ? Number(e.target.value) : ''
-        setEstadoSelecionado(val)
-        setValue('cidadeId', '')
-    }
 
     const onSubmit = async (data: FormData) => {
+        console.log('onSubmit chamado', data)
+
         setLoading(true)
         const formData = new FormData()
         if (cliente?.id) formData.append('id', String(cliente.id))
@@ -160,8 +163,9 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
         errors[campo] ? <p className="text-xs text-red-500 mt-1">{errors[campo]?.message}</p> : null
 
+    const onError = (erros: any) => console.log('erros de validação', erros)
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 text-slate-900">
+        <form onSubmit={handleSubmit(onSubmit, onError)} className="flex flex-col gap-5 text-slate-900">
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
@@ -179,7 +183,7 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                 <div>
                     <FormLabel required>{isPF ? "Cliente" : "Razão Social"}</FormLabel>
                     <FormInput
@@ -206,6 +210,40 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                         </FormSelect>
                     </div>
                 ) : <div />}
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+                <div>
+                    <FormLabel required>País</FormLabel>
+                    <PaisLookup
+                        paises={paisesAtualizados}
+                        value={String(paisSelecionado)}
+                        onChange={handlePaisChange}
+                    />
+                </div>
+                <div>
+                    <FormLabel required>Estado</FormLabel>
+                    <EstadoLookup
+                        estados={estadosFiltrados}
+                        value={String(estadoSelecionado)}
+                        onChange={handleEstadoChange}
+                    />
+                </div>
+                <div>
+                    <FormLabel required>Cidade</FormLabel>
+                    <Controller
+                        name="cidadeId"
+                        control={control}
+                        render={({ field }) => (
+                            <CidadeLookup
+                                cidades={cidadesFiltradas}
+                                value={field.value}
+                                onChange={field.onChange}
+                                error={errors.cidadeId?.message}
+                            />
+                        )}
+                    />
+                </div>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-[160px_1fr_120px] gap-4 md:gap-6">
@@ -247,47 +285,6 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                 <div>
                     <FormLabel>Bairro</FormLabel>
                     <FormInput {...register('bairro')} placeholder="Bairro" />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                <div>
-                    <FormLabel required>País</FormLabel>
-                    <FormSelect
-                        value={paisSelecionado}
-                        onChange={handlePaisChange}
-                    >
-                        <option value="">Selecione o país...</option>
-                        {listaPaises.map((p) => (
-                            <option key={p.id} value={p.id}>{p.pais}</option>
-                        ))}
-                    </FormSelect>
-                </div>
-                <div>
-                    <FormLabel required>Estado</FormLabel>
-                    <FormSelect
-                        value={estadoSelecionado}
-                        onChange={handleEstadoChange}
-                        disabled={!paisSelecionado}
-                    >
-                        <option value="">Selecione o estado...</option>
-                        {estadosFiltrados.map((e) => (
-                            <option key={e.id} value={e.id}>{e.estado}</option>
-                        ))}
-                    </FormSelect>
-                </div>
-                <div>
-                    <FormLabel required>Cidade</FormLabel>
-                    <FormSelect
-                        {...register('cidadeId')}
-                        disabled={!estadoSelecionado}
-                    >
-                        <option value="">Selecione a cidade...</option>
-                        {cidadesFiltradas.map((c) => (
-                            <option key={c.id} value={c.id}>{c.cidade}</option>
-                        ))}
-                    </FormSelect>
-                    <Erro campo="cidadeId" />
                 </div>
             </div>
 

@@ -1,6 +1,6 @@
 "use server"
 
-import { DBErrorLabels } from "@/components/errors"
+import { DBErrorLabels, tratarErroDB } from "@/components/errors"
 import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
@@ -147,8 +147,7 @@ export async function salvarCliente(formData: FormData) {
             )
         }
     } catch (error: any) {
-        if (error.code === '23505') throw new Error("Já existe um cliente cadastrado com este CPF/CNPJ.")
-        throw new Error(error.message)
+        tratarErroDB(error, CLIENTE_DB_ERROR_LABELS)
     }
 
     revalidatePath('/clientes')
@@ -161,7 +160,7 @@ export async function alternarStatusCliente(id: number, statusAtual: boolean) {
             [!statusAtual, id]
         )
     } catch (error: any) {
-        throw new Error(error.message)
+        tratarErroDB(error)
     }
 
     revalidatePath('/clientes')
@@ -171,10 +170,7 @@ export async function excluirCliente(id: number) {
     try {
         await pool.query(`DELETE FROM tb_clientes WHERE id = $1`, [id])
     } catch (error: any) {
-        if (error.code === '23503') {
-            throw new Error("Este cliente não pode ser excluído pois possui notas fiscais ou contas vinculadas.")
-        }
-        throw new Error(error.message)
+        tratarErroDB(error, CLIENTE_DB_ERROR_LABELS)
     }
 
     revalidatePath('/clientes')
