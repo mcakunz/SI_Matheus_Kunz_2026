@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback } from 'react';
 import { UseFormSetValue } from 'react-hook-form';
 import { PaisSelect, EstadoSelect, CidadeSelect } from '@/lib/types';
 import { usePaisCadastrado } from '@/lib/hooks/usePaisCadastrado';
@@ -19,13 +19,6 @@ export function useEndereco(
     const [listaEstados, setListaEstados] = useState<EstadoSelect[]>(listaEstadosInicial)
     const [listaCidades, setListaCidades] = useState<CidadeSelect[]>(listaCidadesInicial)
 
-    const paisSelecionadoRef   = useRef(paisSelecionado)
-    const estadoSelecionadoRef = useRef(estadoSelecionado)
-
-    paisSelecionadoRef.current   = paisSelecionado
-    estadoSelecionadoRef.current = estadoSelecionado
-
-
     const handlePaisChange = useCallback((id: string) => {
         const val = id ? Number(id) : ''
         setPaisSelecionado(val)
@@ -43,24 +36,25 @@ export function useEndereco(
         setListaPaises(prev =>
             [...prev, novoPais].sort((a, b) => a.pais.localeCompare(b.pais, 'pt-BR'))
         )
-    }, [])
+        setPaisSelecionado(novoPais.id)
+        setEstadoSelecionado('')
+        setValue('cidadeId', '')
+    }, [setValue])
 
     const handleEstadoCriado = useCallback((novoEstado: EstadoSelect) => {
         setListaEstados(prev =>
             [...prev, novoEstado].sort((a, b) => a.estado.localeCompare(b.estado, 'pt-BR'))
         )
-        if (novoEstado.paisId === paisSelecionadoRef.current) {
-            handleEstadoChange(String(novoEstado.id))
-        }
+        setPaisSelecionado(novoEstado.paisId)
+        handleEstadoChange(String(novoEstado.id))
     }, [handleEstadoChange])
 
     const handleCidadeCriada = useCallback((novaCidade: CidadeSelect) => {
         setListaCidades(prev =>
             [...prev, novaCidade].sort((a, b) => a.cidade.localeCompare(b.cidade, 'pt-BR'))
         )
-        if (novaCidade.estadoId === estadoSelecionadoRef.current) {
-            setValue('cidadeId', String(novaCidade.id))
-        }
+        setEstadoSelecionado(novaCidade.estadoId)
+        setValue('cidadeId', String(novaCidade.id))
     }, [setValue])
 
     usePaisCadastrado(handlePaisCriado)
