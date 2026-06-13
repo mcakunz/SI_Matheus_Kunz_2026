@@ -34,7 +34,13 @@ export interface Cidade {
     dataCadastro:        string
     dataAlteracao:       string | null
 }
+export interface EstadoComPais extends Estado {
+    pais: string | null
+}
 
+export interface CidadeComEstado extends Cidade {
+    estado: string | null
+}
 export interface CondicaoPagamento {
     id:                  number
     condicaoPagamento:   string
@@ -70,8 +76,6 @@ export interface Cliente {
     apelido:               string | null
     cpfCnpj:               string
     rgInscricaoEstadual:   string | null
-    email:                 string | null
-    telefone:              string | null
     cep:                   string | null
     endereco:              string | null
     numero:                string | null
@@ -89,29 +93,36 @@ export interface Cliente {
     dataCadastro:          string
     dataAlteracao:         string | null
 }
-
-export interface EstadoComPais extends Estado {
-    pais: string | null
-}
-
-export interface CidadeComEstado extends Cidade {
-    estado: string | null
-}
-
 export interface ClienteView extends Cliente {
-    cidade:            string | null   
-    condicaoPagamento: string | null   
+    cidade:            string | null
+    condicaoPagamento: string | null
+    emailPrincipal:    string | null
+    totalEmails:       number          
+    telefonePrincipal: string | null
+    totalTelefones:    number          
 }
-export interface ParcelaCondicao {
-    id:                         number
-    condicaoPagamentoId:        number
-    numero:                     number
-    dias:                       number
-    percentual:                 number
-    formaPagamentoId:           number
-    formaPagamento:             string
-    dataCadastro:               string
-    dataAlteracao:              string | null
+export interface ClienteEmail {
+    id:        number
+    clienteId: number
+    email:     string
+    tipo:      'COMERCIAL' | 'FINANCEIRO' | 'FISCAL' | 'OUTRO'
+    principal: boolean
+    ativo:     boolean
+    dataCadastro: string        
+    dataAlteracao: string | null 
+
+}
+
+export interface ClienteTelefone {
+    id:        number
+    clienteId: number
+    telefone:  string
+    tipo:      'COMERCIAL' | 'FINANCEIRO' | 'CELULAR' | 'OUTRO'
+    principal: boolean
+    ativo:     boolean
+    dataCadastro: string        
+    dataAlteracao: string | null 
+
 }
 
 export interface CondicaoPagamentoCompleto {

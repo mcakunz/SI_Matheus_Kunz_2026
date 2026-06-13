@@ -20,6 +20,27 @@ import { useEndereco } from "@/lib/hooks/useEndereco"
 import { PaisLookup } from "@/components/ui/PaisLookup"
 import { EstadoLookup } from "@/components/ui/EstadoLookup"
 import { CidadeLookup } from "@/components/ui/CidadeLookup"
+import { useFieldArray } from "react-hook-form"
+import { HiPlus, HiTrash, HiStar } from "react-icons/hi"
+import { ClienteEmail, ClienteTelefone } from "@/lib/types"
+import { EmailList } from "@/app/components/ui/EmailList"
+import { TelefoneList } from "@/app/components/ui/TelefoneList"
+
+const clienteEmailSchema = z.object({
+    id:        z.number().optional(),
+    email:     z.string().email("E-mail inválido."),
+    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'FISCAL', 'OUTRO']),
+    principal: z.boolean(),
+    ativo:     z.boolean(),
+})
+
+const clienteTelefoneSchema = z.object({
+    id:        z.number().optional(),
+    telefone:  z.string().min(10, "Telefone inválido.").max(15),
+    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'CELULAR', 'OUTRO']),
+    principal: z.boolean(),
+    ativo:     z.boolean(),
+})
 
 const schema = z.object({
     tipo:                z.enum(['F', 'J']),
@@ -30,8 +51,8 @@ const schema = z.object({
     rgInscricaoEstadual: z.string().max(20).optional(),
     dataNascimento:      z.string().optional(),
     sexo:                z.enum(['M', 'F', 'O', '']).optional(),
-    email:               z.string().email("E-mail inválido.").optional().or(z.literal('')),
-    telefone:            z.string().max(16).optional(),
+    emails:              z.array(clienteEmailSchema),
+    telefones:           z.array(clienteTelefoneSchema),
     observacao:          z.string().max(150).optional(),
     endereco:            z.string().max(100).optional(),
     numero:              z.string().max(10).optional(),
@@ -43,6 +64,7 @@ const schema = z.object({
     limiteCredito:       z.string().min(1, "Informe o limite de crédito."),
 }).superRefine((data, ctx) => {
     const valor = data.rgInscricaoEstadual?.trim();
+
     if (!valor) return;
 
     if (data.tipo === 'F' && !validarRG(valor)) {
@@ -60,6 +82,24 @@ const schema = z.object({
             message: "Inscrição Estadual inválida. Informe entre 8 e 14 caracteres.",
         });
     }
+
+    const emailsPrincipais = data.emails.filter(e => e.principal).length
+    if (emailsPrincipais > 1) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['emails'],
+            message: "Apenas um e-mail pode ser marcado como principal.",
+        })
+    }
+
+    const telPrincipais = data.telefones.filter(t => t.principal).length
+    if (telPrincipais > 1) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['telefones'],
+            message: "Apenas um telefone pode ser marcado como principal.",
+        })
+    }
 });
 
 type FormData = z.infer<typeof schema>
@@ -69,10 +109,12 @@ interface ClienteFormProps {
     listaCidades:   CidadeSelect[]
     listaEstados:   EstadoSelect[]
     listaPaises:    PaisSelect[]
+    emailsIniciais?:   ClienteEmail[]      
+    telefonesIniciais?: ClienteTelefone[]  
     listaCondicoes: CondicaoPagamentoSelect[]
 }
 
-export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, listaCondicoes }: ClienteFormProps) {
+export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, listaCondicoes, emailsIniciais = [], telefonesIniciais = [] }: ClienteFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
@@ -94,8 +136,12 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
             rgInscricaoEstadual: cliente?.rgInscricaoEstadual ?? '',
             dataNascimento:      cliente?.dataNascimento ?? '',
             sexo:                (cliente?.sexo as 'M' | 'F' | 'O' | '') ?? '',
-            email:               cliente?.email ?? '',
-            telefone:            cliente?.telefone ? mascaraTelefone(cliente.telefone) : '',
+            emails: emailsIniciais.map(e => ({
+                id: e.id, email: e.email, tipo: e.tipo, principal: e.principal, ativo: e.ativo,
+            })),
+            telefones: telefonesIniciais.map(t => ({
+                id: t.id, telefone: mascaraTelefone(t.telefone), tipo: t.tipo, principal: t.principal, ativo: t.ativo,
+            })),
             observacao:          cliente?.observacao ?? '',
             endereco:            cliente?.endereco ?? '',
             numero:              cliente?.numero ?? '',
@@ -128,26 +174,43 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
     const tipoPessoa = watch("tipo")
     const isPF = tipoPessoa === "F"
     
+    const { fields: emailFields, append: appendEmail, remove: removeEmail } = useFieldArray({
+        control,
+        name: "emails",
+    })
+    const { fields: telefoneFields, append: appendTelefone, remove: removeTelefone } = useFieldArray({
+        control,
+        name: "telefones",
+    })
 
-
+    const marcarEmailPrincipal = (index: number) => {
+        emailFields.forEach((_, i) => setValue(`emails.${i}.principal`, i === index))
+    }
+    const marcarTelefonePrincipal = (index: number) => {
+        telefoneFields.forEach((_, i) => setValue(`telefones.${i}.principal`, i === index))
+    }
 
     const onSubmit = async (data: FormData) => {
-        console.log('onSubmit chamado', data)
-
         setLoading(true)
         const formData = new FormData()
         if (cliente?.id) formData.append('id', String(cliente.id))
 
+        const { emails, telefones, ...scalar } = data
         const payload = {
-            ...data,
-            telefone: data.telefone ? data.telefone.replace(/\D/g, '') : data.telefone,
+            ...scalar,
+            cpfCnpj:  data.cpfCnpj.replace(/\D/g, ''),
+            cep:      data.cep ? data.cep.replace(/\D/g, '') : '',
+            telefones: data.telefones.map(t => ({ ...t, telefone: t.telefone.replace(/\D/g, '') })),
         }
 
         Object.entries(payload).forEach(([key, value]) => {
-            if (value !== null && value !== undefined) {
+            if (value !== null && value !== undefined && key !== 'telefones') {
                 formData.append(key, String(value))
             }
         })
+
+        formData.append('emails',    JSON.stringify(emails))
+        formData.append('telefones', JSON.stringify(payload.telefones))
 
         try {
             await salvarCliente(formData)
@@ -163,9 +226,8 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
         errors[campo] ? <p className="text-xs text-red-500 mt-1">{errors[campo]?.message}</p> : null
 
-    const onError = (erros: any) => console.log('erros de validação', erros)
     return (
-        <form onSubmit={handleSubmit(onSubmit, onError)} className="flex flex-col gap-5 text-slate-900">
+        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 text-slate-900">
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
@@ -183,9 +245,9 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                 </div>
             </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                 <div>
-                    <FormLabel required>{isPF ? "Cliente" : "Razão Social"}</FormLabel>
+                    <FormLabel required>Cliente</FormLabel>
                     <FormInput
                         {...register('cliente')}
                         placeholder={isPF ? "Digite o nome completo" : "Digite a razão social"}
@@ -288,27 +350,27 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
-                <div>
-                    <FormLabel>Telefone</FormLabel>
-                    <FormInput
-                        {...register('telefone', {
-                            onChange: (e) => {
-                                e.target.value = mascaraTelefone(e.target.value)
-                            }
-                        })}
-                        maxLength={16}
-                        placeholder="(00) 00000-0000"
-                        inputMode="numeric"
-                    />
-                </div>
-                <div>
-                    <FormLabel>E-mail</FormLabel>
-                    <FormInput type="email" {...register('email')} placeholder="email@exemplo.com" />
-                    <Erro campo="email" />
-                </div>
-                <div />
-            </div>
+            <EmailList
+                fields={emailFields}
+                append={appendEmail}
+                remove={removeEmail}
+                register={register}
+                watch={watch}
+                errors={errors.emails}
+                marcarPrincipal={marcarEmailPrincipal}
+                mostrarTipo={!isPF}
+            />
+
+            <TelefoneList
+                fields={telefoneFields}
+                append={appendTelefone}
+                remove={removeTelefone}
+                register={register}
+                watch={watch}
+                errors={errors.telefones}
+                marcarPrincipal={marcarTelefonePrincipal}
+                mostrarTipo={!isPF}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                 <div>

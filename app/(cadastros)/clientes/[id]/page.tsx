@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { HiChevronLeft } from "react-icons/hi"
 
 import { pool } from "@/lib/db"
-import { ClienteView, CidadeSelect, PaisSelect, CondicaoPagamentoSelect, EstadoSelect } from "@/lib/types"
+import { ClienteView, CidadeSelect, PaisSelect, CondicaoPagamentoSelect, EstadoSelect, ClienteEmail, ClienteTelefone } from "@/lib/types"
 import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
 import { ClienteForm } from "../components/ClienteForm"
 
@@ -14,6 +14,10 @@ interface ClientePageProps {
 export default async function ClientePage({ params }: ClientePageProps) {
     const { id } = await params
     const isNovo = id === 'novo'
+
+    let cliente: ClienteView | null = null
+    let emails: ClienteEmail[] = []
+    let telefones: ClienteTelefone[] = []
 
     if (!isNovo && isNaN(Number(id))) return notFound()
 
@@ -31,20 +35,22 @@ export default async function ClientePage({ params }: ClientePageProps) {
         let cliente: ClienteView | null = null
 
         if (!isNovo) {
-            const clienteResult = await pool.query<ClienteView>(
-                `SELECT
-                    c.*,
-                    ci.cidade,
-                    cp."condicaoPagamento"
-                 FROM tb_clientes c
-                 LEFT JOIN tb_cidades ci ON ci.id = c."cidadeId"
-                 LEFT JOIN tb_condicoes_pagamento cp ON cp.id = c."condicaoPagamentoId"
-                 WHERE c.id = $1`,
-                [Number(id)]
-            )
+            const [clienteResult, emailsResult, telefonesResult] = await Promise.all([
+                pool.query<ClienteView>(
+                    `SELECT c.*, ci.cidade, cp."condicaoPagamento"
+                    FROM tb_clientes c
+                    LEFT JOIN tb_cidades ci ON ci.id = c."cidadeId"
+                    LEFT JOIN tb_condicoes_pagamento cp ON cp.id = c."condicaoPagamentoId"
+                    WHERE c.id = $1`, [Number(id)]
+                ),
+                pool.query(`SELECT * FROM tb_cliente_email WHERE "clienteId" = $1 ORDER BY id`, [Number(id)]),
+                pool.query(`SELECT * FROM tb_cliente_telefone WHERE "clienteId" = $1 ORDER BY id`, [Number(id)]),
+            ])
 
             if (!clienteResult.rows[0]) return notFound()
-            cliente = clienteResult.rows[0]
+            cliente   = clienteResult.rows[0]
+            emails    = emailsResult.rows
+            telefones = telefonesResult.rows
         }
 
         return (
@@ -74,6 +80,8 @@ export default async function ClientePage({ params }: ClientePageProps) {
 
                     <ClienteForm
                         cliente={cliente}
+                        emails={emails}
+                        telefones={telefones}
                         listaCidades={cidadesResult.rows}
                         listaEstados={estadosResult.rows}
                         listaPaises={paisesResult.rows}
