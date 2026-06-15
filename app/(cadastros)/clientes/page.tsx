@@ -10,13 +10,18 @@ export default async function ClientesPage() {
                 c.*,
                 ci.cidade,
                 cp."condicaoPagamento",
-                e.email    AS "emailPrincipal",
-                t.telefone AS "telefonePrincipal"
+                ep.email    AS "emailPrincipal",
+                COUNT(ce.id)::int      AS "totalEmails",
+                tp.telefone AS "telefonePrincipal",
+                COUNT(ct.id)::int      AS "totalTelefones"
             FROM tb_clientes c
-            LEFT JOIN tb_cidades ci             ON ci.id = c."cidadeId"
-            LEFT JOIN tb_condicoes_pagamento cp  ON cp.id = c."condicaoPagamentoId"
-            LEFT JOIN tb_cliente_email e         ON e."clienteId" = c.id AND e.principal = true AND e.ativo = true
-            LEFT JOIN tb_cliente_telefone t      ON t."clienteId" = c.id AND t.principal = true AND t.ativo = true
+            LEFT JOIN tb_cidades ci               ON ci.id = c."cidadeId"
+            LEFT JOIN tb_condicoes_pagamento cp   ON cp.id = c."condicaoPagamentoId"
+            LEFT JOIN tb_cliente_email ep         ON ep."clienteId" = c.id AND ep.principal = true AND ep.ativo = true
+            LEFT JOIN tb_cliente_email ce         ON ce."clienteId" = c.id AND ce.ativo = true
+            LEFT JOIN tb_cliente_telefone tp      ON tp."clienteId" = c.id AND tp.principal = true AND tp.ativo = true
+            LEFT JOIN tb_cliente_telefone ct      ON ct."clienteId" = c.id AND ct.ativo = true
+            GROUP BY c.id, ci.cidade, cp."condicaoPagamento", ep.email, tp.telefone
             ORDER BY c.cliente ASC`
         )
 

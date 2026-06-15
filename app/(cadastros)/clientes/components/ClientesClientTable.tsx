@@ -10,6 +10,7 @@ import { ActionToolbar } from "@/app/components/ui/ActionToolbar"
 import { StatusBadge } from "@/app/components/ui/StatusBadge"
 import toast from "react-hot-toast"
 import { ClienteView } from "@/lib/types"
+import { MaisBadge } from "@/app/components/ui/MaisBadge"
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
@@ -27,8 +28,39 @@ const columns: GridColDef[] = [
             </span>
         )
     },
-    { field: 'email', headerName: 'E-mail', flex: 1, minWidth: 180, renderCell: (params) => params.value || '-' },
-    { field: 'telefone', headerName: 'Telefone', width: 140, renderCell: (params) => params.value || '-' },
+    {
+        field: 'emailPrincipal',
+        headerName: 'E-mail',
+        flex: 1,
+        minWidth: 200,
+        renderCell: (params) => {
+            const row = params.row as ClienteView
+            const extras = (row.totalEmails ?? 0) - 1
+            if (!row.emailPrincipal) return <span className="text-slate-400">-</span>
+            return (
+                <span className="flex items-center">
+                    <span className="truncate">{row.emailPrincipal}</span>
+                    <MaisBadge count={extras} />
+                </span>
+            )
+        },
+    },
+    {
+        field: 'telefonePrincipal',
+        headerName: 'Telefone',
+        width: 160,
+        renderCell: (params) => {
+            const row = params.row as ClienteView
+            const extras = (row.totalTelefones ?? 0) - 1
+            if (!row.telefonePrincipal) return <span className="text-slate-400">-</span>
+            return (
+                <span className="flex items-center">
+                    <span>{row.telefonePrincipal}</span>
+                    <MaisBadge count={extras} />
+                </span>
+            )
+        },
+    },
     {
         field: 'cidade',
         headerName: 'Cidade',
@@ -45,6 +77,7 @@ export default function ClientesClientTable({ clientes }: { clientes: ClienteVie
     const [clienteSelecionado, setClienteSelecionado] = useState<ClienteView | null>(null)
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
     const [loadingStatus, setLoadingStatus] = useState(false)
+    
 
     const handleAlternarStatus = async () => {
         if (!clienteSelecionado) return

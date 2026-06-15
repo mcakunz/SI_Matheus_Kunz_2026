@@ -19,13 +19,9 @@ export default async function FornecedoresPage() {
              LEFT JOIN tb_cidades              ci ON ci.id = f."cidadeId"
              LEFT JOIN tb_condicoes_pagamento  cp ON cp.id = f."condicaoPagamentoId"
              LEFT JOIN tb_transportadoras      tr ON tr.id = f."transportadoraId"
-             -- email principal
              LEFT JOIN tb_fornecedor_email     ep ON ep."fornecedorId" = f.id AND ep.principal = true AND ep.ativo = true
-             -- total de emails ativos
              LEFT JOIN tb_fornecedor_email     fe ON fe."fornecedorId" = f.id AND fe.ativo = true
-             -- telefone principal
              LEFT JOIN tb_fornecedor_telefone  tp ON tp."fornecedorId" = f.id AND tp.principal = true AND tp.ativo = true
-             -- total de telefones ativos
              LEFT JOIN tb_fornecedor_telefone  ft ON ft."fornecedorId" = f.id AND ft.ativo = true
              GROUP BY f.id, ci.cidade, cp."condicaoPagamento", tr."razaoSocial", ep.email, tp.telefone
              ORDER BY f.fornecedor ASC`
