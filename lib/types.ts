@@ -243,9 +243,61 @@ export interface TransportadoraView extends Transportadora {
     totalTelefones:    number
 }
 
+export interface Categoria {
+    id: number
+    categoria: string
+    ativo: boolean
+    dataCadastro: string
+    dataAlteracao: string | null
+}
+
+export interface Marca {
+    id:           number
+    marca:        string
+    ativo:        boolean
+    dataCadastro: string
+    dataAlteracao: string | null
+}
+
+export interface UnidadeMedida {
+    id:             number
+    unidadeMedida:  string
+    ativo:          boolean
+    dataCadastro:   string
+    dataAlteracao:  string | null
+}
+export interface Produto {
+    id:               number
+    produto:          string
+    codigoBarras:     string | null
+    referencia:       string | null
+    marcaId:          number
+    unidadeMedidaId:  number
+    categoriaId:      number
+    valorCompra:      number
+    valorVenda:       number
+    quantidade:       number
+    quantidadeMinima: number
+    percentualLucro:  number
+    descricao:        string | null
+    observacoes:      string | null
+    ativo:            boolean
+    dataCadastro:     string
+    dataAlteracao:    string | null
+}
+ 
+export interface ProdutoView extends Produto {
+    marca:        string | null
+    unidadeMedida: string | null
+    categoria:    string | null
+}
+
 export type PaisSelect              = Pick<Pais,             'id' | 'pais'>
 export type EstadoSelect            = Pick<Estado,           'id' | 'estado' | 'paisId'>
 export type CidadeSelect            = Pick<Cidade,           'id' | 'cidade' | 'estadoId'>
 export type CondicaoPagamentoSelect = Pick<CondicaoPagamento,'id' | 'condicaoPagamento'>
 export type FormaPagamentoSelect    = Pick<FormaPagamento,   'id' | 'formaPagamento'>
-export type TransportadoraSelect = Pick<Transportadora, 'id' | 'razaoSocial'>
+export type TransportadoraSelect    = Pick<Transportadora,   'id' | 'razaoSocial'>
+export type CategoriaSelect         = Pick<Categoria,        'id' | 'categoria'>
+export type MarcaSelect             = Pick<Marca, 'id' | 'marca'>
+export type UnidadeMedidaSelect     = Pick<UnidadeMedida, 'id' | 'unidadeMedida'>

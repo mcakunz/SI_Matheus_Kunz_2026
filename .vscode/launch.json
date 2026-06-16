@@ -1,0 +1,28 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+        "name": "Next.js: Server-Side",
+        "type": "node-terminal",
+        "request": "launch",
+        "command": "npm run dev"
+        },
+        {
+        "name": "Next.js: Client-Side (Opera GX)",
+        "type": "chrome",
+        "request": "launch",
+        "url": "http://localhost:3000",
+        "webRoot": "${workspaceFolder}",
+        "runtimeExecutable": "C:\\Users\\Matheus\\AppData\\Local\\Programs\\Opera GX\\opera.exe"
+        }
+    ],
+    "compounds": [
+        {
+        "name": "Next.js: Full Stack (Opera GX)",
+        "configurations": ["Next.js: Server-Side", "Next.js: Client-Side (Opera GX)"]
+        }
+    ]
+    }
