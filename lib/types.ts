@@ -292,6 +292,54 @@ export interface ProdutoView extends Produto {
     categoria:    string | null
 }
 
+export interface FuncaoFuncionario {
+    id:                  number
+    funcaoFuncionario:   string
+    descricao:           string | null
+    salarioBase:         number
+    cargaHoraria:        number
+    requerCnh:           boolean
+    observacao:          string | null
+    ativo:               boolean
+    dataCadastro:        string
+    dataAlteracao:       string | null
+}
+ 
+export interface Funcionario {
+    id:                    number
+    funcionario:           string
+    apelido:               string | null
+    cpfCnpj:                string
+    rgInscricaoEstadual:   string | null
+    telefone:              string
+    email:                 string
+    cep:                   string
+    endereco:              string
+    numero:                string
+    complemento:           string | null
+    bairro:                string
+    cidadeId:              number
+    funcaoFuncionarioId:   number
+    dataNascimento:        string
+    dataAdmissao:          string
+    dataDemissao:          string | null
+    cnh:                   string | null
+    dataValidadeCnh:       string | null
+    sexo:                  'M' | 'F' | 'O'
+    salario:               number
+    tipo:                  'INTERNO' | 'EXTERNO' | 'TERCEIRIZADO'
+    observacao:            string | null
+    ativo:                 boolean
+    dataCadastro:          string
+    dataAlteracao:         string | null
+}
+ 
+export interface FuncionarioView extends Funcionario {
+    cidade:            string | null
+    funcaoFuncionario: string | null
+    requerCnh:         boolean | null
+}
+ 
 export type PaisSelect              = Pick<Pais,             'id' | 'pais'>
 export type EstadoSelect            = Pick<Estado,           'id' | 'estado' | 'paisId'>
 export type CidadeSelect            = Pick<Cidade,           'id' | 'cidade' | 'estadoId'>
@@ -299,5 +347,6 @@ export type CondicaoPagamentoSelect = Pick<CondicaoPagamento,'id' | 'condicaoPag
 export type FormaPagamentoSelect    = Pick<FormaPagamento,   'id' | 'formaPagamento'>
 export type TransportadoraSelect    = Pick<Transportadora,   'id' | 'razaoSocial'>
 export type CategoriaSelect         = Pick<Categoria,        'id' | 'categoria'>
-export type MarcaSelect             = Pick<Marca, 'id' | 'marca'>
-export type UnidadeMedidaSelect     = Pick<UnidadeMedida, 'id' | 'unidadeMedida'>
+export type MarcaSelect             = Pick<Marca,            'id' | 'marca'>
+export type UnidadeMedidaSelect     = Pick<UnidadeMedida,    'id' | 'unidadeMedida'>
+export type FuncaoFuncionarioSelect = Pick<FuncaoFuncionario,'id' | 'funcaoFuncionario' | 'requerCnh'>

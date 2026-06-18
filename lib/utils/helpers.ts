@@ -20,3 +20,10 @@ export function parseJsonField<T>(value: FormDataEntryValue | null, schema: z.Zo
 export const apenasNumeros = (valor: string | null | undefined) => {
     return valor ? valor.replace(/\D/g, '') : '';
 };
+
+export const toDateString = (value: string | Date | null | undefined): string => {
+    if (!value) return ''
+    const d = value instanceof Date ? value : new Date(value)
+    if (isNaN(d.getTime())) return ''
+    return d.toISOString().slice(0, 10)
+}
