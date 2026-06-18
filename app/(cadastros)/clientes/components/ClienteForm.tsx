@@ -21,10 +21,10 @@ import { PaisLookup } from "@/components/ui/PaisLookup"
 import { EstadoLookup } from "@/components/ui/EstadoLookup"
 import { CidadeLookup } from "@/components/ui/CidadeLookup"
 import { useFieldArray } from "react-hook-form"
-import { HiPlus, HiTrash, HiStar } from "react-icons/hi"
 import { ClienteEmail, ClienteTelefone } from "@/lib/types"
 import { EmailList } from "@/app/components/ui/EmailList"
 import { TelefoneList } from "@/app/components/ui/TelefoneList"
+import { toDateString } from "@/lib/utils/helpers"
 
 const clienteEmailSchema = z.object({
     id:        z.number().optional(),
@@ -134,7 +134,7 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                                          : mascaraCNPJ(cliente.cpfCnpj))
                                      : '',
             rgInscricaoEstadual: cliente?.rgInscricaoEstadual ?? '',
-            dataNascimento:      cliente?.dataNascimento ?? '',
+            dataNascimento:      toDateString(cliente?.dataNascimento ?? ''),
             sexo:                (cliente?.sexo as 'M' | 'F' | 'O' | '') ?? '',
             emails: emailsIniciais.map(e => ({
                 id: e.id, email: e.email, tipo: e.tipo, principal: e.principal, ativo: e.ativo,
