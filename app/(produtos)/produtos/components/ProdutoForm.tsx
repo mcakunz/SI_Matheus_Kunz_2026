@@ -117,7 +117,6 @@ export function ProdutoForm({ produto, marcas, unidades, categorias }: ProdutoFo
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-6 text-slate-900">
 
             <div>
-                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-4">Identificação</h2>
                 <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 md:gap-6 items-start">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="md:col-span-3">

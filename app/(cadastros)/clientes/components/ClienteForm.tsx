@@ -274,6 +274,37 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                 ) : <div />}
             </div>
 
+            <div className="grid grid-cols-1 md:grid-cols-[160px_1fr_120px] gap-4 md:gap-6">
+                <div>
+                    <FormLabel>CEP</FormLabel>
+                    <FormInput
+                        {...register('cep', {
+                            onChange: (e) => {
+                                let v = e.target.value
+                                v = v.replace(/^(\d{5})(\d)/, '$1-$2')
+                                e.target.value = v
+                            }
+                        })}
+                        maxLength={9}
+                        placeholder="00000-000"
+                        inputMode="numeric"
+                        onKeyDown={(e) => {
+                            const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight']
+                            if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) e.preventDefault()
+                        }}
+                    />
+                    <Erro campo="cep" />
+                </div>
+                <div>
+                    <FormLabel>Logradouro</FormLabel>
+                    <FormInput {...register('endereco')} placeholder="Rua, avenida, alameda..." />
+                </div>
+                <div>
+                    <FormLabel>Número</FormLabel>
+                    <FormInput {...register('numero')} maxLength={10} placeholder="Nº" />
+                </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                 <div>
                     <FormLabel required>País</FormLabel>
@@ -305,37 +336,6 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                             />
                         )}
                     />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-[160px_1fr_120px] gap-4 md:gap-6">
-                <div>
-                    <FormLabel>CEP</FormLabel>
-                    <FormInput
-                        {...register('cep', {
-                            onChange: (e) => {
-                                let v = e.target.value
-                                v = v.replace(/^(\d{5})(\d)/, '$1-$2')
-                                e.target.value = v
-                            }
-                        })}
-                        maxLength={9}
-                        placeholder="00000-000"
-                        inputMode="numeric"
-                        onKeyDown={(e) => {
-                            const allowed = ['Backspace', 'Delete', 'Tab', 'ArrowLeft', 'ArrowRight']
-                            if (!allowed.includes(e.key) && !/^\d$/.test(e.key)) e.preventDefault()
-                        }}
-                    />
-                    <Erro campo="cep" />
-                </div>
-                <div>
-                    <FormLabel>Logradouro</FormLabel>
-                    <FormInput {...register('endereco')} placeholder="Rua, avenida, alameda..." />
-                </div>
-                <div>
-                    <FormLabel>Número</FormLabel>
-                    <FormInput {...register('numero')} maxLength={10} placeholder="Nº" />
                 </div>
             </div>
 

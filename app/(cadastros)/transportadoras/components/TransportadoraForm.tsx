@@ -314,8 +314,6 @@ export function TransportadoraForm({
             </div>
 
             <div className="pt-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Endereço</p>
-
                 <div className="grid grid-cols-1 md:grid-cols-[160px_1fr_120px] gap-4 md:gap-6 mb-4">
                     <div>
                         <FormLabel>CEP</FormLabel>
@@ -389,8 +387,6 @@ export function TransportadoraForm({
             </div>
 
             <div className="pt-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Financeiro</p>
-
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                     <div>
                         <FormLabel required>Condição de Pagamento</FormLabel>
