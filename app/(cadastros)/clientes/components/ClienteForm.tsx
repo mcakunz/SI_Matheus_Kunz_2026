@@ -25,11 +25,12 @@ import { ClienteEmail, ClienteTelefone } from "@/lib/types"
 import { EmailList } from "@/app/components/ui/EmailList"
 import { TelefoneList } from "@/app/components/ui/TelefoneList"
 import { toDateString } from "@/lib/utils/helpers"
+import { TIPOS_EMAIL_CLIENTE_PF, TIPOS_EMAIL_CLIENTE_PJ, TIPOS_TELEFONE_CLIENTE_PF, TIPOS_TELEFONE_CLIENTE_PJ } from "@/lib/TiposContato"
 
 const clienteEmailSchema = z.object({
     id:        z.number().optional(),
     email:     z.string().email("E-mail inválido."),
-    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'FISCAL', 'OUTRO']),
+    tipo:      z.enum(['PESSOAL','COMERCIAL', 'FINANCEIRO', 'FISCAL']),
     principal: z.boolean(),
     ativo:     z.boolean(),
 })
@@ -37,7 +38,7 @@ const clienteEmailSchema = z.object({
 const clienteTelefoneSchema = z.object({
     id:        z.number().optional(),
     telefone:  z.string().min(10, "Telefone inválido.").max(15),
-    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'CELULAR', 'OUTRO']),
+    tipo:      z.enum(['PESSOAL','COMERCIAL', 'FINANCEIRO']),
     principal: z.boolean(),
     ativo:     z.boolean(),
 })
@@ -358,7 +359,7 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                 watch={watch}
                 errors={errors.emails}
                 marcarPrincipal={marcarEmailPrincipal}
-                mostrarTipo={!isPF}
+                tiposEmail={isPF ? TIPOS_EMAIL_CLIENTE_PF : TIPOS_EMAIL_CLIENTE_PJ}
             />
 
             <TelefoneList
@@ -369,7 +370,7 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                 watch={watch}
                 errors={errors.telefones}
                 marcarPrincipal={marcarTelefonePrincipal}
-                mostrarTipo={!isPF}
+                tiposTelefone={isPF ? TIPOS_TELEFONE_CLIENTE_PF : TIPOS_TELEFONE_CLIENTE_PJ}
             />
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">

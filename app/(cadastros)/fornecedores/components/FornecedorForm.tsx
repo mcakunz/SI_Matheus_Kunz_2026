@@ -33,6 +33,7 @@ import { EstadoLookup } from "@/components/ui/EstadoLookup"
 import { CidadeLookup } from "@/components/ui/CidadeLookup"
 import { EmailList } from "@/app/components/ui/EmailList"
 import { TelefoneList } from "@/app/components/ui/TelefoneList"
+import { TIPOS_EMAIL_FORNECEDOR, TIPOS_TELEFONE_FORNECEDOR } from "@/lib/TiposContato"
 
 
 const fornecedorEmailSchema = z.object({
@@ -431,6 +432,7 @@ export function FornecedorForm({
                 watch={watch}
                 errors={errors.emails}
                 marcarPrincipal={marcarEmailPrincipal}
+                tiposEmail={TIPOS_EMAIL_FORNECEDOR}
             />
 
             <TelefoneList
@@ -441,6 +443,7 @@ export function FornecedorForm({
                 watch={watch}
                 errors={errors.telefones}
                 marcarPrincipal={marcarTelefonePrincipal}
+                tiposTelefone={TIPOS_TELEFONE_FORNECEDOR}
             />
 
             <div>
