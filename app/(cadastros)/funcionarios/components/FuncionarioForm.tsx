@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { Controller, useForm } from "react-hook-form"
+import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarFuncionario } from "../actions"
@@ -16,19 +16,40 @@ import { FormSwitch } from "@/components/ui/FormSwitch"
 import { PaisLookup } from "@/components/ui/PaisLookup"
 import { EstadoLookup } from "@/components/ui/EstadoLookup"
 import { CidadeLookup } from "@/components/ui/CidadeLookup"
+import { EmailList } from "@/app/components/ui/EmailList"
+import { TelefoneList } from "@/app/components/ui/TelefoneList"
 import { useEndereco } from "@/lib/hooks/useEndereco"
 import { mascaraCPF, mascaraTelefone } from "@/lib/utils/mascaras"
-import { FuncionarioView, CidadeSelect, EstadoSelect, PaisSelect, FuncaoFuncionarioSelect } from "@/lib/types"
+import {
+    FuncionarioView, CidadeSelect, EstadoSelect, PaisSelect,
+    FuncaoFuncionarioSelect, FuncionarioEmail, FuncionarioTelefone,
+} from "@/lib/types"
 import { toDateString } from "@/lib/utils/helpers"
+import { TIPOS_EMAIL_FUNCIONARIO, TIPOS_TELEFONE_FUNCIONARIO } from "@/lib/TiposContato"
+
+const funcionarioEmailSchema = z.object({
+    id:        z.number().optional(),
+    email:     z.string().email("E-mail inválido."),
+    tipo:      z.enum(['PESSOAL', 'CORPORATIVO']),
+    principal: z.boolean(),
+    ativo:     z.boolean(),
+})
+
+const funcionarioTelefoneSchema = z.object({
+    id:        z.number().optional(),
+    telefone:  z.string().min(10, "Telefone inválido.").max(15),
+    tipo:      z.enum(['PESSOAL', 'CORPORATIVO']),
+    principal: z.boolean(),
+    ativo:     z.boolean(),
+})
 
 const schema = z.object({
     funcionario:         z.string().min(2, "O nome deve ter no mínimo 2 caracteres.").max(100),
     apelido:             z.string().max(50).optional(),
     cpfCnpj:             z.string().min(11, "CPF inválido.").max(14),
     rgInscricaoEstadual: z.string().max(20).optional(),
-    telefone:            z.string().min(10, "Telefone inválido.").max(15),
-    email:               z.string().email("E-mail inválido.").max(80),
-    cep:                 z.string().min(8, "CEP inválido.").max(9),
+    emails:              z.array(funcionarioEmailSchema),
+    telefones:           z.array(funcionarioTelefoneSchema),    cep:                 z.string().min(8, "CEP inválido.").max(9),
     endereco:            z.string().min(1, "Informe o endereço.").max(100),
     numero:              z.string().min(1, "Informe o número.").max(10),
     complemento:         z.string().max(50).optional(),
@@ -53,16 +74,36 @@ const schema = z.object({
             message: "A data de demissão não pode ser anterior à data de admissão.",
         })
     }
+
+    const emailsPrincipais = data.emails.filter(e => e.principal).length
+    if (emailsPrincipais > 1) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['emails'],
+            message: "Apenas um e-mail pode ser marcado como principal.",
+        })
+    }
+
+    const telPrincipais = data.telefones.filter(t => t.principal).length
+    if (telPrincipais > 1) {
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['telefones'],
+            message: "Apenas um telefone pode ser marcado como principal.",
+        })
+    }
 })
 
 type FormData = z.infer<typeof schema>
 
 interface FuncionarioFormProps {
-    funcionario?:  FuncionarioView | null
-    listaCidades:  CidadeSelect[]
-    listaEstados:  EstadoSelect[]
-    listaPaises:   PaisSelect[]
-    listaFuncoes:  FuncaoFuncionarioSelect[]
+    funcionario?:       FuncionarioView | null
+    listaCidades:       CidadeSelect[]
+    listaEstados:       EstadoSelect[]
+    listaPaises:        PaisSelect[]
+    listaFuncoes:       FuncaoFuncionarioSelect[]
+    emailsIniciais?:    FuncionarioEmail[]
+    telefonesIniciais?: FuncionarioTelefone[]
 }
 
 export function FuncionarioForm({
@@ -71,6 +112,8 @@ export function FuncionarioForm({
     listaEstados,
     listaPaises,
     listaFuncoes,
+    emailsIniciais    = [],
+    telefonesIniciais = [],
 }: FuncionarioFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
@@ -87,10 +130,12 @@ export function FuncionarioForm({
                                      ? mascaraCPF(funcionario.cpfCnpj)
                                      : '',
             rgInscricaoEstadual: funcionario?.rgInscricaoEstadual ?? '',
-            telefone:            funcionario?.telefone
-                                     ? mascaraTelefone(funcionario.telefone)
-                                     : '',
-            email:               funcionario?.email ?? '',
+            emails: emailsIniciais.map(e => ({
+                id: e.id, email: e.email, tipo: e.tipo, principal: e.principal, ativo: e.ativo,
+            })),
+            telefones: telefonesIniciais.map(t => ({
+                id: t.id, telefone: mascaraTelefone(t.telefone), tipo: t.tipo, principal: t.principal, ativo: t.ativo,
+            })),
             cep:                 funcionario?.cep ?? '',
             endereco:            funcionario?.endereco ?? '',
             numero:              funcionario?.numero ?? '',
@@ -132,23 +177,37 @@ export function FuncionarioForm({
     const funcaoSelecionada   = listaFuncoes.find(f => f.id === Number(funcaoSelecionadaId))
     const requerCnh           = funcaoSelecionada?.requerCnh ?? false
 
+    const { fields: emailFields,    append: appendEmail,    remove: removeEmail    } = useFieldArray({ control, name: 'emails' })
+    const { fields: telefoneFields, append: appendTelefone, remove: removeTelefone } = useFieldArray({ control, name: 'telefones' })
+
+    const marcarEmailPrincipal = (index: number) => {
+        emailFields.forEach((_, i) => setValue(`emails.${i}.principal`, i === index))
+    }
+    const marcarTelefonePrincipal = (index: number) => {
+        telefoneFields.forEach((_, i) => setValue(`telefones.${i}.principal`, i === index))
+    }
+
     const onSubmit = async (data: FormData) => {
         setLoading(true)
         const formData = new FormData()
         if (funcionario?.id) formData.append('id', String(funcionario.id))
 
+        const { emails, telefones, ...scalar } = data
         const payload = {
-            ...data,
+            ...scalar,
             cpfCnpj:  data.cpfCnpj.replace(/\D/g, ''),
-            telefone: data.telefone.replace(/\D/g, ''),
             cep:      data.cep.replace(/\D/g, ''),
+            telefones: data.telefones.map(t => ({ ...t, telefone: t.telefone.replace(/\D/g, '') })),
         }
 
         Object.entries(payload).forEach(([key, value]) => {
-            if (value !== null && value !== undefined) {
+            if (value !== null && value !== undefined && key !== 'telefones') {
                 formData.append(key, String(value))
             }
         })
+
+        formData.append('emails',    JSON.stringify(emails))
+        formData.append('telefones', JSON.stringify(payload.telefones))
 
         try {
             await salvarFuncionario(formData)
@@ -237,32 +296,27 @@ export function FuncionarioForm({
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                <div>
-                    <FormLabel required>Telefone</FormLabel>
-                    <FormInput
-                        {...register('telefone', {
-                            onChange: (e) => {
-                                e.target.value = mascaraTelefone(e.target.value)
-                            }
-                        })}
-                        maxLength={15}
-                        placeholder="(00) 00000-0000"
-                        inputMode="numeric"
-                    />
-                    <Erro campo="telefone" />
-                </div>
-                <div>
-                    <FormLabel required>E-mail</FormLabel>
-                    <FormInput
-                        {...register('email')}
-                        type="email"
-                        placeholder="email@exemplo.com"
-                        inputMode="email"
-                    />
-                    <Erro campo="email" />
-                </div>
-            </div>
+            <EmailList
+                fields={emailFields}
+                append={appendEmail}
+                remove={removeEmail}
+                register={register}
+                watch={watch}
+                errors={errors.emails}
+                marcarPrincipal={marcarEmailPrincipal}
+                tiposEmail={TIPOS_EMAIL_FUNCIONARIO}
+            />
+
+            <TelefoneList
+                fields={telefoneFields}
+                append={appendTelefone}
+                remove={removeTelefone}
+                register={register}
+                watch={watch}
+                errors={errors.telefones}
+                marcarPrincipal={marcarTelefonePrincipal}
+                tiposTelefone={TIPOS_TELEFONE_FUNCIONARIO}
+            />
 
             <div className="grid grid-cols-1 md:grid-cols-[160px_1fr_120px] gap-4 md:gap-6">
                 <div>

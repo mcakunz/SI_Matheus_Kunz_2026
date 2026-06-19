@@ -3,7 +3,10 @@ import { notFound } from "next/navigation"
 import { HiChevronLeft } from "react-icons/hi"
 
 import { pool } from "@/lib/db"
-import { FuncionarioView, CidadeSelect, PaisSelect, EstadoSelect, FuncaoFuncionarioSelect } from "@/lib/types"
+import {
+    FuncionarioView, CidadeSelect, PaisSelect, EstadoSelect,
+    FuncaoFuncionarioSelect, FuncionarioEmail, FuncionarioTelefone,
+} from "@/lib/types"
 import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
 import { FuncionarioForm } from "../components/FuncionarioForm"
 
@@ -14,8 +17,6 @@ interface FuncionarioPageProps {
 export default async function FuncionarioPage({ params }: FuncionarioPageProps) {
     const { id } = await params
     const isNovo = id === 'novo'
-
-    let funcionario: FuncionarioView | null = null
 
     if (!isNovo && isNaN(Number(id))) return notFound()
 
@@ -31,21 +32,35 @@ export default async function FuncionarioPage({ params }: FuncionarioPageProps) 
                 `SELECT id, "funcaoFuncionario", "requerCnh" FROM tb_funcoes_funcionario WHERE ativo = true ORDER BY "funcaoFuncionario" ASC`),
         ])
 
+        let funcionario: FuncionarioView | null = null
+        let emails: FuncionarioEmail[] = []
+        let telefones: FuncionarioTelefone[] = []
+
         if (!isNovo) {
-            const funcionarioResult = await pool.query<FuncionarioView>(
-                `SELECT
-                    f.*,
-                    ci.cidade,
-                    ff."funcaoFuncionario",
-                    ff."requerCnh"
-                FROM tb_funcionarios f
-                LEFT JOIN tb_cidades ci             ON ci.id = f."cidadeId"
-                LEFT JOIN tb_funcoes_funcionario ff ON ff.id = f."funcaoFuncionarioId"
-                WHERE f.id = $1`, [Number(id)]
-            )
+            const [funcionarioResult, emailsResult, telefonesResult] = await Promise.all([
+                pool.query<FuncionarioView>(
+                    `SELECT
+                        f.*,
+                        ci.cidade,
+                        ff."funcaoFuncionario",
+                        ff."requerCnh"
+                    FROM tb_funcionarios f
+                    LEFT JOIN tb_cidades ci             ON ci.id = f."cidadeId"
+                    LEFT JOIN tb_funcoes_funcionario ff ON ff.id = f."funcaoFuncionarioId"
+                    WHERE f.id = $1`, [Number(id)]
+                ),
+                pool.query<FuncionarioEmail>(
+                    `SELECT * FROM tb_funcionario_email WHERE "funcionarioId" = $1 ORDER BY id`, [Number(id)]
+                ),
+                pool.query<FuncionarioTelefone>(
+                    `SELECT * FROM tb_funcionario_telefone WHERE "funcionarioId" = $1 ORDER BY id`, [Number(id)]
+                ),
+            ])
 
             if (!funcionarioResult.rows[0]) return notFound()
             funcionario = funcionarioResult.rows[0]
+            emails      = emailsResult.rows
+            telefones   = telefonesResult.rows
         }
 
         return (
@@ -75,6 +90,8 @@ export default async function FuncionarioPage({ params }: FuncionarioPageProps) 
 
                     <FuncionarioForm
                         funcionario={funcionario}
+                        emailsIniciais={emails}
+                        telefonesIniciais={telefones}
                         listaCidades={cidadesResult.rows}
                         listaEstados={estadosResult.rows}
                         listaPaises={paisesResult.rows}

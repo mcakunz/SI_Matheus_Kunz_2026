@@ -105,7 +105,7 @@ export interface ClienteEmail {
     id:        number
     clienteId: number
     email:     string
-    tipo:      'COMERCIAL' | 'FINANCEIRO' | 'FISCAL' | 'OUTRO'
+    tipo:      'PESSOAL' | 'COMERCIAL' | 'FINANCEIRO' | 'FISCAL'
     principal: boolean
     ativo:     boolean
     dataCadastro: string        
@@ -117,7 +117,7 @@ export interface ClienteTelefone {
     id:        number
     clienteId: number
     telefone:  string
-    tipo:      'COMERCIAL' | 'FINANCEIRO' | 'CELULAR' | 'OUTRO'
+    tipo:      'PESSOAL' | 'COMERCIAL' | 'FINANCEIRO'           
     principal: boolean
     ativo:     boolean
     dataCadastro: string        
@@ -166,7 +166,7 @@ export interface FornecedorEmail {
     id:           number
     fornecedorId: number
     email:        string
-    tipo:         'COMERCIAL' | 'FINANCEIRO' | 'FISCAL' | 'OUTRO'
+    tipo:         'COMERCIAL' | 'FINANCEIRO' | 'FISCAL'           
     principal:    boolean
     ativo:        boolean
     dataCadastro: string
@@ -177,7 +177,7 @@ export interface FornecedorTelefone {
     id:           number
     fornecedorId: number
     telefone:     string
-    tipo:         'COMERCIAL' | 'FINANCEIRO' | 'CELULAR' | 'OUTRO'
+    tipo:         'COMERCIAL' | 'FINANCEIRO'                     
     principal:    boolean
     ativo:        boolean
     dataCadastro: string
@@ -218,7 +218,7 @@ export interface TransportadoraEmail {
     id:                number
     transportadoraId:  number
     email:             string
-    tipo:              'COMERCIAL' | 'FINANCEIRO' | 'FISCAL' | 'OUTRO'
+    tipo:              'COMERCIAL' | 'FINANCEIRO' | 'FISCAL' 
     principal:         boolean
     ativo:             boolean
     dataCadastro:      string
@@ -228,7 +228,7 @@ export interface TransportadoraTelefone {
     id:                number
     transportadoraId:  number
     telefone:          string
-    tipo:              'COMERCIAL' | 'FINANCEIRO' | 'CELULAR' | 'OUTRO'
+    tipo:              'COMERCIAL' | 'FINANCEIRO'
     principal:         boolean
     ativo:             boolean
     dataCadastro:      string
@@ -309,10 +309,8 @@ export interface Funcionario {
     id:                    number
     funcionario:           string
     apelido:               string | null
-    cpfCnpj:                string
+    cpfCnpj:               string
     rgInscricaoEstadual:   string | null
-    telefone:              string
-    email:                 string
     cep:                   string
     endereco:              string
     numero:                string
@@ -333,11 +331,34 @@ export interface Funcionario {
     dataCadastro:          string
     dataAlteracao:         string | null
 }
- 
 export interface FuncionarioView extends Funcionario {
     cidade:            string | null
     funcaoFuncionario: string | null
     requerCnh:         boolean | null
+    emailPrincipal:    string | null
+    totalEmails:       number
+    telefonePrincipal: string | null
+    totalTelefones:    number
+}
+export interface FuncionarioEmail {
+    id:            number
+    funcionarioId: number
+    email:         string
+    tipo:          'PESSOAL' | 'CORPORATIVO'
+    principal:     boolean
+    ativo:         boolean
+    dataCadastro:  string
+    dataAlteracao: string | null
+}
+export interface FuncionarioTelefone {
+    id:            number
+    funcionarioId: number
+    telefone:      string
+    tipo:          'PESSOAL' | 'CORPORATIVO'
+    principal:     boolean
+    ativo:         boolean
+    dataCadastro:  string
+    dataAlteracao: string | null
 }
  
 export type PaisSelect              = Pick<Pais,             'id' | 'pais'>
