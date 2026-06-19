@@ -9,7 +9,7 @@ import { nullableString, parseJsonField } from "@/lib/utils/helpers"
 const clienteEmailSchema = z.object({
     id:        z.number().optional(),
     email:     z.string().email("E-mail inválido."),
-    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'FISCAL', 'OUTRO']),
+    tipo:      z.enum(['PESSOAL', 'COMERCIAL', 'FINANCEIRO', 'FISCAL']),
     principal: z.boolean(),
     ativo:     z.boolean(),
 })
@@ -17,7 +17,7 @@ const clienteEmailSchema = z.object({
 const clienteTelefoneSchema = z.object({
     id:        z.number().optional(),
     telefone:  z.string().min(10, "Telefone inválido.").max(15),
-    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'CELULAR', 'OUTRO']),
+    tipo:      z.enum(['PESSOAL', 'COMERCIAL', 'FINANCEIRO']),
     principal: z.boolean(),
     ativo:     z.boolean(),
 })
