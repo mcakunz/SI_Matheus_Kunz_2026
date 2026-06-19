@@ -10,6 +10,7 @@ import { ActionToolbar } from "@/app/components/ui/ActionToolbar"
 import { StatusBadge } from "@/app/components/ui/StatusBadge"
 import toast from "react-hot-toast"
 import { FuncionarioView } from "@/lib/types"
+import { mascaraCPF } from "@/lib/utils/mascaras"
 
 const TIPO_LABELS: Record<FuncionarioView['tipo'], string> = {
     INTERNO:      'Interno',
@@ -26,7 +27,12 @@ const TIPO_STYLES: Record<FuncionarioView['tipo'], string> = {
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'funcionario', headerName: 'Funcionário', flex: 1, minWidth: 200 },
-    { field: 'cpfCnpj', headerName: 'CPF', width: 150 },
+    { 
+        field: 'cpfCnpj', 
+        headerName: 'CPF', 
+        width: 150,
+        valueFormatter: (value) => mascaraCPF(value),
+    },
     {
         field: 'funcaoFuncionario',
         headerName: 'Função',

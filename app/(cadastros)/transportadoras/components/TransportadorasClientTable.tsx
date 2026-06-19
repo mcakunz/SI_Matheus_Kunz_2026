@@ -10,20 +10,21 @@ import { ActionToolbar } from "@/app/components/ui/ActionToolbar"
 import { StatusBadge } from "@/app/components/ui/StatusBadge"
 import toast from "react-hot-toast"
 import { TransportadoraView } from "@/lib/types"
-
-function MaisBadge({ count }: { count: number }) {
-    if (count <= 0) return null
-    return (
-        <span className="ml-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
-            +{count}
-        </span>
-    )
-}
+import { mascaraCNPJ, mascaraCPF, mascaraTelefone } from "@/lib/utils/mascaras"
+import { MaisBadge } from "@/app/components/ui/MaisBadge"
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'razaoSocial', headerName: 'Razão Social', flex: 1, minWidth: 200 },
-    { field: 'cnpj', headerName: 'CPF / CNPJ', width: 150 },
+    { 
+        field: 'cnpj', headerName: 'CPF / CNPJ', width: 160,
+        renderCell: (params) => {
+            const row = params.row as TransportadoraView
+            return row.tipo === 'J'
+                ? mascaraCNPJ(params.value)
+                : mascaraCPF(params.value)
+        } 
+    },
     {
         field: 'tipo', headerName: 'Tipo', width: 90,
         renderCell: (params) => (
@@ -63,7 +64,7 @@ const columns: GridColDef[] = [
             if (!row.telefonePrincipal) return <span className="text-slate-400">-</span>
             return (
                 <span className="flex items-center">
-                    <span>{row.telefonePrincipal}</span>
+                    <span>{mascaraTelefone(row.telefonePrincipal)}</span>
                     <MaisBadge count={extras} />
                 </span>
             )

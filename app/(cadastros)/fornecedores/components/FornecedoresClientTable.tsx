@@ -11,11 +11,20 @@ import { StatusBadge } from "@/app/components/ui/StatusBadge"
 import toast from "react-hot-toast"
 import { FornecedorView } from "@/lib/types"
 import { MaisBadge } from "@/app/components/ui/MaisBadge"
+import { mascaraCNPJ, mascaraCPF, mascaraTelefone } from "@/lib/utils/mascaras"
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
     { field: 'fornecedor', headerName: 'Nome / Razão Social', flex: 1, minWidth: 200 },
-    { field: 'cpfCnpj', headerName: 'CPF / CNPJ', width: 150 },
+    { 
+        field: 'cpfCnpj', headerName: 'CPF / CNPJ', width: 160,
+        renderCell: (params) => {
+            const row = params.row as FornecedorView
+            return row.tipo === 'J'
+                ? mascaraCNPJ(params.value)
+                : mascaraCPF(params.value)
+        } 
+    },
     {
         field: 'tipo', headerName: 'Tipo', width: 90,
         renderCell: (params) => (
@@ -55,7 +64,7 @@ const columns: GridColDef[] = [
             if (!row.telefonePrincipal) return <span className="text-slate-400">-</span>
             return (
                 <span className="flex items-center">
-                    <span>{row.telefonePrincipal}</span>
+                    <span>{mascaraTelefone(row.telefonePrincipal)}</span>
                     <MaisBadge count={extras} />
                 </span>
             )
