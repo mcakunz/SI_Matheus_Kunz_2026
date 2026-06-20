@@ -1,7 +1,6 @@
 "use client"
 
-import { useState, useRef, useEffect, useCallback } from "react"
-import { Search, ExternalLink, X, ChevronDown, Plus } from "lucide-react"
+import { BaseLookup } from "@/components/ui/BaseLookup"
 import { EstadoSelect } from "@/lib/types"
 
 interface EstadoLookupProps {
@@ -13,176 +12,21 @@ interface EstadoLookupProps {
 }
 
 export function EstadoLookup({ estados, value, onChange, required, error }: EstadoLookupProps) {
-    const [aberto, setAberto] = useState(false)
-    const [busca, setBusca] = useState('')
-    const inputRef = useRef<HTMLInputElement>(null)
-    const containerRef = useRef<HTMLDivElement>(null)
-
-    const estadoAtual = estados.find(e => String(e.id) === value)
-
-    const filtrados = busca.trim()
-        ? estados.filter(e => e.estado.toLowerCase().includes(busca.toLowerCase()))
-        : estados
-
-    useEffect(() => {
-        function onClickOutside(e: MouseEvent) {
-            if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-                setAberto(false)
-                setBusca('')
-            }
-        }
-        document.addEventListener('mousedown', onClickOutside)
-        return () => document.removeEventListener('mousedown', onClickOutside)
-    }, [])
-
-    const abrir = () => {
-        setAberto(true)
-        setBusca('')
-        setTimeout(() => inputRef.current?.focus(), 50)
-    }
-
-    const selecionar = (estado: EstadoSelect) => {
-        onChange(String(estado.id))
-        setAberto(false)
-        setBusca('')
-    }
-
-    const limpar = (e: React.MouseEvent) => {
-        e.stopPropagation()
-        onChange('')
-        setBusca('')
-        setAberto(false)
-    }
-
-    const abrirCadastroEstado = (e: React.MouseEvent) => {
-        e.stopPropagation()
-        setAberto(false)
-        window.open('/estados/novo?origem=lookup', '_blank')
-    }
+    const items = estados.map(e => ({ id: e.id, label: e.estado }))
 
     return (
-        <div ref={containerRef} className="relative">
-            <div
-                onClick={abrir}
-                className={`flex items-center gap-2 w-full px-2 py-2 border rounded bg-white cursor-pointer transition-all
-                    ${aberto
-                        ? 'border-emerald-500 ring-2 ring-emerald-500/20'
-                        : error
-                            ? 'border-red-400'
-                            : 'border-slate-300 hover:border-slate-400'
-                    }`}
-            >
-                <Search size={15} className="text-slate-400 shrink-0" />
-
-                {estadoAtual
-                    ? <span className="flex-1 text-sm text-slate-800 truncate">{estadoAtual.estado}</span>
-                    : <span className="flex-1 text-sm text-slate-400">Selecionar estado...</span>
-                }
-
-                <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                    {estadoAtual && (
-                        <a
-                            href={`/estados/${estadoAtual.id}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title={`Editar ${estadoAtual.estado}`}
-                            className="p-0.5 text-slate-400 hover:text-emerald-600 transition-colors"
-                        >
-                            <ExternalLink size={13} />
-                        </a>
-                    )}
-                    <button
-                        type="button"
-                        onClick={abrirCadastroEstado}
-                        title="Cadastrar novo estado"
-                        className="p-0.5 text-slate-400 hover:text-emerald-600 transition-colors"
-                    >
-                        <Plus size={14} />
-                    </button>
-                    {estadoAtual && (
-                        <button type="button" onClick={limpar} className="p-0.5 text-slate-400 hover:text-slate-700 transition-colors">
-                            <X size={13} />
-                        </button>
-                    )}
-                    <ChevronDown size={14} className={`text-slate-400 transition-transform duration-150 ${aberto ? 'rotate-180' : ''}`} />
-                </div>
-            </div>
-
-            {aberto && (
-                <div className="absolute z-50 mt-1 w-full min-w-[260px] bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
-                    <div className="p-2 border-b border-slate-100">
-                        <div className="flex items-center gap-2 px-2 py-1.5 bg-slate-50 rounded border border-slate-200 focus-within:border-emerald-400 transition-colors">
-                            <Search size={13} className="text-slate-400 shrink-0" />
-                            <input
-                                ref={inputRef}
-                                type="text"
-                                value={busca}
-                                onChange={e => setBusca(e.target.value)}
-                                placeholder="Pesquisar estado..."
-                                className="flex-1 text-sm bg-transparent outline-none text-slate-800 placeholder:text-slate-400"
-                            />
-                            {busca && (
-                                <button type="button" onClick={() => setBusca('')}>
-                                    <X size={12} className="text-slate-400 hover:text-slate-600" />
-                                </button>
-                            )}
-                        </div>
-                    </div>
-
-                    <ul className="max-h-52 overflow-y-auto">
-                        {filtrados.length === 0 ? (
-                            <li className="px-3 py-5 text-center">
-                                <p className="text-sm text-slate-400">Nenhum estado encontrado.</p>
-                                <button
-                                    type="button"
-                                    onClick={abrirCadastroEstado}
-                                    className="mt-2 inline-flex items-center gap-1 text-xs text-emerald-600 hover:underline font-medium"
-                                >
-                                </button>
-                            </li>
-                        ) : (
-                            filtrados.map(estado => (
-                                <li key={estado.id}>
-                                    <button
-                                        type="button"
-                                        onClick={() => selecionar(estado)}
-                                        className={`w-full text-left px-3 py-2 text-sm flex items-center justify-between group transition-colors
-                                            ${String(estado.id) === value
-                                                ? 'bg-emerald-50 text-emerald-700 font-medium'
-                                                : 'text-slate-700 hover:bg-slate-50'
-                                            }`}
-                                    >
-                                        <span>{estado.estado}</span>
-                                        <a
-                                            href={`/estados/${estado.id}`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            onClick={e => e.stopPropagation()}
-                                            title="Editar este estado"
-                                            className="opacity-0 group-hover:opacity-100 p-0.5 text-slate-400 hover:text-emerald-600 transition-all"
-                                        >
-                                            <ExternalLink size={12} />
-                                        </a>
-                                    </button>
-                                </li>
-                            ))
-                        )}
-                    </ul>
-
-                    <div className="px-2 py-1.5 border-t border-slate-100 bg-slate-50">
-                        <button
-                            type="button"
-                            onClick={abrirCadastroEstado}
-                            className="w-full flex items-center justify-center gap-1.5 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
-                        >
-                            <Plus size={13} />
-                            Cadastrar novo estado
-                        </button>
-                    </div>
-                </div>
-            )}
-
-            {error && <p className="text-xs text-red-500 mt-1">{error}</p>}
-        </div>
+        <BaseLookup
+            items={items}
+            value={value}
+            onChange={onChange}
+            required={required}
+            error={error}
+            placeholder="Selecionar estado..."
+            pesquisaPlaceholder="Pesquisar estado..."
+            msgSemResultadoEncontrado="Nenhum estado encontrado."
+            pathCadastro="/estados"
+            pathLabel="Cadastrar novo estado"
+            editTitle={label => `Editar ${label}`}
+        />
     )
 }
