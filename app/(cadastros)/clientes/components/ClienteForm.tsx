@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -26,6 +26,8 @@ import { EmailList } from "@/app/components/ui/EmailList"
 import { TelefoneList } from "@/app/components/ui/TelefoneList"
 import { toDateString } from "@/lib/utils/helpers"
 import { TIPOS_EMAIL_CLIENTE_PF, TIPOS_EMAIL_CLIENTE_PJ, TIPOS_TELEFONE_CLIENTE_PF, TIPOS_TELEFONE_CLIENTE_PJ } from "@/lib/TiposContato"
+import { CondicaoPagamentoLookup } from "@/components/ui/CondicaoPagamentoLookup"
+import { useCondicaoPagamentoCadastrada } from "@/lib/hooks/useCondicaoPagamentoCadastrado"
 
 const clienteEmailSchema = z.object({
     id:        z.number().optional(),
@@ -118,6 +120,8 @@ interface ClienteFormProps {
 export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, listaCondicoes, emailsIniciais = [], telefonesIniciais = [] }: ClienteFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+    
+    const [condicoes, setCondicoes] = useState<CondicaoPagamentoSelect[]>(listaCondicoes)
 
     const cidadeInicial = listaCidades.find(c => c.id === cliente?.cidadeId)
     const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
@@ -171,6 +175,17 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
         listaEstados,
         listaCidades,
     )
+
+    const handleCondicaoCriada = useCallback((novaCondicao: CondicaoPagamentoSelect) => {
+        setCondicoes(prev =>
+            [...prev, novaCondicao].sort((a, b) =>
+                a.condicaoPagamento.localeCompare(b.condicaoPagamento, 'pt-BR')
+            )
+        )
+        setValue('condicaoPagamentoId', String(novaCondicao.id))
+    }, [setValue])
+
+    useCondicaoPagamentoCadastrada(handleCondicaoCriada)
 
     const tipoPessoa = watch("tipo")
     const isPF = tipoPessoa === "F"
@@ -407,14 +422,19 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                    <FormLabel>Condição de Pagamento</FormLabel>
-                    <FormSelect {...register('condicaoPagamentoId')}>
-                        <option value="">Selecione uma condição...</option>
-                        {listaCondicoes.map((c) => (
-                            <option key={c.id} value={c.id}>{c.condicaoPagamento}</option>
-                        ))}
-                    </FormSelect>
-                    <Erro campo="condicaoPagamentoId" />
+                    <FormLabel required>Condicão de Pagamento</FormLabel>
+                    <Controller
+                        name="condicaoPagamentoId"
+                        control={control}
+                        render={({ field }) => (
+                            <CondicaoPagamentoLookup
+                                condicoes={condicoes}
+                                value={field.value}
+                                onChange={field.onChange}
+                                error={errors.condicaoPagamentoId?.message}
+                            />
+                        )}
+                    />
                 </div>
                 <div>
                     <FormLabel required>Limite de Crédito (R$)</FormLabel>

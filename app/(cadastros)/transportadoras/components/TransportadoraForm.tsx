@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -33,6 +33,8 @@ import { CidadeLookup } from "@/components/ui/CidadeLookup"
 import { EmailList } from "@/app/components/ui/EmailList"
 import { TelefoneList } from "@/app/components/ui/TelefoneList"
 import { TIPOS_EMAIL_TRANSPORTADORA, TIPOS_TELEFONE_TRANSPORTADORA } from "@/lib/TiposContato"
+import { useCondicaoPagamentoCadastrada } from "@/lib/hooks/useCondicaoPagamentoCadastrado"
+import { CondicaoPagamentoLookup } from "@/components/ui/CondicaoPagamentoLookup"
 
 const transportadoraEmailSchema = z.object({
     id:        z.number().optional(),
@@ -134,6 +136,8 @@ export function TransportadoraForm({
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
+    const [condicoes, setCondicoes] = useState<CondicaoPagamentoSelect[]>(listaCondicoes)
+
     const cidadeInicial = listaCidades.find(c => c.id === transportadora?.cidadeId)
     const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
 
@@ -192,6 +196,17 @@ export function TransportadoraForm({
         listaEstados,
         listaCidades,
     )
+
+    const handleCondicaoCriada = useCallback((novaCondicao: CondicaoPagamentoSelect) => {
+        setCondicoes(prev =>
+            [...prev, novaCondicao].sort((a, b) =>
+                a.condicaoPagamento.localeCompare(b.condicaoPagamento, 'pt-BR')
+            )
+        )
+        setValue('condicaoPagamentoId', String(novaCondicao.id))
+    }, [setValue])
+
+    useCondicaoPagamentoCadastrada(handleCondicaoCriada)
 
     const tipoPessoa = watch("tipo")
     const isPF = tipoPessoa === "F"
@@ -391,16 +406,21 @@ export function TransportadoraForm({
 
             <div className="pt-1">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
-                    <div>
-                        <FormLabel required>Condição de Pagamento</FormLabel>
-                        <FormSelect {...register('condicaoPagamentoId')}>
-                            <option value="">Selecione uma condição...</option>
-                            {listaCondicoes.map(c => (
-                                <option key={c.id} value={c.id}>{c.condicaoPagamento}</option>
-                            ))}
-                        </FormSelect>
-                        <Erro campo="condicaoPagamentoId" />
-                    </div>
+                <div>
+                    <FormLabel required>Condicão de Pagamento</FormLabel>
+                    <Controller
+                        name="condicaoPagamentoId"
+                        control={control}
+                        render={({ field }) => (
+                            <CondicaoPagamentoLookup
+                                condicoes={condicoes}
+                                value={field.value}
+                                onChange={field.onChange}
+                                error={errors.condicaoPagamentoId?.message}
+                            />
+                        )}
+                    />
+                </div>
                     <div>
                         <FormLabel required>Limite de Crédito (R$)</FormLabel>
                         <FormInput type="number" {...register('limiteCredito')} min={0} step="0.01" />

@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm, useFieldArray } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { salvarCondicaoPagamento } from "../actions"
+import { salvarCondicaoPagamento, salvarCondicaoPagamentoComRetorno } from "../actions"
 import toast from "react-hot-toast"
 import { HiPlus, HiTrash } from "react-icons/hi"
 
@@ -15,6 +15,7 @@ import { FormLabel } from "@/app/components/ui/FormLabel"
 import { FormSelect } from "@/app/components/ui/FormSelect"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { CondicaoPagamentoCompleto, ParcelaCondicao, FormaPagamentoSelect } from "@/lib/types"
+import { emitirCondicaoPagamentoCadastrada } from "@/lib/hooks/useCondicaoPagamentoCadastrado"
 
 const parcelaSchema = z.object({
     numero:           z.number().int().positive(),
@@ -67,6 +68,9 @@ export function CondicaoPagamentoForm({
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
+    const searchParams = useSearchParams()
+    const abertoPorLookup = searchParams.get('origem') === 'lookup'
+
     const { register, handleSubmit, watch, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
@@ -117,14 +121,24 @@ export function CondicaoPagamentoForm({
         })
         
         try {
-            await salvarCondicaoPagamento(formData)
-            toast.success(condicao ? "Condição atualizada com sucesso!" : "Condição cadastrada com sucesso!")
-            router.push("/condicoes-pagamento")
+            if (abertoPorLookup && !condicao?.id) {
+                const resultado = await salvarCondicaoPagamentoComRetorno(formData)
+                toast.success("Condição de pagamento cadastrada com sucesso!")
+                emitirCondicaoPagamentoCadastrada({
+                    id: resultado.id,
+                    condicaoPagamento: resultado.condicaoPagamento,
+                })
+            } else {
+                await salvarCondicaoPagamento(formData)
+                toast.success(condicao ? "Condição atualizada com sucesso!" : "Condição cadastrada com sucesso!")
+                router.push("/condicoes-pagamento")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {
             setLoading(false)
         }
+
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>

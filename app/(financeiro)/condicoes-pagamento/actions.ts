@@ -150,6 +150,67 @@ export async function salvarCondicaoPagamento(formData: FormData) {
     revalidatePath('/condicoes-pagamento')
 }
 
+export async function salvarCondicaoPagamentoComRetorno(
+    formData: FormData
+): Promise<{ id: number; condicaoPagamento: string }> {
+
+    const dados = {
+        condicaoPagamento:   (formData.get('condicaoPagamento') as string || "").trim(),
+        numeroParcelas:      formData.get('numeroParcelas'),
+        diasPrimeiraParcela: formData.get('diasPrimeiraParcela'),
+        diasEntreParcelas:   formData.get('diasEntreParcelas'),
+        percentualJuros:     formData.get('percentualJuros'),
+        percentualMulta:     formData.get('percentualMulta'),
+        percentualDesconto:  formData.get('percentualDesconto'),
+        ativo:               formData.get('ativo') === 'true',
+        parcelas:            parseParcelasFromFormData(formData),
+    }
+
+    const validacao = condicaoPagamentoSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+
+    const v = validacao.data
+
+    const client = await pool.connect()
+    try {
+        await client.query('BEGIN')
+
+        const res = await client.query<{ id: number; condicaoPagamento: string }>(
+            `INSERT INTO tb_condicoes_pagamento (
+                "condicaoPagamento", "numeroParcelas", "diasPrimeiraParcela",
+                "diasEntreParcelas", "percentualJuros", "percentualMulta",
+                "percentualDesconto", "ativo"
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+            RETURNING id, "condicaoPagamento"`,
+            [
+                v.condicaoPagamento, v.numeroParcelas, v.diasPrimeiraParcela,
+                v.diasEntreParcelas, v.percentualJuros, v.percentualMulta,
+                v.percentualDesconto, v.ativo,
+            ]
+        )
+
+        const condicaoPagamentoId = res.rows[0].id
+
+        for (const p of v.parcelas) {
+            await client.query(
+                `INSERT INTO tb_parcelas_condicao_pagamento
+                    ("condicaoPagamentoId", "numero", "dias", "percentual", "formaPagamentoId")
+                VALUES ($1,$2,$3,$4,$5)`,
+                [condicaoPagamentoId, p.numero, p.dias, p.percentual, p.formaPagamentoId]
+            )
+        }
+
+        await client.query('COMMIT')
+        revalidatePath('/condicoes-pagamento')
+        return res.rows[0]
+    } catch (error: any) {
+        await client.query('ROLLBACK')
+        throw new Error(error.message)
+    } finally {
+        client.release()
+    }
+}
+
 export async function alternarStatusCondicaoPagamento(id: number, statusAtual: boolean) {
     try {
         await pool.query(
