@@ -1,6 +1,6 @@
 "use server"
 
-import { DBErrorLabels, tratarErroDB } from "@/components/errors"
+import { DBErrorLabels, tratarErroDB } from "@/lib/utils/errors"
 import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"

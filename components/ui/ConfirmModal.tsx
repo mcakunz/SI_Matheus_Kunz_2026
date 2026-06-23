@@ -1,6 +1,6 @@
 "use client"
 
-import { Modal } from "@/app/components/ui/Modal"
+import { Modal } from "@/components/ui/Modal"
 
 interface ConfirmModalProps {
     isOpen: boolean

@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db"
 import { UnidadeMedida } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import UnidadeMedidaClientTable from "./components/UnidadesMedidaClientTable"
 
 export default async function UnidadeMedidaPage() {

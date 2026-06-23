@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db"
 import { ProdutoView } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import ProdutoClientTable from "./components/ProdutosClientTable"
 
 export default async function ProdutoPage() {

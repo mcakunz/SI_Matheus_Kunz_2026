@@ -4,7 +4,7 @@ import { HiChevronLeft } from "react-icons/hi"
 
 import { pool } from "@/lib/db"
 import { UnidadeMedida } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import { UnidadeMedidaForm } from "../components/UnidadeMedidaForm"
 
 interface UnidadeMedidaPageProps {

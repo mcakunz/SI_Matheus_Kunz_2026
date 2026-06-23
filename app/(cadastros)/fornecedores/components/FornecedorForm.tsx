@@ -9,10 +9,10 @@ import { salvarFornecedor } from "../actions"
 import toast from "react-hot-toast"
 import { HiPlus, HiTrash, HiStar } from "react-icons/hi"
 
-import { Button } from "@/app/components/ui/Button"
-import { FormInput } from "@/app/components/ui/FormInput"
-import { FormLabel } from "@/app/components/ui/FormLabel"
-import { FormSelect } from "@/app/components/ui/FormSelect"
+import { Button } from "@/components/ui/Button"
+import { FormInput } from "@/components/ui/FormInput"
+import { FormLabel } from "@/components/ui/FormLabel"
+import { FormSelect } from "@/components/ui/FormSelect"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import {
     FornecedorView,
@@ -28,13 +28,13 @@ import {
 import { validarIE, validarRG } from "@/lib/utils/validacoes"
 import { mascaraCPF, mascaraCNPJ, mascaraTelefone } from "@/lib/utils/mascaras"
 import { useEndereco } from "@/lib/hooks/useEndereco"
-import { PaisLookup } from "@/components/ui/PaisLookup"
-import { EstadoLookup } from "@/components/ui/EstadoLookup"
-import { CidadeLookup } from "@/components/ui/CidadeLookup"
+import { PaisLookup } from "@/app/components/ui/PaisLookup"
+import { EstadoLookup } from "@/app/components/ui/EstadoLookup"
+import { CidadeLookup } from "@/app/components/ui/CidadeLookup"
 import { EmailList } from "@/app/components/ui/EmailList"
 import { TelefoneList } from "@/app/components/ui/TelefoneList"
 import { TIPOS_EMAIL_FORNECEDOR, TIPOS_TELEFONE_FORNECEDOR } from "@/lib/TiposContato"
-import { CondicaoPagamentoLookup } from "@/components/ui/CondicaoPagamentoLookup"
+import { CondicaoPagamentoLookup } from "@/app/components/ui/CondicaoPagamentoLookup"
 import { useCondicaoPagamentoCadastrada } from "@/lib/hooks/useCondicaoPagamentoCadastrado"
 
 

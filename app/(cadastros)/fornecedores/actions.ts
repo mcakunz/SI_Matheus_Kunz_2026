@@ -6,7 +6,7 @@ import { z } from "zod"
 
 import { validarRG, validarIE } from "@/lib/utils/validacoes"
 import { nullableString,parseJsonField } from "@/lib/utils/helpers"
-import { DBErrorLabels, tratarErroDB } from "@/components/errors"
+import { DBErrorLabels, tratarErroDB } from "@/lib/utils/errors"
 
 const FORNECEDOR_DB_ERROR_LABELS: DBErrorLabels = {
     unique: {

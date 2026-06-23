@@ -4,7 +4,7 @@ import { HiChevronLeft } from "react-icons/hi"
 
 import { pool } from "@/lib/db"
 import { Marca } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import { MarcaForm } from "../components/MarcaForm"
 
 interface MarcaPageProps {

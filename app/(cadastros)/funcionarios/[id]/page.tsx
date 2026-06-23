@@ -7,7 +7,7 @@ import {
     FuncionarioView, CidadeSelect, PaisSelect, EstadoSelect,
     FuncaoFuncionarioSelect, FuncionarioEmail, FuncionarioTelefone,
 } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import { FuncionarioForm } from "../components/FuncionarioForm"
 
 interface FuncionarioPageProps {

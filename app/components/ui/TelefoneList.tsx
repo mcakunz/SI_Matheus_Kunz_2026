@@ -2,9 +2,9 @@
 
 import { UseFormRegister, UseFormWatch } from "react-hook-form"
 import { HiPlus, HiTrash, HiStar } from "react-icons/hi"
-import { FormInput } from "@/app/components/ui/FormInput"
-import { FormLabel } from "@/app/components/ui/FormLabel"
-import { FormSelect } from "@/app/components/ui/FormSelect"
+import { FormInput } from "@/components/ui/FormInput"
+import { FormLabel } from "@/components/ui/FormLabel"
+import { FormSelect } from "@/components/ui/FormSelect"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { mascaraTelefone } from "@/lib/utils/mascaras"
 import { TipoOpcao } from "./EmailList"

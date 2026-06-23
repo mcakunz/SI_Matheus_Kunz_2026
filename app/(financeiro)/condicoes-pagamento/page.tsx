@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db"
 import { CondicaoPagamentoCompleto } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import CondicoesPagamentoClientTable from "./components/CondicaoPagamentoClientTable"
 
 export default async function CondicoesPagamentoPage() {

@@ -9,12 +9,12 @@ import { salvarEstado, salvarEstadoComRetorno } from "../actions"
 import { emitirEstadoCadastrado } from "@/lib/hooks/useEstadoCadastrado"
 import toast from "react-hot-toast"
 
-import { Button } from "@/app/components/ui/Button"
-import { FormInput } from "@/app/components/ui/FormInput"
-import { FormLabel } from "@/app/components/ui/FormLabel"
+import { Button } from "@/components/ui/Button"
+import { FormInput } from "@/components/ui/FormInput"
+import { FormLabel } from "@/components/ui/FormLabel"
 import { EstadoComPais, PaisSelect } from "@/lib/types"
 import { FormSwitch } from "@/components/ui/FormSwitch"
-import { PaisLookup } from "@/components/ui/PaisLookup"
+import { PaisLookup } from "@/app/components/ui/PaisLookup"
 import { usePaisCadastrado } from "@/lib/hooks/usePaisCadastrado"
 
 const schema = z.object({

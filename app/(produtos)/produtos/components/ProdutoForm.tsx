@@ -8,12 +8,12 @@ import { z } from "zod"
 import { salvarProduto } from "../actions"
 import toast from "react-hot-toast"
 
-import { Button } from "@/app/components/ui/Button"
-import { FormInput } from "@/app/components/ui/FormInput"
-import { FormLabel } from "@/app/components/ui/FormLabel"
+import { Button } from "@/components/ui/Button"
+import { FormInput } from "@/components/ui/FormInput"
+import { FormLabel } from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
-import { FormSelect } from "@/app/components/ui/FormSelect"
-import { FormTextArea } from "@/app/components/ui/FormTextArea"
+import { FormSelect } from "@/components/ui/FormSelect"
+import { FormTextArea } from "@/components/ui/FormTextArea"
 import { Produto, MarcaSelect, UnidadeMedidaSelect, CategoriaSelect } from "@/lib/types"
 
 const schema = z.object({

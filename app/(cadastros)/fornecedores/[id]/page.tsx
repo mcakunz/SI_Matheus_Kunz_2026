@@ -13,7 +13,7 @@ import {
     CondicaoPagamentoSelect,
     TransportadoraSelect,
 } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import { FornecedorForm } from "../components/FornecedorForm"
 
 interface FornecedorPageProps {

@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db"
 import { ClienteView } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import ClientesClientTable from "./components/ClientesClientTable"
 
 export default async function ClientesPage() {

@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db"
 import { Marca } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import MarcaClientTable from "./components/MarcasClientTable"
 
 export default async function MarcaPage() {

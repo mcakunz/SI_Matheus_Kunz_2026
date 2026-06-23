@@ -8,9 +8,9 @@ import { z } from "zod"
 import { salvarMarca } from "../actions"
 import toast from "react-hot-toast"
 
-import { Button } from "@/app/components/ui/Button"
-import { FormInput } from "@/app/components/ui/FormInput"
-import { FormLabel } from "@/app/components/ui/FormLabel"
+import { Button } from "@/components/ui/Button"
+import { FormInput } from "@/components/ui/FormInput"
+import { FormLabel } from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { Marca } from "@/lib/types"
 

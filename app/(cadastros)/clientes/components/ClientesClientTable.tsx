@@ -4,13 +4,13 @@ import { useState } from "react"
 import { alternarStatusCliente, excluirCliente } from "../actions"
 
 import { GridColDef } from "@mui/x-data-grid"
-import { DataTable } from "@/app/components/ui/DataTable"
-import { ConfirmModal } from "@/app/components/ui/ConfirmModal"
-import { ActionToolbar } from "@/app/components/ui/ActionToolbar"
-import { StatusBadge } from "@/app/components/ui/StatusBadge"
+import { DataTable } from "@/components/ui/DataTable"
+import { ConfirmModal } from "@/components/ui/ConfirmModal"
+import { ActionToolbar } from "@/components/ui/ActionToolbar"
+import { StatusBadge } from "@/components/ui/StatusBadge"
 import toast from "react-hot-toast"
 import { ClienteView } from "@/lib/types"
-import { MaisBadge } from "@/app/components/ui/MaisBadge"
+import { MaisBadge } from "@/components/ui/MaisBadge"
 import { mascaraCNPJ, mascaraCPF, mascaraTelefone } from "@/lib/utils/mascaras"
 
 const columns: GridColDef[] = [

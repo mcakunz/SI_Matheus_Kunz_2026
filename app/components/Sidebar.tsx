@@ -59,6 +59,7 @@ const ROUTE_GROUPS: RouteGroup[] = [
         subRoutes: [
             { label: "Clientes", href: "/clientes" },
             { label: "Fornecedores", href: "/fornecedores" },
+            { label: "Veiculos", href: "/veiculos" },
             { label: "Transportadoras", href: "/transportadoras" },
             { label: "Funcionários", href: "/funcionarios" },
         ],

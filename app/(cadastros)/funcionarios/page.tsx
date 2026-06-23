@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db"
 import { FuncionarioView } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import FuncionariosClientTable from "./components/FuncionariosClientTable"
 
 export default async function FuncionariosPage() {

@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db"
 import { Categoria } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import CategoriaClientTable from "./components/CategoriasClientTable"
 
 export default async function CategoriaPage() {

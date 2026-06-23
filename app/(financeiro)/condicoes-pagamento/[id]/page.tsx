@@ -4,7 +4,7 @@ import { HiChevronLeft } from "react-icons/hi"
 
 import { pool } from "@/lib/db"
 import { CondicaoPagamentoCompleto, ParcelaCondicao, FormaPagamentoSelect } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import { CondicaoPagamentoForm } from "../components/CondicaoPagamentoForm"
 
 interface CondicaoPagamentoPageProps {

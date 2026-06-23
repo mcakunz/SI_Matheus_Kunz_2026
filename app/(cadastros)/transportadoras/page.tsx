@@ -1,6 +1,6 @@
 import { pool } from "@/lib/db"
 import { TransportadoraView } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import TransportadorasClientTable from "./components/TransportadorasClientTable"
 
 export default async function TransportadorasPage() {

@@ -2,9 +2,9 @@ import { createSearchParamsCache, parseAsString, type SearchParams } from 'nuqs/
 import { Suspense } from 'react'
 
 import { SearchInput } from '@/app/components/SearchInput'
-import { PageTitle } from '@/app/components/ui/PageTitle'
-import { LoadingSpinner } from '@/app/components/ui/LoadingSpinner'
-import { ErrorLoadingData } from '@/app/components/ui/ErrorLoadingData'
+import { PageTitle } from '@/components/ui/PageTitle'
+import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { ErrorLoadingData } from '@/components/ui/ErrorLoadingData'
 import { pool } from '@/lib/db'
 import { EstadoComPais, PaisSelect } from '@/lib/types'
 import EstadosClientTable from './components/EstadosClientTable'

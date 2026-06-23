@@ -22,3 +22,15 @@ export function mascaraTelefone(valor: string): string {
     if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`
     return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`
 }
+
+// Aplica máscara "AAA-0000" para placa padrão 
+export function mascaraPlacaPadrao(val: string): string {
+    const limpo = val.replace(/[^A-Z0-9]/gi, '').toUpperCase().slice(0, 7)
+    if (limpo.length > 3) return `${limpo.slice(0, 3)}-${limpo.slice(3)}`
+    return limpo
+}
+
+// Aplica máscara "AAA0A00" para placa Mercosul
+export function mascaraPlacaMercosul(val: string): string {
+    return val.replace(/[^A-Z0-9]/gi, '').toUpperCase().slice(0, 7)
+}

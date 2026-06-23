@@ -3,7 +3,7 @@ import { notFound } from "next/navigation"
 import { HiChevronLeft } from "react-icons/hi"
 import { pool } from "@/lib/db"
 import { CidadeComEstado, EstadoSelect } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import { CidadeForm } from "../components/CidadeForm"
 
 interface CidadePageProps {

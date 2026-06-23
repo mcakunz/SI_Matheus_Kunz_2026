@@ -96,44 +96,6 @@ function parseDadosTransportadora(formData: FormData) {
     }
 }
 
-const SQL_INSERT_TRANSPORTADORA = `
-    INSERT INTO tb_transportadoras (
-        "razaoSocial", "nomeFantasiaApelido", "cnpj", "tipo",
-        "cidadeId", "condicaoPagamentoId", "limiteCredito", "ativo",
-        "rgIe", "cep", "endereco", "numero", "complemento", "bairro", "observacoes"
-    ) VALUES (
-        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15
-    ) RETURNING id`
-
-const SQL_UPDATE_TRANSPORTADORA = `
-    UPDATE tb_transportadoras
-       SET "razaoSocial"         = $1,
-           "nomeFantasiaApelido" = $2,
-           "cnpj"                = $3,
-           "tipo"                = $4,
-           "cidadeId"            = $5,
-           "condicaoPagamentoId" = $6,
-           "limiteCredito"       = $7,
-           "ativo"               = $8,
-           "rgIe"                = $9,
-           "cep"                 = $10,
-           "endereco"            = $11,
-           "numero"              = $12,
-           "complemento"         = $13,
-           "bairro"              = $14,
-           "observacoes"         = $15
-     WHERE id = $16`
-
-function buildParams(v: z.infer<typeof transportadoraSchema>) {
-    return [
-        v.razaoSocial, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
-        v.cidadeId, v.condicaoPagamentoId, v.limiteCredito, v.ativo,
-        v.rgIe ?? null, v.cep ?? null, v.endereco ?? null,
-        v.numero ?? null, v.complemento ?? null, v.bairro ?? null,
-        v.observacoes ?? null,
-    ]
-}
-
 export async function salvarTransportadora(formData: FormData) {
     const dados     = parseDadosTransportadora(formData)
     const validacao = transportadoraSchema.safeParse(dados)
@@ -154,9 +116,49 @@ export async function salvarTransportadora(formData: FormData) {
 
         if (id) {
             transportadoraId = Number(id)
-            await client.query(SQL_UPDATE_TRANSPORTADORA, [...buildParams(v), transportadoraId])
+            await client.query(
+                `UPDATE tb_transportadoras
+                    SET "razaoSocial"         = $1,
+                        "nomeFantasiaApelido" = $2,
+                        "cnpj"                = $3,
+                        "tipo"                = $4,
+                        "cidadeId"            = $5,
+                        "condicaoPagamentoId" = $6,
+                        "limiteCredito"       = $7,
+                        "ativo"               = $8,
+                        "rgIe"                = $9,
+                        "cep"                 = $10,
+                        "endereco"            = $11,
+                        "numero"              = $12,
+                        "complemento"         = $13,
+                        "bairro"              = $14,
+                        "observacoes"         = $15
+                  WHERE id = $16`,
+                [
+                    v.razaoSocial, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
+                    v.cidadeId, v.condicaoPagamentoId, v.limiteCredito, v.ativo,
+                    v.rgIe ?? null, v.cep ?? null, v.endereco ?? null,
+                    v.numero ?? null, v.complemento ?? null, v.bairro ?? null,
+                    v.observacoes ?? null, transportadoraId,
+                ]
+            )
         } else {
-            const res = await client.query<{ id: number }>(SQL_INSERT_TRANSPORTADORA, buildParams(v))
+            const res = await client.query<{ id: number }>(
+                `INSERT INTO tb_transportadoras (
+                    "razaoSocial", "nomeFantasiaApelido", "cnpj", "tipo",
+                    "cidadeId", "condicaoPagamentoId", "limiteCredito", "ativo",
+                    "rgIe", "cep", "endereco", "numero", "complemento", "bairro", "observacoes"
+                ) VALUES (
+                    $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+                ) RETURNING id`,
+                [
+                    v.razaoSocial, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
+                    v.cidadeId, v.condicaoPagamentoId, v.limiteCredito, v.ativo,
+                    v.rgIe ?? null, v.cep ?? null, v.endereco ?? null,
+                    v.numero ?? null, v.complemento ?? null, v.bairro ?? null,
+                    v.observacoes ?? null,
+                ]
+            )
             transportadoraId = res.rows[0].id
         }
 
@@ -228,8 +230,20 @@ export async function salvarTransportadoraComRetorno(
         await client.query('BEGIN')
 
         const res = await client.query<{ id: number; razaoSocial: string }>(
-            SQL_INSERT_TRANSPORTADORA.replace('RETURNING id', 'RETURNING id, "razaoSocial"'),
-            buildParams(v)
+            `INSERT INTO tb_transportadoras (
+                "razaoSocial", "nomeFantasiaApelido", "cnpj", "tipo",
+                "cidadeId", "condicaoPagamentoId", "limiteCredito", "ativo",
+                "rgIe", "cep", "endereco", "numero", "complemento", "bairro", "observacoes"
+            ) VALUES (
+                $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+            ) RETURNING id, "razaoSocial"`,
+            [
+                v.razaoSocial, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
+                v.cidadeId, v.condicaoPagamentoId, v.limiteCredito, v.ativo,
+                v.rgIe ?? null, v.cep ?? null, v.endereco ?? null,
+                v.numero ?? null, v.complemento ?? null, v.bairro ?? null,
+                v.observacoes ?? null,
+            ]
         )
         const transportadoraId = res.rows[0].id
 

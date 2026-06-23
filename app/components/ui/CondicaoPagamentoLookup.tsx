@@ -1,6 +1,6 @@
 "use client"
 
-import { BaseLookup } from "./BaseLookup"
+import { BaseLookup } from "../../../components/ui/BaseLookup"
 import { CondicaoPagamentoSelect } from "@/lib/types"
 
 interface CondicaoPagamentoProps {

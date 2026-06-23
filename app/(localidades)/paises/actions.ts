@@ -1,6 +1,6 @@
 "use server"
 
-import { DBErrorLabels, tratarErroDB } from "@/components/errors"
+import { DBErrorLabels, tratarErroDB } from "@/lib/utils/errors"
 import { query, queryOne } from "@/lib/db"
 import { obterSessao } from "@/lib/auth/session"
 import { exigirPermissao } from "@/lib/auth/permissoes"
