@@ -194,25 +194,38 @@ export interface FornecedorView extends Fornecedor {
     telefonePrincipal: string | null
     totalTelefones:    number
 }
+
+export interface Veiculo {
+    id:           number
+    placa:        string
+    modelo:       string
+    marca:        string
+    ano:          number
+    capacidade:   number | null
+    ativo:        boolean
+    dataCadastro: string
+    dataAlteracao: string | null
+}
 export interface Transportadora {
-    id:                  number
-    razaoSocial:         string
-    nomeFantasia:        string | null
-    cnpj:                string
-    rgIe:                string | null
-    cep:                 string | null
-    endereco:            string | null
-    numero:              string | null
-    complemento:         string | null
-    bairro:              string | null
-    cidadeId:            number
-    condicaoPagamentoId: number
-    tipo:                'F' | 'J'
-    limiteCredito:       number
-    observacoes:         string | null
-    ativo:               boolean
-    dataCadastro:        string
-    dataAlteracao:       string | null
+    id:                    number
+    razaoSocial:           string
+    nomeFantasiaApelido:   string | null   
+    cnpj:                  string
+    rgIe:                  string | null
+    cep:                   string | null
+    endereco:              string | null
+    numero:                string | null
+    complemento:           string | null
+    bairro:                string | null
+    cidadeId:              number
+    condicaoPagamentoId:   number
+    transportadoraId:      number | null
+    tipo:                  'F' | 'J'
+    limiteCredito:         number
+    observacoes:           string | null
+    ativo:                 boolean
+    dataCadastro:          string
+    dataAlteracao:         string | null
 }
 export interface TransportadoraEmail {
     id:                number
@@ -234,6 +247,13 @@ export interface TransportadoraTelefone {
     dataCadastro:      string
     dataAlteracao:     string | null
 }
+
+export interface TransportadoraVeiculo {
+    transportadoraId: number
+    veiculoId:        number
+    dataCadastro:     string
+    dataAlteracao:    string | null
+}
 export interface TransportadoraView extends Transportadora {
     cidade:            string | null
     condicaoPagamento: string | null
@@ -242,7 +262,6 @@ export interface TransportadoraView extends Transportadora {
     telefonePrincipal: string | null
     totalTelefones:    number
 }
-
 export interface Categoria {
     id: number
     categoria: string
@@ -367,6 +386,7 @@ export type CidadeSelect            = Pick<Cidade,           'id' | 'cidade' | '
 export type CondicaoPagamentoSelect = Pick<CondicaoPagamento,'id' | 'condicaoPagamento'>
 export type FormaPagamentoSelect    = Pick<FormaPagamento,   'id' | 'formaPagamento'>
 export type TransportadoraSelect    = Pick<Transportadora,   'id' | 'razaoSocial'>
+export type VeiculoSelect           = Pick<Veiculo,          'id' | 'placa' | 'modelo' | 'marca'>
 export type CategoriaSelect         = Pick<Categoria,        'id' | 'categoria'>
 export type MarcaSelect             = Pick<Marca,            'id' | 'marca'>
 export type UnidadeMedidaSelect     = Pick<UnidadeMedida,    'id' | 'unidadeMedida'>

@@ -1,19 +1,26 @@
 "use client"
 
-import { useCallback, useState } from "react"
-import { useRouter } from "next/navigation"
-import { useForm, useFieldArray, Controller } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { salvarTransportadora } from "../actions"
-import toast from "react-hot-toast"
-import { HiPlus, HiTrash, HiStar } from "react-icons/hi"
+import { useCallback, useState }                      from "react"
+import { useRouter }                                  from "next/navigation"
+import { useForm, useFieldArray, Controller }         from "react-hook-form"
+import { zodResolver }                                from "@hookform/resolvers/zod"
+import { z }                                          from "zod"
+import { salvarTransportadora }                       from "../actions"
+import toast                                          from "react-hot-toast"
 
-import { Button } from "@/app/components/ui/Button"
-import { FormInput } from "@/app/components/ui/FormInput"
-import { FormLabel } from "@/app/components/ui/FormLabel"
-import { FormSelect } from "@/app/components/ui/FormSelect"
-import { FormSwitch } from "@/components/ui/FormSwitch"
+import { Button }          from "@/components/ui/Button"
+import { FormInput }       from "@/components/ui/FormInput"
+import { FormLabel }       from "@/components/ui/FormLabel"
+import { FormSelect }      from "@/components/ui/FormSelect"
+import { FormSwitch }      from "@/components/ui/FormSwitch"
+import { EmailList }       from "@/app/components/ui/EmailList"
+import { TelefoneList }    from "@/app/components/ui/TelefoneList"
+import { VeiculoList }     from "@/app/components/ui/VeiculoList"
+import { PaisLookup }      from "@/app/components/ui/PaisLookup"
+import { EstadoLookup }    from "@/app/components/ui/EstadoLookup"
+import { CidadeLookup }    from "@/app/components/ui/CidadeLookup"
+import { CondicaoPagamentoLookup } from "@/app/components/ui/CondicaoPagamentoLookup"
+
 import {
     TransportadoraView,
     TransportadoraEmail,
@@ -22,24 +29,20 @@ import {
     PaisSelect,
     EstadoSelect,
     CondicaoPagamentoSelect,
+    VeiculoSelect,
 } from "@/lib/types"
 
-import { validarIE, validarRG } from "@/lib/utils/validacoes"
-import { mascaraCPF, mascaraCNPJ, mascaraTelefone } from "@/lib/utils/mascaras"
-import { useEndereco } from "@/lib/hooks/useEndereco"
-import { PaisLookup } from "@/components/ui/PaisLookup"
-import { EstadoLookup } from "@/components/ui/EstadoLookup"
-import { CidadeLookup } from "@/components/ui/CidadeLookup"
-import { EmailList } from "@/app/components/ui/EmailList"
-import { TelefoneList } from "@/app/components/ui/TelefoneList"
+import { validarIE, validarRG }                             from "@/lib/utils/validacoes"
+import { mascaraCPF, mascaraCNPJ, mascaraTelefone }         from "@/lib/utils/mascaras"
+import { useEndereco }                                      from "@/lib/hooks/useEndereco"
 import { TIPOS_EMAIL_TRANSPORTADORA, TIPOS_TELEFONE_TRANSPORTADORA } from "@/lib/TiposContato"
-import { useCondicaoPagamentoCadastrada } from "@/lib/hooks/useCondicaoPagamentoCadastrado"
-import { CondicaoPagamentoLookup } from "@/components/ui/CondicaoPagamentoLookup"
+import { useCondicaoPagamentoCadastrada }                   from "@/lib/hooks/useCondicaoPagamentoCadastrado"
+
 
 const transportadoraEmailSchema = z.object({
     id:        z.number().optional(),
     email:     z.string().email("E-mail inválido."),
-    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'FISCAL', 'OUTRO']),
+    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'FISCAL']),
     principal: z.boolean(),
     ativo:     z.boolean(),
 })
@@ -47,95 +50,89 @@ const transportadoraEmailSchema = z.object({
 const transportadoraTelefoneSchema = z.object({
     id:        z.number().optional(),
     telefone:  z.string().min(10, "Telefone inválido.").max(15),
-    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'CELULAR', 'OUTRO']),
+    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO']),
     principal: z.boolean(),
     ativo:     z.boolean(),
 })
 
-const schema = z.object({
-    tipo:                z.enum(['F', 'J']),
-    ativo:               z.boolean(),
-    razaoSocial:         z.string().min(2, "A razão social deve ter no mínimo 2 caracteres.").max(100),
-    nomeFantasia:        z.string().max(80).optional(),
-    cnpj:                z.string().min(11, "CPF/CNPJ inválido.").max(18),
-    rgIe:                z.string().max(20).optional(),
-    cep:                 z.string().max(9).optional(),
-    endereco:            z.string().max(100).optional(),
-    numero:              z.string().max(10).optional(),
-    complemento:         z.string().max(50).optional(),
-    bairro:              z.string().max(50).optional(),
-    cidadeId:            z.string().min(1, "Selecione uma cidade."),
-    condicaoPagamentoId: z.string().min(1, "Selecione uma condição de pagamento."),
-    limiteCredito:       z.string().min(1, "Informe o limite de crédito."),
-    observacoes:         z.string().max(150).optional(),
-    emails:              z.array(transportadoraEmailSchema),
-    telefones:           z.array(transportadoraTelefoneSchema),
-}).superRefine((data, ctx) => {
+const transportadoraVeiculoSchema = z.object({
+    veiculoId: z.string().min(1, "Selecione um veículo."),
+})
 
+const schema = z.object({
+    tipo:                  z.enum(['F', 'J']),
+    ativo:                 z.boolean(),
+    razaoSocial:           z.string().min(2, "A razão social deve ter no mínimo 2 caracteres.").max(100),
+    nomeFantasiaApelido:   z.string().max(80).optional(),
+    cnpj:                  z.string().min(11, "CPF/CNPJ inválido.").max(18),
+    rgIe:                  z.string().max(20).optional(),
+    cep:                   z.string().max(9).optional(),
+    endereco:              z.string().max(100).optional(),
+    numero:                z.string().max(10).optional(),
+    complemento:           z.string().max(50).optional(),
+    bairro:                z.string().max(50).optional(),
+    cidadeId:              z.string().min(1, "Selecione uma cidade."),
+    condicaoPagamentoId:   z.string().min(1, "Selecione uma condição de pagamento."),
+    limiteCredito:         z.string().min(1, "Informe o limite de crédito."),
+    observacoes:           z.string().max(150).optional(),
+    emails:                z.array(transportadoraEmailSchema),
+    telefones:             z.array(transportadoraTelefoneSchema),
+    veiculos:              z.array(transportadoraVeiculoSchema),
+}).superRefine((data, ctx) => {
     const valor = data.rgIe?.trim() ?? ''
     if (valor) {
         if (data.tipo === 'F') {
             if (!validarRG(valor)) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    path: ['rgIe'],
-                    message: "RG inválido. Informe entre 7 e 9 dígitos.",
-                })
+                ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['rgIe'], message: "RG inválido. Informe entre 7 e 9 dígitos." })
             }
         } else {
             if (!validarIE(valor)) {
-                ctx.addIssue({
-                    code: z.ZodIssueCode.custom,
-                    path: ['rgIe'],
-                    message: "Inscrição Estadual inválida. Informe entre 8 e 14 caracteres.",
-                })
+                ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['rgIe'], message: "Inscrição Estadual inválida. Informe entre 8 e 14 caracteres." })
             }
         }
     }
 
-    const emailsPrincipais = data.emails.filter(e => e.principal).length
-    if (emailsPrincipais > 1) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['emails'],
-            message: "Apenas um e-mail pode ser marcado como principal.",
-        })
+    if (data.emails.filter(e => e.principal).length > 1) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['emails'], message: "Apenas um e-mail pode ser marcado como principal." })
     }
 
-    const telPrincipais = data.telefones.filter(t => t.principal).length
-    if (telPrincipais > 1) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['telefones'],
-            message: "Apenas um telefone pode ser marcado como principal.",
-        })
+    if (data.telefones.filter(t => t.principal).length > 1) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['telefones'], message: "Apenas um telefone pode ser marcado como principal." })
+    }
+
+    const ids = data.veiculos.map(v => v.veiculoId)
+    if (new Set(ids).size !== ids.length) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ['veiculos'], message: "Existem veículos duplicados na lista." })
     }
 })
 
 type FormData = z.infer<typeof schema>
 
 interface TransportadoraFormProps {
-    transportadora?:  TransportadoraView | null
-    emailsIniciais?:  TransportadoraEmail[]
+    transportadora?:    TransportadoraView | null
+    emailsIniciais?:    TransportadoraEmail[]
     telefonesIniciais?: TransportadoraTelefone[]
-    listaCidades:     CidadeSelect[]
-    listaEstados:     EstadoSelect[]
-    listaPaises:      PaisSelect[]
-    listaCondicoes:   CondicaoPagamentoSelect[]
+    veiculosIniciais?:  VeiculoSelect[]
+    listaVeiculos:      VeiculoSelect[]
+    listaCidades:       CidadeSelect[]
+    listaEstados:       EstadoSelect[]
+    listaPaises:        PaisSelect[]
+    listaCondicoes:     CondicaoPagamentoSelect[]
 }
 
 export function TransportadoraForm({
     transportadora,
-    emailsIniciais = [],
+    emailsIniciais    = [],
     telefonesIniciais = [],
+    veiculosIniciais  = [],
+    listaVeiculos,
     listaCidades,
     listaEstados,
     listaPaises,
     listaCondicoes,
 }: TransportadoraFormProps) {
-    const router = useRouter()
+    const router  = useRouter()
     const [loading, setLoading] = useState(false)
-
     const [condicoes, setCondicoes] = useState<CondicaoPagamentoSelect[]>(listaCondicoes)
 
     const cidadeInicial = listaCidades.find(c => c.id === transportadora?.cidadeId)
@@ -144,39 +141,32 @@ export function TransportadoraForm({
     const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
-            tipo:                (transportadora?.tipo as 'F' | 'J') ?? 'J',
-            ativo:               transportadora ? transportadora.ativo : true,
-            razaoSocial:         transportadora?.razaoSocial ?? '',
-            nomeFantasia:        transportadora?.nomeFantasia ?? '',
-            cnpj:                transportadora?.cnpj
+            tipo:                  (transportadora?.tipo as 'F' | 'J') ?? 'J',
+            ativo:                 transportadora ? transportadora.ativo : true,
+            razaoSocial:           transportadora?.razaoSocial           ?? '',
+            nomeFantasiaApelido:   transportadora?.nomeFantasiaApelido   ?? '',
+            cnpj: transportadora?.cnpj
                                      ? (transportadora.cnpj.replace(/\D/g, '').length === 11
                                          ? mascaraCPF(transportadora.cnpj)
                                          : mascaraCNPJ(transportadora.cnpj))
                                      : '',
-            rgIe:                transportadora?.rgIe ?? '',
-            cep:                 transportadora?.cep ?? '',
-            endereco:            transportadora?.endereco ?? '',
-            numero:              transportadora?.numero ?? '',
-            complemento:         transportadora?.complemento ?? '',
-            bairro:              transportadora?.bairro ?? '',
-            cidadeId:            transportadora?.cidadeId?.toString() ?? '',
-            condicaoPagamentoId: transportadora?.condicaoPagamentoId?.toString() ?? '',
-            limiteCredito:       transportadora?.limiteCredito?.toString() ?? '0',
-            observacoes:         transportadora?.observacoes ?? '',
+            rgIe:                  transportadora?.rgIe          ?? '',
+            cep:                   transportadora?.cep            ?? '',
+            endereco:              transportadora?.endereco       ?? '',
+            numero:                transportadora?.numero         ?? '',
+            complemento:           transportadora?.complemento   ?? '',
+            bairro:                transportadora?.bairro         ?? '',
+            cidadeId:              transportadora?.cidadeId?.toString()            ?? '',
+            condicaoPagamentoId:   transportadora?.condicaoPagamentoId?.toString() ?? '',
+            limiteCredito:         transportadora?.limiteCredito?.toString()        ?? '0',
+            observacoes:           transportadora?.observacoes    ?? '',
             emails: emailsIniciais.map(e => ({
-                id:        e.id,
-                email:     e.email,
-                tipo:      e.tipo,
-                principal: e.principal,
-                ativo:     e.ativo,
+                id: e.id, email: e.email, tipo: e.tipo, principal: e.principal, ativo: e.ativo,
             })),
             telefones: telefonesIniciais.map(t => ({
-                id:        t.id,
-                telefone:  mascaraTelefone(t.telefone),
-                tipo:      t.tipo,
-                principal: t.principal,
-                ativo:     t.ativo,
+                id: t.id, telefone: mascaraTelefone(t.telefone), tipo: t.tipo, principal: t.principal, ativo: t.ativo,
             })),
+            veiculos: veiculosIniciais.map(v => ({ veiculoId: String(v.id) })),
         },
     })
 
@@ -199,58 +189,46 @@ export function TransportadoraForm({
 
     const handleCondicaoCriada = useCallback((novaCondicao: CondicaoPagamentoSelect) => {
         setCondicoes(prev =>
-            [...prev, novaCondicao].sort((a, b) =>
-                a.condicaoPagamento.localeCompare(b.condicaoPagamento, 'pt-BR')
-            )
+            [...prev, novaCondicao].sort((a, b) => a.condicaoPagamento.localeCompare(b.condicaoPagamento, 'pt-BR'))
         )
         setValue('condicaoPagamentoId', String(novaCondicao.id))
     }, [setValue])
 
     useCondicaoPagamentoCadastrada(handleCondicaoCriada)
 
+
+    const { fields: emailFields,   append: appendEmail,   remove: removeEmail   } = useFieldArray({ control, name: "emails" })
+    const { fields: telefoneFields, append: appendTelefone, remove: removeTelefone } = useFieldArray({ control, name: "telefones" })
+    const { fields: veiculoFields,  append: appendVeiculo,  remove: removeVeiculo  } = useFieldArray({ control, name: "veiculos" })
+
+    const marcarEmailPrincipal    = (index: number) => emailFields.forEach((_, i)    => setValue(`emails.${i}.principal`,    i === index))
+    const marcarTelefonePrincipal = (index: number) => telefoneFields.forEach((_, i) => setValue(`telefones.${i}.principal`, i === index))
+
+
     const tipoPessoa = watch("tipo")
-    const isPF = tipoPessoa === "F"
-
-    const { fields: emailFields, append: appendEmail, remove: removeEmail } = useFieldArray({
-        control,
-        name: "emails",
-    })
-    const { fields: telefoneFields, append: appendTelefone, remove: removeTelefone } = useFieldArray({
-        control,
-        name: "telefones",
-    })
-
-    const marcarEmailPrincipal = (index: number) => {
-        emailFields.forEach((_, i) => setValue(`emails.${i}.principal`, i === index))
-    }
-    const marcarTelefonePrincipal = (index: number) => {
-        telefoneFields.forEach((_, i) => setValue(`telefones.${i}.principal`, i === index))
-    }
+    const isPF       = tipoPessoa === "F"
 
     const onSubmit = async (data: FormData) => {
         setLoading(true)
         const formData = new FormData()
         if (transportadora?.id) formData.append('id', String(transportadora.id))
 
-        const { emails, telefones, ...scalar } = data
-        const payload = {
-            ...scalar,
-            cnpj:     data.cnpj.replace(/\D/g, ''),
-            cep:      data.cep ? data.cep.replace(/\D/g, '') : '',
-            telefones: data.telefones.map(t => ({
-                ...t,
-                telefone: t.telefone.replace(/\D/g, ''),
-            })),
-        }
+        const { emails, telefones, veiculos, ...scalar } = data
 
-        Object.entries(payload).forEach(([key, value]) => {
-            if (value !== null && value !== undefined && key !== 'telefones') {
-                formData.append(key, String(value))
-            }
+        Object.entries({
+            ...scalar,
+            cnpj: data.cnpj.replace(/\D/g, ''),
+            cep:  data.cep ? data.cep.replace(/\D/g, '') : '',
+        }).forEach(([key, value]) => {
+            if (value !== null && value !== undefined) formData.append(key, String(value))
         })
 
         formData.append('emails',    JSON.stringify(emails))
-        formData.append('telefones', JSON.stringify(payload.telefones))
+        formData.append('telefones', JSON.stringify(telefones.map(t => ({
+            ...t,
+            telefone: t.telefone.replace(/\D/g, ''),
+        }))))
+        formData.append('veiculos',  JSON.stringify(veiculos))
 
         try {
             await salvarTransportadora(formData)
@@ -297,7 +275,7 @@ export function TransportadoraForm({
                 <div>
                     <FormLabel>{isPF ? "Apelido" : "Nome Fantasia"}</FormLabel>
                     <FormInput
-                        {...register('nomeFantasia')}
+                        {...register('nomeFantasiaApelido')}
                         placeholder={isPF ? "Apelido" : "Nome fantasia"}
                     />
                 </div>
@@ -309,10 +287,8 @@ export function TransportadoraForm({
                     <FormInput
                         {...register('cnpj', {
                             onChange: (e) => {
-                                e.target.value = isPF
-                                    ? mascaraCPF(e.target.value)
-                                    : mascaraCNPJ(e.target.value)
-                            }
+                                e.target.value = isPF ? mascaraCPF(e.target.value) : mascaraCNPJ(e.target.value)
+                            },
                         })}
                         maxLength={isPF ? 14 : 18}
                         placeholder={isPF ? "000.000.000-00" : "00.000.000/0000-00"}
@@ -341,7 +317,7 @@ export function TransportadoraForm({
                                     let v = e.target.value.replace(/\D/g, '').slice(0, 8)
                                     if (v.length > 5) v = `${v.slice(0, 5)}-${v.slice(5)}`
                                     e.target.value = v
-                                }
+                                },
                             })}
                             maxLength={9}
                             placeholder="00000-000"
@@ -372,19 +348,11 @@ export function TransportadoraForm({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                     <div>
                         <FormLabel required>País</FormLabel>
-                        <PaisLookup
-                            paises={paisesAtualizados}
-                            value={String(paisSelecionado)}
-                            onChange={handlePaisChange}
-                        />
+                        <PaisLookup paises={paisesAtualizados} value={String(paisSelecionado)} onChange={handlePaisChange} />
                     </div>
                     <div>
                         <FormLabel required>Estado</FormLabel>
-                        <EstadoLookup
-                            estados={estadosFiltrados}
-                            value={String(estadoSelecionado)}
-                            onChange={handleEstadoChange}
-                        />
+                        <EstadoLookup estados={estadosFiltrados} value={String(estadoSelecionado)} onChange={handleEstadoChange} />
                     </div>
                     <div>
                         <FormLabel required>Cidade</FormLabel>
@@ -392,12 +360,7 @@ export function TransportadoraForm({
                             name="cidadeId"
                             control={control}
                             render={({ field }) => (
-                                <CidadeLookup
-                                    cidades={cidadesFiltradas}
-                                    value={field.value}
-                                    onChange={field.onChange}
-                                    error={errors.cidadeId?.message}
-                                />
+                                <CidadeLookup cidades={cidadesFiltradas} value={field.value} onChange={field.onChange} error={errors.cidadeId?.message} />
                             )}
                         />
                     </div>
@@ -407,7 +370,7 @@ export function TransportadoraForm({
             <div className="pt-1">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                    <FormLabel required>Condicão de Pagamento</FormLabel>
+                    <FormLabel required>Condição de Pagamento</FormLabel>
                     <Controller
                         name="condicaoPagamentoId"
                         control={control}
@@ -449,6 +412,16 @@ export function TransportadoraForm({
                 errors={errors.telefones}
                 marcarPrincipal={marcarTelefonePrincipal}
                 tiposTelefone={TIPOS_TELEFONE_TRANSPORTADORA}
+            />
+
+            <VeiculoList
+                fields={veiculoFields}
+                append={appendVeiculo}
+                remove={removeVeiculo}
+                register={register}
+                watch={watch}
+                errors={errors.veiculos}
+                listaVeiculos={listaVeiculos}
             />
 
             <div>

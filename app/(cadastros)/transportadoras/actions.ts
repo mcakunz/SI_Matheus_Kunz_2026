@@ -1,12 +1,12 @@
 "use server"
 
-import { pool } from "@/lib/db"
-import { revalidatePath } from "next/cache"
-import { z } from "zod"
+import { pool }            from "@/lib/db"
+import { revalidatePath }  from "next/cache"
+import { z }               from "zod"
 
 import { validarCNPJ, validarRG, validarIE } from "@/lib/utils/validacoes"
-import { nullableString, parseJsonField } from "@/lib/utils/helpers"
-import { DBErrorLabels, tratarErroDB } from "@/components/errors"
+import { nullableString, parseJsonField }     from "@/lib/utils/helpers"
+import { DBErrorLabels, tratarErroDB }        from "@/lib/utils/errors"
 
 const TRANSPORTADORA_DB_ERROR_LABELS: DBErrorLabels = {
     unique: {
@@ -31,23 +31,27 @@ const transportadoraTelefoneSchema = z.object({
     ativo:     z.boolean(),
 })
 
-const transportadoraSchema = z.object({
-    razaoSocial:         z.string().min(2, "A razão social deve ter no mínimo 2 caracteres.").max(100),
-    cnpj:                z.string().min(11, "CNPJ inválido.").max(14),
-    tipo:                z.enum(['F', 'J'], { message: "Tipo de pessoa inválido." }),
-    cidadeId:            z.coerce.number().positive("Selecione uma cidade válida."),
-    condicaoPagamentoId: z.coerce.number().int().positive("Selecione uma condição de pagamento."),
-    limiteCredito:       z.coerce.number().min(0, "O limite de crédito não pode ser negativo."),
-    ativo:               z.boolean(),
+const transportadoraVeiculoSchema = z.object({
+    veiculoId: z.coerce.number().int().positive("Selecione um veículo válido."),
+})
 
-    nomeFantasia:        z.string().max(80).nullable().optional(),
-    rgIe:                z.string().max(20).nullable().optional(),
-    cep:                 z.string().max(9).nullable().optional(),
-    endereco:            z.string().max(100).nullable().optional(),
-    numero:              z.string().max(10).nullable().optional(),
-    complemento:         z.string().max(50).nullable().optional(),
-    bairro:              z.string().max(50).nullable().optional(),
-    observacoes:         z.string().max(150).nullable().optional(),
+const transportadoraSchema = z.object({
+    razaoSocial:           z.string().min(2, "A razão social deve ter no mínimo 2 caracteres.").max(100),
+    nomeFantasiaApelido:   z.string().max(80).nullable().optional(),
+    cnpj:                  z.string().min(11, "CNPJ inválido.").max(14),
+    tipo:                  z.enum(['F', 'J'], { message: "Tipo de pessoa inválido." }),
+    cidadeId:              z.coerce.number().positive("Selecione uma cidade válida."),
+    condicaoPagamentoId:   z.coerce.number().int().positive("Selecione uma condição de pagamento."),
+    limiteCredito:         z.coerce.number().min(0, "O limite de crédito não pode ser negativo."),
+    ativo:                 z.boolean(),
+
+    rgIe:                  z.string().max(20).nullable().optional(),
+    cep:                   z.string().max(9).nullable().optional(),
+    endereco:              z.string().max(100).nullable().optional(),
+    numero:                z.string().max(10).nullable().optional(),
+    complemento:           z.string().max(50).nullable().optional(),
+    bairro:                z.string().max(50).nullable().optional(),
+    observacoes:           z.string().max(150).nullable().optional(),
 }).superRefine((data, ctx) => {
     const valor = data.rgIe?.trim() ?? ''
     if (!valor) return
@@ -71,34 +75,76 @@ const transportadoraSchema = z.object({
     }
 })
 
-export async function salvarTransportadora(formData: FormData) {
-    const dados = {
-        razaoSocial:         (formData.get('razaoSocial') as string).trim(),
-        cnpj:                (formData.get('cnpj') as string).replace(/\D/g, ''),
-        tipo:                formData.get('tipo') as string,
-        cidadeId:            formData.get('cidadeId'),
-        condicaoPagamentoId: formData.get('condicaoPagamentoId'),
-        limiteCredito:       formData.get('limiteCredito'),
-        ativo:               formData.get('ativo') === 'true',
+function parseDadosTransportadora(formData: FormData) {
+    return {
+        razaoSocial:           (formData.get('razaoSocial') as string).trim(),
+        nomeFantasiaApelido:   nullableString(formData.get('nomeFantasiaApelido')),
+        cnpj:                  (formData.get('cnpj') as string).replace(/\D/g, ''),
+        tipo:                  formData.get('tipo') as string,
+        cidadeId:              formData.get('cidadeId'),
+        condicaoPagamentoId:   formData.get('condicaoPagamentoId'),
+        limiteCredito:         formData.get('limiteCredito'),
+        ativo:                 formData.get('ativo') === 'true',
 
-        nomeFantasia:        nullableString(formData.get('nomeFantasia')),
-        rgIe:                nullableString(formData.get('rgIe')),
-        cep:                 nullableString(formData.get('cep'))?.replace(/\D/g, ''),
-        endereco:            nullableString(formData.get('endereco')),
-        numero:              nullableString(formData.get('numero')),
-        complemento:         nullableString(formData.get('complemento')),
-        bairro:              nullableString(formData.get('bairro')),
-        observacoes:         nullableString(formData.get('observacoes')),
+        rgIe:                  nullableString(formData.get('rgIe')),
+        cep:                   nullableString(formData.get('cep'))?.replace(/\D/g, ''),
+        endereco:              nullableString(formData.get('endereco')),
+        numero:                nullableString(formData.get('numero')),
+        complemento:           nullableString(formData.get('complemento')),
+        bairro:                nullableString(formData.get('bairro')),
+        observacoes:           nullableString(formData.get('observacoes')),
     }
+}
 
+const SQL_INSERT_TRANSPORTADORA = `
+    INSERT INTO tb_transportadoras (
+        "razaoSocial", "nomeFantasiaApelido", "cnpj", "tipo",
+        "cidadeId", "condicaoPagamentoId", "limiteCredito", "ativo",
+        "rgIe", "cep", "endereco", "numero", "complemento", "bairro", "observacoes"
+    ) VALUES (
+        $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15
+    ) RETURNING id`
+
+const SQL_UPDATE_TRANSPORTADORA = `
+    UPDATE tb_transportadoras
+       SET "razaoSocial"         = $1,
+           "nomeFantasiaApelido" = $2,
+           "cnpj"                = $3,
+           "tipo"                = $4,
+           "cidadeId"            = $5,
+           "condicaoPagamentoId" = $6,
+           "limiteCredito"       = $7,
+           "ativo"               = $8,
+           "rgIe"                = $9,
+           "cep"                 = $10,
+           "endereco"            = $11,
+           "numero"              = $12,
+           "complemento"         = $13,
+           "bairro"              = $14,
+           "observacoes"         = $15
+     WHERE id = $16`
+
+function buildParams(v: z.infer<typeof transportadoraSchema>) {
+    return [
+        v.razaoSocial, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
+        v.cidadeId, v.condicaoPagamentoId, v.limiteCredito, v.ativo,
+        v.rgIe ?? null, v.cep ?? null, v.endereco ?? null,
+        v.numero ?? null, v.complemento ?? null, v.bairro ?? null,
+        v.observacoes ?? null,
+    ]
+}
+
+export async function salvarTransportadora(formData: FormData) {
+    const dados     = parseDadosTransportadora(formData)
     const validacao = transportadoraSchema.safeParse(dados)
     if (!validacao.success) throw new Error(validacao.error.issues[0].message)
 
-    const v = validacao.data
+    const v  = validacao.data
     const id = formData.get('id')
 
     const emails    = parseJsonField(formData.get('emails'),    z.array(transportadoraEmailSchema))
     const telefones = parseJsonField(formData.get('telefones'), z.array(transportadoraTelefoneSchema))
+    const veiculos  = parseJsonField(formData.get('veiculos'),  z.array(transportadoraVeiculoSchema))
 
     const client = await pool.connect()
     try {
@@ -108,49 +154,9 @@ export async function salvarTransportadora(formData: FormData) {
 
         if (id) {
             transportadoraId = Number(id)
-            await client.query(
-                `UPDATE tb_transportadoras
-                    SET "razaoSocial"         = $1,
-                        "cnpj"               = $2,
-                        "tipo"               = $3,
-                        "cidadeId"           = $4,
-                        "condicaoPagamentoId" = $5,
-                        "limiteCredito"      = $6,
-                        "ativo"              = $7,
-                        "nomeFantasia"       = $8,
-                        "rgIe"               = $9,
-                        "cep"                = $10,
-                        "endereco"           = $11,
-                        "numero"             = $12,
-                        "complemento"        = $13,
-                        "bairro"             = $14,
-                        "observacoes"        = $15
-                 WHERE id = $16`,
-                [
-                    v.razaoSocial, v.cnpj, v.tipo, v.cidadeId,
-                    v.condicaoPagamentoId, v.limiteCredito, v.ativo,
-                    v.nomeFantasia, v.rgIe, v.cep, v.endereco,
-                    v.numero, v.complemento, v.bairro,
-                    v.observacoes, transportadoraId
-                ]
-            )
+            await client.query(SQL_UPDATE_TRANSPORTADORA, [...buildParams(v), transportadoraId])
         } else {
-            const res = await client.query<{ id: number }>(
-                `INSERT INTO tb_transportadoras (
-                    "razaoSocial", "cnpj", "tipo", "cidadeId",
-                    "condicaoPagamentoId", "limiteCredito", "ativo",
-                    "nomeFantasia", "rgIe", "cep", "endereco",
-                    "numero", "complemento", "bairro", "observacoes"
-                ) VALUES (
-                    $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15
-                ) RETURNING id`,
-                [
-                    v.razaoSocial, v.cnpj, v.tipo, v.cidadeId,
-                    v.condicaoPagamentoId, v.limiteCredito, v.ativo,
-                    v.nomeFantasia, v.rgIe, v.cep, v.endereco,
-                    v.numero, v.complemento, v.bairro, v.observacoes
-                ]
-            )
+            const res = await client.query<{ id: number }>(SQL_INSERT_TRANSPORTADORA, buildParams(v))
             transportadoraId = res.rows[0].id
         }
 
@@ -180,6 +186,19 @@ export async function salvarTransportadora(formData: FormData) {
             )
         }
 
+        await client.query(
+            `DELETE FROM tb_transportadora_veiculo WHERE "transportadoraId" = $1`,
+            [transportadoraId]
+        )
+        for (const v of veiculos) {
+            await client.query(
+                `INSERT INTO tb_transportadora_veiculo ("transportadoraId", "veiculoId")
+                 VALUES ($1, $2)
+                 ON CONFLICT DO NOTHING`,
+                [transportadoraId, v.veiculoId]
+            )
+        }
+
         await client.query('COMMIT')
     } catch (error: any) {
         await client.query('ROLLBACK')
@@ -191,6 +210,67 @@ export async function salvarTransportadora(formData: FormData) {
     revalidatePath('/transportadoras')
 }
 
+export async function salvarTransportadoraComRetorno(
+    formData: FormData
+): Promise<{ id: number; razaoSocial: string }> {
+    const dados     = parseDadosTransportadora(formData)
+    const validacao = transportadoraSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+
+    const v = validacao.data
+
+    const emails    = parseJsonField(formData.get('emails'),    z.array(transportadoraEmailSchema))
+    const telefones = parseJsonField(formData.get('telefones'), z.array(transportadoraTelefoneSchema))
+    const veiculos  = parseJsonField(formData.get('veiculos'),  z.array(transportadoraVeiculoSchema))
+
+    const client = await pool.connect()
+    try {
+        await client.query('BEGIN')
+
+        const res = await client.query<{ id: number; razaoSocial: string }>(
+            SQL_INSERT_TRANSPORTADORA.replace('RETURNING id', 'RETURNING id, "razaoSocial"'),
+            buildParams(v)
+        )
+        const transportadoraId = res.rows[0].id
+
+        for (const email of emails) {
+            await client.query(
+                `INSERT INTO tb_transportadora_email
+                    ("transportadoraId", "email", "tipo", "principal", "ativo")
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [transportadoraId, email.email.toLowerCase().trim(), email.tipo, email.principal, email.ativo]
+            )
+        }
+
+        for (const tel of telefones) {
+            await client.query(
+                `INSERT INTO tb_transportadora_telefone
+                    ("transportadoraId", "telefone", "tipo", "principal", "ativo")
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [transportadoraId, tel.telefone, tel.tipo, tel.principal, tel.ativo]
+            )
+        }
+
+        for (const v of veiculos) {
+            await client.query(
+                `INSERT INTO tb_transportadora_veiculo ("transportadoraId", "veiculoId")
+                 VALUES ($1, $2)
+                 ON CONFLICT DO NOTHING`,
+                [transportadoraId, v.veiculoId]
+            )
+        }
+
+        await client.query('COMMIT')
+        revalidatePath('/transportadoras')
+        return res.rows[0]
+    } catch (error: any) {
+        await client.query('ROLLBACK')
+        tratarErroDB(error, TRANSPORTADORA_DB_ERROR_LABELS)
+        throw error // satisfaz o TypeScript (tratarErroDB já lança)
+    } finally {
+        client.release()
+    }
+}
 
 export async function alternarStatusTransportadora(id: number, statusAtual: boolean) {
     try {

@@ -11,8 +11,10 @@ import {
     PaisSelect,
     EstadoSelect,
     CondicaoPagamentoSelect,
+    VeiculoSelect,
+    TransportadoraVeiculo,
 } from "@/lib/types"
-import { ErrorLoadingData } from "@/app/components/ui/ErrorLoadingData"
+import { ErrorLoadingData } from "@/components/ui/ErrorLoadingData"
 import { TransportadoraForm
     
  } from "../components/TransportadoraForm"
@@ -27,7 +29,7 @@ export default async function TransportadoraPage({ params }: TransportadoraPageP
     if (!isNovo && isNaN(Number(id))) return notFound()
 
     try {
-        const [cidadesResult, estadosResult, paisesResult, condicoesResult] = await Promise.all([
+        const [cidadesResult, estadosResult, paisesResult, condicoesResult, veiculosResult] = await Promise.all([
             pool.query<CidadeSelect>(
                 `SELECT id, cidade, "estadoId" FROM tb_cidades WHERE ativo = true ORDER BY cidade ASC`
             ),
@@ -40,14 +42,18 @@ export default async function TransportadoraPage({ params }: TransportadoraPageP
             pool.query<CondicaoPagamentoSelect>(
                 `SELECT id, "condicaoPagamento" FROM tb_condicoes_pagamento WHERE ativo = true ORDER BY "condicaoPagamento" ASC`
             ),
+            pool.query<VeiculoSelect>(
+                `SELECT id, placa, modelo, marca FROM tb_veiculos WHERE ativo = true ORDER BY placa ASC`
+            )
         ])
 
-        let transportadora: TransportadoraView | null = null
-        let emails:         TransportadoraEmail[]     = []
-        let telefones:      TransportadoraTelefone[]  = []
+        let transportadora:         TransportadoraView | null = null
+        let emails:                 TransportadoraEmail[]     = []
+        let telefones:              TransportadoraTelefone[]  = []
+        let veiculosVinculados:     VeiculoSelect[]   = []
 
         if (!isNovo) {
-            const [transportadoraResult, emailsResult, telefonesResult] = await Promise.all([
+            const [transportadoraResult, emailsResult, telefonesResult, veiculosResult] = await Promise.all([
                 pool.query<TransportadoraView>(
                     `SELECT
                         t.*,
@@ -75,13 +81,22 @@ export default async function TransportadoraPage({ params }: TransportadoraPageP
                      ORDER BY principal DESC, id ASC`,
                     [Number(id)]
                 ),
+                pool.query<VeiculoSelect>(
+                    `SELECT v.id, v.placa, v.modelo, v.marca
+                    FROM tb_transportadora_veiculo tv
+                    JOIN tb_veiculos v ON v.id = tv."veiculoId"
+                    WHERE tv."transportadoraId" = $1
+                    ORDER BY v.placa ASC`,
+                    [Number(id)]
+                )
             ])
 
             if (!transportadoraResult.rows[0]) return notFound()
 
-            transportadora = transportadoraResult.rows[0]
-            emails         = emailsResult.rows
-            telefones      = telefonesResult.rows
+            transportadora      = transportadoraResult.rows[0]
+            emails              = emailsResult.rows
+            telefones           = telefonesResult.rows
+            veiculosVinculados  = veiculosResult.rows
         }
 
         return (
@@ -113,10 +128,12 @@ export default async function TransportadoraPage({ params }: TransportadoraPageP
                         transportadora={transportadora}
                         emailsIniciais={emails}
                         telefonesIniciais={telefones}
+                        veiculosIniciais={veiculosVinculados}
                         listaCidades={cidadesResult.rows}
                         listaEstados={estadosResult.rows}
                         listaPaises={paisesResult.rows}
                         listaCondicoes={condicoesResult.rows}
+                        listaVeiculos={veiculosResult.rows}
                     />
                 </div>
             </div>
