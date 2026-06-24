@@ -1,39 +1,32 @@
 "use client"
 
-import { UseFormRegister, UseFormWatch } from "react-hook-form"
+import { UseFormWatch, Control, Controller, FieldValues, Path } from "react-hook-form"
 import { HiPlus, HiTrash }  from "react-icons/hi"
 import { FormLabel }         from "@/components/ui/FormLabel"
 import { VeiculoSelect }     from "@/lib/types"
-import { isMercosul }        from "@/lib/utils/helpers"
+import { VeiculoLookup }     from "@/app/components/ui/VeiculoLookup"
 
-function formatarPlaca(placa: string): string {
-    const limpo = placa.toUpperCase()
-    if (isMercosul(limpo)) return limpo
-    if (/^[A-Z]{3}[0-9]{4}$/.test(limpo)) return `${limpo.slice(0, 3)}-${limpo.slice(3)}`
-    return limpo
-}
-
-interface VeiculoListProps {
+interface VeiculoListProps<T extends FieldValues> {
     fields:        any[]
     append:        (value: { veiculoId: string }) => void
     remove:        (index: number) => void
-    register:      UseFormRegister<any>
-    watch:         UseFormWatch<any>
+    watch:         UseFormWatch<T>
+    control:       Control<T>
     errors?:       any
     listaVeiculos: VeiculoSelect[]
 }
 
-export function VeiculoList({
+export function VeiculoList<T extends FieldValues>({
     fields,
     append,
     remove,
-    register,
     watch,
+    control,
     errors,
     listaVeiculos,
-}: VeiculoListProps) {
+}: VeiculoListProps<T>) {
 
-    const veiculosWatched      = watch('veiculos') ?? []
+    const veiculosWatched      = (watch as UseFormWatch<FieldValues>)('veiculos') ?? []
     const veiculosSelecionados = veiculosWatched.map((v: any) => v?.veiculoId ?? '')
 
     const veiculosDisponiveis = listaVeiculos.filter(
@@ -66,7 +59,7 @@ export function VeiculoList({
                 {fields.map((field, index) => {
                     const veiculoIdAtual = veiculosWatched[index]?.veiculoId ?? ''
 
-                    const opcoes = listaVeiculos.filter(
+                    const veiculosParaEssaLinha = listaVeiculos.filter(
                         v =>
                             String(v.id) === veiculoIdAtual ||
                             !veiculosSelecionados.includes(String(v.id)) ||
@@ -80,22 +73,18 @@ export function VeiculoList({
                         >
                             <div>
                                 {index === 0 && <FormLabel>Veículo</FormLabel>}
-                                        <select
-                                            {...register(`veiculos.${index}.veiculoId`)}
-                                            className="w-full h-10 rounded-lg border border-slate-300 bg-white px-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-transparent"
-                                        >
-                                            <option value="">Selecione um veículo...</option>
-                                            {opcoes.map(v => (
-                                                <option key={v.id} value={String(v.id)}>
-                                                    {formatarPlaca(v.placa)} — {v.marca} {v.modelo}
-                                                </option>
-                                            ))}
-                                        </select>
-                                {errors?.[index]?.veiculoId && (
-                                    <p className="text-xs text-red-500 mt-1">
-                                        {errors[index].veiculoId.message}
-                                    </p>
+                                <Controller
+                                    name={`veiculos.${index}.veiculoId` as Path<T>}
+                                    control={control}
+                                    render={({ field: f }) => (
+                                        <VeiculoLookup
+                                            veiculos={veiculosParaEssaLinha}
+                                            value={f.value}
+                                            onChange={f.onChange}
+                                            error={errors?.[index]?.veiculoId?.message}
+                                        />
                                 )}
+                                />
                             </div>
 
                             <div className="flex flex-col items-center gap-1">
@@ -118,3 +107,5 @@ export function VeiculoList({
         </div>
     )
 }
+
+

@@ -37,6 +37,8 @@ import { mascaraCPF, mascaraCNPJ, mascaraTelefone }         from "@/lib/utils/ma
 import { useEndereco }                                      from "@/lib/hooks/useEndereco"
 import { TIPOS_EMAIL_TRANSPORTADORA, TIPOS_TELEFONE_TRANSPORTADORA } from "@/lib/TiposContato"
 import { useCondicaoPagamentoCadastrada }                   from "@/lib/hooks/useCondicaoPagamentoCadastrado"
+import { useVeiculoCadastrado } from "@/lib/hooks/useVeiculoCadastrado"
+import { getValueOptions } from "@mui/x-data-grid/internals"
 
 
 const transportadoraEmailSchema = z.object({
@@ -133,12 +135,14 @@ export function TransportadoraForm({
 }: TransportadoraFormProps) {
     const router  = useRouter()
     const [loading, setLoading] = useState(false)
+
     const [condicoes, setCondicoes] = useState<CondicaoPagamentoSelect[]>(listaCondicoes)
+    const [veiculos, setVeiculos]   = useState<VeiculoSelect[]>(listaVeiculos)
 
     const cidadeInicial = listaCidades.find(c => c.id === transportadora?.cidadeId)
     const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
 
-    const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, watch, setValue, getValues, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             tipo:                  (transportadora?.tipo as 'F' | 'J') ?? 'J',
@@ -187,6 +191,10 @@ export function TransportadoraForm({
         listaCidades,
     )
 
+    const { fields: emailFields,    append: appendEmail,    remove: removeEmail    } = useFieldArray({ control, name: "emails" })
+    const { fields: telefoneFields, append: appendTelefone, remove: removeTelefone } = useFieldArray({ control, name: "telefones" })
+    const { fields: veiculoFields,  append: appendVeiculo,  remove: removeVeiculo  } = useFieldArray({ control, name: "veiculos" })
+
     const handleCondicaoCriada = useCallback((novaCondicao: CondicaoPagamentoSelect) => {
         setCondicoes(prev =>
             [...prev, novaCondicao].sort((a, b) => a.condicaoPagamento.localeCompare(b.condicaoPagamento, 'pt-BR'))
@@ -196,10 +204,22 @@ export function TransportadoraForm({
 
     useCondicaoPagamentoCadastrada(handleCondicaoCriada)
 
+    const handleVeiculoCriado = useCallback((novoVeiculo: VeiculoSelect) => {
+        setVeiculos(prev =>
+            [...prev, novoVeiculo].sort((a, b) => a.placa.localeCompare(b.placa, 'pt-BR'))
+        )
 
-    const { fields: emailFields,   append: appendEmail,   remove: removeEmail   } = useFieldArray({ control, name: "emails" })
-    const { fields: telefoneFields, append: appendTelefone, remove: removeTelefone } = useFieldArray({ control, name: "telefones" })
-    const { fields: veiculoFields,  append: appendVeiculo,  remove: removeVeiculo  } = useFieldArray({ control, name: "veiculos" })
+        const veiculosAtuais = getValues('veiculos')
+        const indexVazio = veiculosAtuais.findIndex((v: any) => !v.veiculoId)
+
+        if (indexVazio >= 0) {
+        setValue(`veiculos.${indexVazio}.veiculoId`, String(novoVeiculo.id))
+        } else {
+            appendVeiculo({ veiculoId: String(novoVeiculo.id) })
+        }
+    }, [appendVeiculo, getValues, setValue])
+
+    useVeiculoCadastrado(handleVeiculoCriado)
 
     const marcarEmailPrincipal    = (index: number) => emailFields.forEach((_, i)    => setValue(`emails.${i}.principal`,    i === index))
     const marcarTelefonePrincipal = (index: number) => telefoneFields.forEach((_, i) => setValue(`telefones.${i}.principal`, i === index))
@@ -418,10 +438,10 @@ export function TransportadoraForm({
                 fields={veiculoFields}
                 append={appendVeiculo}
                 remove={removeVeiculo}
-                register={register}
                 watch={watch}
+                control={control}
                 errors={errors.veiculos}
-                listaVeiculos={listaVeiculos}
+                listaVeiculos={veiculos}
             />
 
             <div>

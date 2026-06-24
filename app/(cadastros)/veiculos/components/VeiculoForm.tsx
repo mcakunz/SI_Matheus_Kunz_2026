@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { salvarVeiculo } from "../actions"
+import { salvarVeiculo, salvarVeiculoComRetorno } from "../actions"
 import toast from "react-hot-toast"
 
 import { Button }     from "@/components/ui/Button"
@@ -15,6 +15,7 @@ import { FormSwitch } from "@/components/ui/FormSwitch"
 import { Veiculo }    from "@/lib/types"
 import { mascaraPlacaMercosul, mascaraPlacaPadrao } from "@/lib/utils/mascaras"
 import { isMercosul } from "@/lib/utils/helpers"
+import { emitirVeiculoCadastrado } from "@/lib/hooks/useVeiculoCadastrado"
 
 const schema = z.object({
 placa: z.string()
@@ -44,6 +45,9 @@ interface VeiculoFormProps {
 export function VeiculoForm({ veiculo }: VeiculoFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+
+    const searchParams = useSearchParams()
+    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const mercosulInicial  = veiculo?.placa ? isMercosul(veiculo.placa) : false
     const placaFormatada   = veiculo?.placa
@@ -80,9 +84,20 @@ export function VeiculoForm({ veiculo }: VeiculoFormProps) {
         formData.append('ativo',      String(data.ativo))
 
         try {
-            await salvarVeiculo(formData)
-            toast.success(veiculo ? "Veículo atualizado com sucesso!" : "Veículo cadastrado com sucesso!")
-            router.push("/veiculos")
+            if (abertoPorLookup && !veiculo?.id) {
+                const resultado = await salvarVeiculoComRetorno(formData)
+                toast.success("Veiculo cadastrado com sucesso!")
+                emitirVeiculoCadastrado({
+                    id: resultado.id,
+                    placa: resultado.placa,
+                    modelo: resultado.modelo,
+                    marca: resultado.marca
+                })
+            } else {
+                await salvarVeiculo(formData)
+                toast.success(veiculo ? "Veículo atualizado com sucesso!" : "Veículo cadastrado com sucesso!")
+                router.push("/veiculos")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {

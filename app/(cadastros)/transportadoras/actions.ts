@@ -280,7 +280,6 @@ export async function salvarTransportadoraComRetorno(
     } catch (error: any) {
         await client.query('ROLLBACK')
         tratarErroDB(error, TRANSPORTADORA_DB_ERROR_LABELS)
-        throw error // satisfaz o TypeScript (tratarErroDB já lança)
     } finally {
         client.release()
     }
