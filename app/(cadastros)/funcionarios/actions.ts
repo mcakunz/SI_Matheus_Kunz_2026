@@ -226,7 +226,8 @@ export async function salvarFuncionario(formData: FormData) {
                     "dataNascimento", "dataAdmissao", "dataDemissao",
                     "cnh", "dataValidadeCnh", "sexo", "salario",
                     "tipo", "observacao", "ativo"
-                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22,$23)`,
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
+                RETURNING id`, 
                 [
                     v.funcionario, v.apelido, v.cpfCnpj, v.rgInscricaoEstadual,
                     v.cep, v.endereco, v.numero, v.complemento, v.bairro,
