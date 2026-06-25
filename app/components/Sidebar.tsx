@@ -62,6 +62,7 @@ const ROUTE_GROUPS: RouteGroup[] = [
             { label: "Veiculos", href: "/veiculos" },
             { label: "Transportadoras", href: "/transportadoras" },
             { label: "Funcionários", href: "/funcionarios" },
+            { label: "Funcões de Funcionário", href: "/funcoes-funcionario" },
         ],
     },
     {
