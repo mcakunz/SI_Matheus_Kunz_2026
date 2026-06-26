@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
@@ -26,6 +26,8 @@ import {
 } from "@/lib/types"
 import { toDateString } from "@/lib/utils/helpers"
 import { TIPOS_EMAIL_FUNCIONARIO, TIPOS_TELEFONE_FUNCIONARIO } from "@/lib/TiposContato"
+import { useFuncaoCadastrada } from "@/lib/hooks/useFuncaoCadastrada"
+import { FuncaoFuncionarioLookup } from "@/app/components/ui/FuncaoFuncionarioLookup"
 
 const funcionarioEmailSchema = z.object({
     id:        z.number().optional(),
@@ -118,6 +120,8 @@ export function FuncionarioForm({
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
+    const [funcoes, setFuncoes] = useState<FuncaoFuncionarioSelect[]>(listaFuncoes)
+
     const cidadeInicial = listaCidades.find(c => c.id === funcionario?.cidadeId)
     const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
 
@@ -174,7 +178,7 @@ export function FuncionarioForm({
     )
 
     const funcaoSelecionadaId = watch('funcaoFuncionarioId')
-    const funcaoSelecionada   = listaFuncoes.find(f => f.id === Number(funcaoSelecionadaId))
+    const funcaoSelecionada = funcoes.find(f => f.id === Number(funcaoSelecionadaId))
     const requerCnh           = funcaoSelecionada?.requerCnh ?? false
 
     const { fields: emailFields,    append: appendEmail,    remove: removeEmail    } = useFieldArray({ control, name: 'emails' })
@@ -186,6 +190,15 @@ export function FuncionarioForm({
     const marcarTelefonePrincipal = (index: number) => {
         telefoneFields.forEach((_, i) => setValue(`telefones.${i}.principal`, i === index))
     }
+
+    const handleFuncaoFuncionarioCriada = useCallback((novaFuncao: FuncaoFuncionarioSelect) => {
+        setFuncoes(prev =>
+            [...prev, novaFuncao].sort((a, b) => a.funcaoFuncionario.localeCompare(b.funcaoFuncionario, 'pt-BR'))
+        )
+        setValue('funcaoFuncionarioId', String(novaFuncao.id))
+    }, [setValue])
+    
+    useFuncaoCadastrada(handleFuncaoFuncionarioCriada)
 
     const onSubmit = async (data: FormData) => {
         setLoading(true)
@@ -400,13 +413,18 @@ export function FuncionarioForm({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                 <div>
                     <FormLabel required>Função</FormLabel>
-                    <FormSelect {...register('funcaoFuncionarioId')}>
-                        <option value="">Selecione uma função...</option>
-                        {listaFuncoes.map((f) => (
-                            <option key={f.id} value={f.id}>{f.funcaoFuncionario}</option>
-                        ))}
-                    </FormSelect>
-                    <Erro campo="funcaoFuncionarioId" />
+                    <Controller
+                        name="funcaoFuncionarioId"
+                        control={control}
+                        render={({ field }) => (
+                            <FuncaoFuncionarioLookup
+                                funcoes={funcoes}          
+                                value={field.value}
+                                onChange={field.onChange}
+                                error={errors.funcaoFuncionarioId?.message}
+                            />
+                        )}
+                    />
                 </div>
                 <div>
                     <FormLabel required>Salário (R$)</FormLabel>

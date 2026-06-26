@@ -1,18 +1,19 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { salvarFuncaoFuncionario } from "../actions"
+import { salvarFuncaoFuncionario, salvarFuncaoFuncionarioComRetorno } from "../actions"
 import toast from "react-hot-toast"
 
 import { Button }     from "@/components/ui/Button"
 import { FormInput }  from "@/components/ui/FormInput"
 import { FormLabel }  from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
-import { FuncaoFuncionario } from "@/lib/types"
+import { FuncaoFuncionario, FuncaoFuncionarioSelect } from "@/lib/types"
+import { emitirFuncaoCadastrada } from "@/lib/hooks/useFuncaoCadastrada"
 
 const schema = z.object({
     funcaoFuncionario: z.string().min(2, "A função deve ter no mínimo 2 caracteres.").max(100),
@@ -33,6 +34,9 @@ interface FuncaoFuncionarioFormProps {
 export function FuncaoFuncionarioForm({ funcao }: FuncaoFuncionarioFormProps) {
     const router  = useRouter()
     const [loading, setLoading] = useState(false)
+
+    const searchParams = useSearchParams()
+    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -59,9 +63,20 @@ export function FuncaoFuncionarioForm({ funcao }: FuncaoFuncionarioFormProps) {
         })
 
         try {
-            await salvarFuncaoFuncionario(formData)
-            toast.success(funcao ? "Função atualizada com sucesso!" : "Função cadastrada com sucesso!")
-            router.push("/funcoes-funcionario")
+            if (abertoPorLookup && !funcao?.id) {
+                const resultado = await salvarFuncaoFuncionarioComRetorno(formData)
+                toast.success("Função cadastrada com sucesso!")
+                emitirFuncaoCadastrada({
+                    id: resultado.id,
+                    funcaoFuncionario: resultado.funcaoFuncionario,
+                    requerCnh:         resultado.requerCnh,
+                })
+
+            } else {
+                await salvarFuncaoFuncionario(formData)
+                toast.success(funcao ? "Função atualizada com sucesso!" : "Função cadastrada com sucesso!")
+                router.push("/funcoes-funcionario")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {

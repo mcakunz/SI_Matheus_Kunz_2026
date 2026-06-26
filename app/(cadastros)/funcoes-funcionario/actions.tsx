@@ -69,6 +69,41 @@ export async function salvarFuncaoFuncionario(formData: FormData) {
     revalidatePath('/funcoes-funcionario')
 }
 
+export async function salvarFuncaoFuncionarioComRetorno(
+    formData: FormData
+): Promise<{ id: number; funcaoFuncionario: string; requerCnh: boolean }> {
+    const dados = {
+        funcaoFuncionario: (formData.get('funcaoFuncionario') as string).trim(),
+        descricao:         nullableString(formData.get('descricao')),
+        salarioBase:       formData.get('salarioBase'),
+        cargaHoraria:      formData.get('cargaHoraria'),
+        requerCnh:         formData.get('requerCnh') === 'true',
+        observacao:        nullableString(formData.get('observacao')),
+        ativo:             formData.get('ativo') === 'true',
+    }
+
+    const validacao = funcaoFuncionarioSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+
+    const v = validacao.data
+
+    try {
+        const res = await pool.query<{ id: number; funcaoFuncionario: string; requerCnh: boolean }>(
+            `INSERT INTO tb_funcoes_funcionario
+                ("funcaoFuncionario", "descricao", "salarioBase", "cargaHoraria", "requerCnh", "observacao", "ativo")
+             VALUES ($1, $2, $3, $4, $5, $6, $7)
+             RETURNING id, "funcaoFuncionario", "requerCnh"`,
+            [v.funcaoFuncionario, v.descricao, v.salarioBase, v.cargaHoraria,
+             v.requerCnh, v.observacao, v.ativo]
+        )
+        revalidatePath('/funcoes-funcionario')
+        return res.rows[0]
+    } catch (error: any) {
+        tratarErroDB(error, FUNCAO_DB_ERROR_LABELS)
+        throw error
+    }
+}
+
 export async function alternarStatusFuncaoFuncionario(id: number, statusAtual: boolean) {
     try {
         await pool.query(
