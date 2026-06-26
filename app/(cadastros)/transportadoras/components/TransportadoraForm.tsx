@@ -1,11 +1,11 @@
 "use client"
 
 import { useCallback, useState }                      from "react"
-import { useRouter }                                  from "next/navigation"
+import { useRouter, useSearchParams }                                  from "next/navigation"
 import { useForm, useFieldArray, Controller }         from "react-hook-form"
 import { zodResolver }                                from "@hookform/resolvers/zod"
 import { z }                                          from "zod"
-import { salvarTransportadora }                       from "../actions"
+import { salvarTransportadora, salvarTransportadoraComRetorno }                       from "../actions"
 import toast                                          from "react-hot-toast"
 
 import { Button }          from "@/components/ui/Button"
@@ -39,6 +39,7 @@ import { TIPOS_EMAIL_TRANSPORTADORA, TIPOS_TELEFONE_TRANSPORTADORA } from "@/lib
 import { useCondicaoPagamentoCadastrada }                   from "@/lib/hooks/useCondicaoPagamentoCadastrado"
 import { useVeiculoCadastrado } from "@/lib/hooks/useVeiculoCadastrado"
 import { getValueOptions } from "@mui/x-data-grid/internals"
+import { emitirTransportadoraCadastrada } from "@/lib/hooks/useTransportadoraCadastrada"
 
 
 const transportadoraEmailSchema = z.object({
@@ -64,7 +65,7 @@ const transportadoraVeiculoSchema = z.object({
 const schema = z.object({
     tipo:                  z.enum(['F', 'J']),
     ativo:                 z.boolean(),
-    razaoSocial:           z.string().min(2, "A razão social deve ter no mínimo 2 caracteres.").max(100),
+    razaoSocialNome:           z.string().min(2, "A razão social deve ter no mínimo 2 caracteres.").max(100),
     nomeFantasiaApelido:   z.string().max(80).optional(),
     cnpj:                  z.string().min(11, "CPF/CNPJ inválido.").max(18),
     rgIe:                  z.string().max(20).optional(),
@@ -142,12 +143,15 @@ export function TransportadoraForm({
     const cidadeInicial = listaCidades.find(c => c.id === transportadora?.cidadeId)
     const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
 
+    const searchParams = useSearchParams()
+    const abertoPorLookup = searchParams.get('origem') === 'lookup'
+
     const { register, handleSubmit, watch, setValue, getValues, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             tipo:                  (transportadora?.tipo as 'F' | 'J') ?? 'J',
             ativo:                 transportadora ? transportadora.ativo : true,
-            razaoSocial:           transportadora?.razaoSocial           ?? '',
+            razaoSocialNome:           transportadora?.razaoSocialNome           ?? '',
             nomeFantasiaApelido:   transportadora?.nomeFantasiaApelido   ?? '',
             cnpj: transportadora?.cnpj
                                      ? (transportadora.cnpj.replace(/\D/g, '').length === 11
@@ -251,9 +255,18 @@ export function TransportadoraForm({
         formData.append('veiculos',  JSON.stringify(veiculos))
 
         try {
-            await salvarTransportadora(formData)
-            toast.success(transportadora ? "Transportadora atualizada com sucesso!" : "Transportadora cadastrada com sucesso!")
-            router.push("/transportadoras")
+            if (abertoPorLookup && !transportadora?.id) {
+                const resultado = await salvarTransportadoraComRetorno(formData)
+                toast.success("Transportadora cadastrada com sucesso!")
+                emitirTransportadoraCadastrada({
+                    id: resultado.id,
+                    razaoSocialNome: resultado.razaoSocialNome,
+                })
+            } else {
+                await salvarTransportadora(formData)
+                toast.success(transportadora ? "Transportadora atualizada com sucesso!" : "Transportadora cadastrada com sucesso!")
+                router.push("/transportadoras")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {
@@ -287,10 +300,10 @@ export function TransportadoraForm({
                 <div>
                     <FormLabel required>{isPF ? "Nome Completo" : "Razão Social"}</FormLabel>
                     <FormInput
-                        {...register('razaoSocial')}
+                        {...register('razaoSocialNome')}
                         placeholder={isPF ? "Digite o nome completo" : "Digite a razão social"}
                     />
-                    <Erro campo="razaoSocial" />
+                    <Erro campo="razaoSocialNome" />
                 </div>
                 <div>
                     <FormLabel>{isPF ? "Apelido" : "Nome Fantasia"}</FormLabel>

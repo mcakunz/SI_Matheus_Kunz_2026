@@ -115,7 +115,7 @@ export default async function TransportadoraPage({ params }: TransportadoraPageP
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8">
                     <div className="mb-8">
                         <h1 className="text-2xl font-bold text-slate-800">
-                            {isNovo ? "Nova Transportadora" : transportadora!.razaoSocial}
+                            {isNovo ? "Nova Transportadora" : transportadora!.razaoSocialNome}
                         </h1>
                         {!isNovo && transportadora && (
                             <p className="text-sm text-slate-400 mt-1">

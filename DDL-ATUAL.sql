@@ -115,7 +115,7 @@ CREATE TABLE public.tb_veiculos (
 
 CREATE TABLE public.tb_transportadoras (
     "id"                  serial        NOT NULL,
-    "razaoSocial"         varchar(100)  NOT NULL,
+    "razaoSocialNome"         varchar(100)  NOT NULL,
     "nomeFantasia"        varchar(80)   NULL,
     "cnpj"                varchar(14)   NOT NULL,
     "rgIe"                varchar(20)   NULL,

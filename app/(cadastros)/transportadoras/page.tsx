@@ -26,7 +26,7 @@ export default async function TransportadorasPage() {
              -- total de telefones ativos
              LEFT JOIN tb_transportadora_telefone tt ON tt."transportadoraId" = t.id AND tt.ativo = true
              GROUP BY t.id, ci.cidade, cp."condicaoPagamento", ep.email, tp.telefone
-             ORDER BY t."razaoSocial" ASC`
+             ORDER BY t."razaoSocialNome" ASC`
         )
 
         return (

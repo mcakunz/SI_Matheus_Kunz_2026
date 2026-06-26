@@ -10,7 +10,7 @@ export interface LookupItem {
 
 interface BaseLookupProps {
     items: LookupItem[]
-    value: string
+    value: string | undefined
     onChange: (id: string) => void
     required?: boolean
     error?: string
@@ -40,7 +40,7 @@ export function BaseLookup({
     const inputRef = useRef<HTMLInputElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
 
-    const itemAtual = items.find(i => String(i.id) === value)
+    const itemAtual = items.find(i => String(i.id) === (value ?? ''))
 
     const filtrados = busca.trim()
         ? items.filter(i => i.label.toLowerCase().includes(busca.toLowerCase()))

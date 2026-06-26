@@ -41,7 +41,7 @@ export default async function FornecedorPage({ params }: FornecedorPageProps) {
                 `SELECT id, "condicaoPagamento" FROM tb_condicoes_pagamento WHERE ativo = true ORDER BY "condicaoPagamento" ASC`
             ),
             pool.query<TransportadoraSelect>(
-                `SELECT id, "razaoSocial" FROM tb_transportadoras WHERE ativo = true ORDER BY "razaoSocial" ASC` 
+                `SELECT id, "razaoSocialNome" FROM tb_transportadoras WHERE ativo = true ORDER BY "razaoSocialNome" ASC` 
             ),
         ])
 
@@ -56,7 +56,7 @@ export default async function FornecedorPage({ params }: FornecedorPageProps) {
                         f.*,
                         ci.cidade,
                         cp."condicaoPagamento",
-                        tr."razaoSocial"   AS transportadora,
+                        tr."razaoSocialNome"   AS transportadora,
                         NULL::text         AS "emailPrincipal",
                         0                  AS "totalEmails",
                         NULL::text         AS "telefonePrincipal",

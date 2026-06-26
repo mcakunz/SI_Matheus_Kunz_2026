@@ -15,7 +15,7 @@ import { MaisBadge } from "@/components/ui/MaisBadge"
 
 const columns: GridColDef[] = [
     { field: 'id', headerName: 'ID', width: 70 },
-    { field: 'razaoSocial', headerName: 'Razão Social', flex: 1, minWidth: 200 },
+    { field: 'razaoSocialNome', headerName: 'Razão Social', flex: 1, minWidth: 200 },
     { 
         field: 'cnpj', headerName: 'CPF / CNPJ', width: 160,
         renderCell: (params) => {
@@ -147,7 +147,7 @@ export default function TransportadorasClientTable({ transportadoras }: { transp
                 onConfirm={handleExcluir}
                 loading={loadingStatus}
                 title="Excluir Transportadora"
-                message={`Tem certeza que deseja excluir "${transportadoraSelecionada?.razaoSocial}"? Esta ação não pode ser desfeita.`}
+                message={`Tem certeza que deseja excluir "${transportadoraSelecionada?.razaoSocialNome}"? Esta ação não pode ser desfeita.`}
                 variant="danger"
                 confirmText="Excluir"
             />

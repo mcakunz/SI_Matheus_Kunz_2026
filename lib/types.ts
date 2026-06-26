@@ -208,7 +208,7 @@ export interface Veiculo {
 }
 export interface Transportadora {
     id:                    number
-    razaoSocial:           string
+    razaoSocialNome:           string
     nomeFantasiaApelido:   string | null   
     cnpj:                  string
     rgIe:                  string | null
@@ -385,7 +385,7 @@ export type EstadoSelect            = Pick<Estado,           'id' | 'estado' | '
 export type CidadeSelect            = Pick<Cidade,           'id' | 'cidade' | 'estadoId'>
 export type CondicaoPagamentoSelect = Pick<CondicaoPagamento,'id' | 'condicaoPagamento'>
 export type FormaPagamentoSelect    = Pick<FormaPagamento,   'id' | 'formaPagamento'>
-export type TransportadoraSelect    = Pick<Transportadora,   'id' | 'razaoSocial'>
+export type TransportadoraSelect    = Pick<Transportadora,   'id' | 'razaoSocialNome'>
 export type VeiculoSelect           = Pick<Veiculo,          'id' | 'placa' | 'modelo' | 'marca'>
 export type CategoriaSelect         = Pick<Categoria,        'id' | 'categoria'>
 export type MarcaSelect             = Pick<Marca,            'id' | 'marca'>

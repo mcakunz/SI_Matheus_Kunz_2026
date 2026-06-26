@@ -31,11 +31,13 @@ import { useEndereco } from "@/lib/hooks/useEndereco"
 import { PaisLookup } from "@/app/components/ui/PaisLookup"
 import { EstadoLookup } from "@/app/components/ui/EstadoLookup"
 import { CidadeLookup } from "@/app/components/ui/CidadeLookup"
+import { TransportadoraLookup } from "@/app/components/ui/TransportadoraLookup"
 import { EmailList } from "@/app/components/ui/EmailList"
 import { TelefoneList } from "@/app/components/ui/TelefoneList"
 import { TIPOS_EMAIL_FORNECEDOR, TIPOS_TELEFONE_FORNECEDOR } from "@/lib/TiposContato"
 import { CondicaoPagamentoLookup } from "@/app/components/ui/CondicaoPagamentoLookup"
 import { useCondicaoPagamentoCadastrada } from "@/lib/hooks/useCondicaoPagamentoCadastrado"
+import { useTranportadoraCadastrada } from "@/lib/hooks/useTransportadoraCadastrada"
 
 
 const fornecedorEmailSchema = z.object({
@@ -142,6 +144,7 @@ export function FornecedorForm({
     const [loading, setLoading] = useState(false)
 
     const [condicoes, setCondicoes] = useState<CondicaoPagamentoSelect[]>(listaCondicoes)
+    const [transportadoras, setTransportadoras] = useState<TransportadoraSelect[]>(listaTransportadoras)
 
     const cidadeInicial = listaCidades.find(c => c.id === fornecedor?.cidadeId)
     const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
@@ -213,6 +216,17 @@ export function FornecedorForm({
     }, [setValue])
 
     useCondicaoPagamentoCadastrada(handleCondicaoCriada)
+
+    const handleTransportadoraCriada = useCallback((novaTransportadora: TransportadoraSelect) => {
+    setTransportadoras(prev =>
+        [...prev, novaTransportadora].sort((a, b) =>
+            a.razaoSocialNome.localeCompare(b.razaoSocialNome, 'pt-BR')
+        )
+    )
+    setValue('transportadoraId', String(novaTransportadora.id))
+}, [setValue])
+
+    useTranportadoraCadastrada(handleTransportadoraCriada)
 
     const tipoPessoa = watch("tipo")
     const isPF = tipoPessoa === "F"
@@ -433,13 +447,19 @@ export function FornecedorForm({
                         <Erro campo="limiteCredito" />
                     </div>
                     <div>
-                        <FormLabel>Transportadora</FormLabel>
-                        <FormSelect {...register('transportadoraId')}>
-                            <option value="">Nenhuma</option>
-                            {listaTransportadoras.map(t => (
-                                <option key={t.id} value={t.id}>{t.razaoSocial}</option>
-                            ))}
-                        </FormSelect>
+                        <FormLabel required>Transportadora</FormLabel>
+                        <Controller
+                            name="transportadoraId"
+                            control={control}
+                            render={({ field }) => (
+                                <TransportadoraLookup
+                                    transportadoras={transportadoras}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={errors.transportadoraId?.message}
+                                />
+                            )}
+                        />
                     </div>
                 </div>
             </div>

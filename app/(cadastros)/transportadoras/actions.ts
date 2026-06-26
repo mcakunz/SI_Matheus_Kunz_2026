@@ -36,7 +36,7 @@ const transportadoraVeiculoSchema = z.object({
 })
 
 const transportadoraSchema = z.object({
-    razaoSocial:           z.string().min(2, "A razão social deve ter no mínimo 2 caracteres.").max(100),
+    razaoSocialNome:           z.string().min(2, "A razão social deve ter no mínimo 2 caracteres.").max(100),
     nomeFantasiaApelido:   z.string().max(80).nullable().optional(),
     cnpj:                  z.string().min(11, "CNPJ inválido.").max(14),
     tipo:                  z.enum(['F', 'J'], { message: "Tipo de pessoa inválido." }),
@@ -77,7 +77,7 @@ const transportadoraSchema = z.object({
 
 function parseDadosTransportadora(formData: FormData) {
     return {
-        razaoSocial:           (formData.get('razaoSocial') as string).trim(),
+        razaoSocialNome:           (formData.get('razaoSocialNome') as string).trim(),
         nomeFantasiaApelido:   nullableString(formData.get('nomeFantasiaApelido')),
         cnpj:                  (formData.get('cnpj') as string).replace(/\D/g, ''),
         tipo:                  formData.get('tipo') as string,
@@ -118,7 +118,7 @@ export async function salvarTransportadora(formData: FormData) {
             transportadoraId = Number(id)
             await client.query(
                 `UPDATE tb_transportadoras
-                    SET "razaoSocial"         = $1,
+                    SET "razaoSocialNome"         = $1,
                         "nomeFantasiaApelido" = $2,
                         "cnpj"                = $3,
                         "tipo"                = $4,
@@ -135,7 +135,7 @@ export async function salvarTransportadora(formData: FormData) {
                         "observacoes"         = $15
                   WHERE id = $16`,
                 [
-                    v.razaoSocial, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
+                    v.razaoSocialNome, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
                     v.cidadeId, v.condicaoPagamentoId, v.limiteCredito, v.ativo,
                     v.rgIe ?? null, v.cep ?? null, v.endereco ?? null,
                     v.numero ?? null, v.complemento ?? null, v.bairro ?? null,
@@ -145,14 +145,14 @@ export async function salvarTransportadora(formData: FormData) {
         } else {
             const res = await client.query<{ id: number }>(
                 `INSERT INTO tb_transportadoras (
-                    "razaoSocial", "nomeFantasiaApelido", "cnpj", "tipo",
+                    "razaoSocialNome", "nomeFantasiaApelido", "cnpj", "tipo",
                     "cidadeId", "condicaoPagamentoId", "limiteCredito", "ativo",
                     "rgIe", "cep", "endereco", "numero", "complemento", "bairro", "observacoes"
                 ) VALUES (
                     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
                 ) RETURNING id`,
                 [
-                    v.razaoSocial, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
+                    v.razaoSocialNome, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
                     v.cidadeId, v.condicaoPagamentoId, v.limiteCredito, v.ativo,
                     v.rgIe ?? null, v.cep ?? null, v.endereco ?? null,
                     v.numero ?? null, v.complemento ?? null, v.bairro ?? null,
@@ -214,7 +214,7 @@ export async function salvarTransportadora(formData: FormData) {
 
 export async function salvarTransportadoraComRetorno(
     formData: FormData
-): Promise<{ id: number; razaoSocial: string }> {
+): Promise<{ id: number; razaoSocialNome: string }> {
     const dados     = parseDadosTransportadora(formData)
     const validacao = transportadoraSchema.safeParse(dados)
     if (!validacao.success) throw new Error(validacao.error.issues[0].message)
@@ -229,16 +229,16 @@ export async function salvarTransportadoraComRetorno(
     try {
         await client.query('BEGIN')
 
-        const res = await client.query<{ id: number; razaoSocial: string }>(
+        const res = await client.query<{ id: number; razaoSocialNome: string }>(
             `INSERT INTO tb_transportadoras (
-                "razaoSocial", "nomeFantasiaApelido", "cnpj", "tipo",
+                "razaoSocialNome", "nomeFantasiaApelido", "cnpj", "tipo",
                 "cidadeId", "condicaoPagamentoId", "limiteCredito", "ativo",
                 "rgIe", "cep", "endereco", "numero", "complemento", "bairro", "observacoes"
             ) VALUES (
                 $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
-            ) RETURNING id, "razaoSocial"`,
+            ) RETURNING id, "razaoSocialNome"`,
             [
-                v.razaoSocial, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
+                v.razaoSocialNome, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
                 v.cidadeId, v.condicaoPagamentoId, v.limiteCredito, v.ativo,
                 v.rgIe ?? null, v.cep ?? null, v.endereco ?? null,
                 v.numero ?? null, v.complemento ?? null, v.bairro ?? null,

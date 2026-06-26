@@ -10,7 +10,7 @@ export default async function FornecedoresPage() {
                 f.*,
                 ci.cidade,
                 cp."condicaoPagamento",
-                tr."razaoSocial"        AS transportadora,
+                tr."razaoSocialNome"        AS transportadora,
                 ep.email               AS "emailPrincipal",
                 COUNT(fe.id)::int      AS "totalEmails",
                 tp.telefone            AS "telefonePrincipal",
@@ -23,7 +23,7 @@ export default async function FornecedoresPage() {
              LEFT JOIN tb_fornecedor_email     fe ON fe."fornecedorId" = f.id AND fe.ativo = true
              LEFT JOIN tb_fornecedor_telefone  tp ON tp."fornecedorId" = f.id AND tp.principal = true AND tp.ativo = true
              LEFT JOIN tb_fornecedor_telefone  ft ON ft."fornecedorId" = f.id AND ft.ativo = true
-             GROUP BY f.id, ci.cidade, cp."condicaoPagamento", tr."razaoSocial", ep.email, tp.telefone
+             GROUP BY f.id, ci.cidade, cp."condicaoPagamento", tr."razaoSocialNome", ep.email, tp.telefone
              ORDER BY f.fornecedor ASC`
         )
 
