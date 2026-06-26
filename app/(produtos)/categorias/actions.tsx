@@ -54,6 +54,35 @@ export async function salvarCategoria(formData: FormData) {
         revalidatePath('/categorias')
 }
 
+export async function salvarCategoriaComRetorno(
+    formData: FormData
+): Promise<{ id: number; categoria: string; }> {
+    const dados = {
+        categoria:      (formData.get('categoria') as string || "").trim(),
+        ativo:          formData.get('ativo') === 'true',
+    }
+
+    const validacao = categoriaSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+
+    const v = validacao.data
+
+    try {
+        const res = await pool.query<{ id: number; categoria: string; }>(
+            `INSERT INTO tb_categorias ("categoria", "ativo")
+                VALUES ($1, $2)
+            RETURNING id, "categoria"    
+            `,
+                [v.categoria, v.ativo]
+        )
+        revalidatePath('/categorias')
+        return res.rows[0]
+    } catch (error: any) {
+        tratarErroDB(error, CATEGORIA_ERROR_LABELS)
+        throw error
+    }
+}
+
 export async function alternarStatusCategoria(id: number, statusAtual: boolean) {
     try {
         await pool.query(

@@ -70,7 +70,7 @@ export default async function ProdutoPage({ params }: ProdutoPageProps) {
                         produto={produto}
                         marcas={marcasResult.rows}
                         unidades={unidadesResult.rows}
-                        categorias={categoriasResult.rows}
+                        listaCategorias={categoriasResult.rows}
                     />
                 </div>
             </div>

@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { salvarCategoria } from "../actions"
+import { salvarCategoria, salvarCategoriaComRetorno } from "../actions"
 import toast from "react-hot-toast"
 
 import { Button } from "@/components/ui/Button"
@@ -13,6 +13,7 @@ import { FormInput } from "@/components/ui/FormInput"
 import { FormLabel } from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { Categoria } from "@/lib/types"
+import { emitirCategoriaCadastrada } from "@/lib/hooks/useCategoriaCadastrada"
 
 const schema = z.object({
     categoria:      z.string().max(50),
@@ -28,6 +29,9 @@ interface CategoriaFormProps {
 export function CategoriaForm({ categoria }: CategoriaFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+
+    const searchParams = useSearchParams()
+    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -46,9 +50,19 @@ export function CategoriaForm({ categoria }: CategoriaFormProps) {
         formData.append('ativo',          String(data.ativo))
 
         try {
-            await salvarCategoria(formData)
-            toast.success(categoria ? "Categoria atualizada com sucesso!" : "Categoria cadastrada com sucesso!")
-            router.push("/categorias")
+            if (abertoPorLookup && !categoria?.id) {
+                const resultado = await salvarCategoriaComRetorno(formData)
+                toast.success("Categoria cadastrada com sucesso!")
+                emitirCategoriaCadastrada({
+                    id:        resultado.id,
+                    categoria: resultado.categoria,
+                })
+
+            } else {
+                await salvarCategoria(formData)
+                toast.success(categoria ? "Categoria atualizada com sucesso!" : "Categoria cadastrada com sucesso!")
+                router.push("/categorias")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {
