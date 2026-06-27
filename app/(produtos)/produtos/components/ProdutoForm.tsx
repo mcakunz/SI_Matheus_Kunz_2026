@@ -43,17 +43,17 @@ type FormData = z.infer<typeof schema>
 
 interface ProdutoFormProps {
     produto?:   Produto | null
-    marcas:     MarcaSelect[]
+    listaMarcas:     MarcaSelect[]
     listaUnidades:   UnidadeMedidaSelect[]
     listaCategorias: CategoriaSelect[]
 }
 
-export function ProdutoForm({ produto, marcas: marcasIniciais, listaUnidades, listaCategorias }: ProdutoFormProps) {
+export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategorias }: ProdutoFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
     const [categorias, setCategorias] = useState<CategoriaSelect[]>(listaCategorias)
-    const [marcas, setMarcas] = useState<MarcaSelect[]>(marcasIniciais)
+    const [marcas, setMarcas] = useState<MarcaSelect[]>(listaMarcas)
     const [unidades, setUnidades]   = useState<UnidadeMedidaSelect[]>(listaUnidades)
 
     const { register, handleSubmit, setValue, watch, control, formState: { errors } } = useForm<FormData>({

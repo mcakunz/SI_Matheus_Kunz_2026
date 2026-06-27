@@ -68,7 +68,7 @@ export default async function ProdutoPage({ params }: ProdutoPageProps) {
 
                     <ProdutoForm
                         produto={produto}
-                        marcas={marcasResult.rows}
+                        listaMarcas={marcasResult.rows}
                         listaUnidades={unidadesResult.rows}
                         listaCategorias={categoriasResult.rows}
                     />
