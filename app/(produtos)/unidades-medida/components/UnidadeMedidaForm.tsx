@@ -1,11 +1,11 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { salvarUnidadeMedida } from "../actions"
+import { salvarUnidadeMedida, salvarUnidadeMedidaComRetorno } from "../actions"
 import toast from "react-hot-toast"
 
 import { Button } from "@/components/ui/Button"
@@ -13,6 +13,7 @@ import { FormInput } from "@/components/ui/FormInput"
 import { FormLabel } from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { UnidadeMedida } from "@/lib/types"
+import { emitirUnidadeMedidaCadastrada } from "@/lib/hooks/useUnidadeMedidaCadastrada"
 
 const schema = z.object({
     unidadeMedida: z.string().min(1, "Unidade de medida é obrigatória").max(3, "Máximo de 3 caracteres"),
@@ -28,6 +29,9 @@ interface UnidadeMedidaFormProps {
 export function UnidadeMedidaForm({ unidade }: UnidadeMedidaFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
+
+    const searchParams = useSearchParams()
+    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -46,9 +50,18 @@ export function UnidadeMedidaForm({ unidade }: UnidadeMedidaFormProps) {
         formData.append('ativo', String(data.ativo))
 
         try {
-            await salvarUnidadeMedida(formData)
-            toast.success(unidade ? "Unidade de medida atualizada com sucesso!" : "Unidade de medida cadastrada com sucesso!")
-            router.push("/unidades-medida")
+            if (abertoPorLookup && !unidade?.id) {
+                const resultado = await salvarUnidadeMedidaComRetorno(formData)
+                toast.success("Unidade de medida cadastrada com sucesso!")
+                emitirUnidadeMedidaCadastrada({
+                    id:            resultado.id,
+                    unidadeMedida: resultado.unidadeMedida,
+                })
+            } else {
+                await salvarUnidadeMedida(formData)
+                toast.success(unidade ? "Unidade de medida atualizada com sucesso!" : "Unidade de medida cadastrada com sucesso!")
+                router.push("/unidades-medida")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {

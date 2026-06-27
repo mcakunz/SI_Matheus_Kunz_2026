@@ -19,13 +19,15 @@ import { useCategoriaCadastrada } from "@/lib/hooks/useCategoriaCadastrada"
 import { useMarcaCadastrada } from "@/lib/hooks/useMarcaCadastrada"
 import { CategoriaLookup } from "@/app/components/ui/CategoriaLookup"
 import { MarcaLookup } from "@/app/components/ui/MarcaLookup"
+import { UnidadeMedidaLookup } from "@/app/components/ui/UnidadeMedidaLookup"
+import { useUnidadeMedidaCadastrada } from "@/lib/hooks/useUnidadeMedidaCadastrada"
 
 const schema = z.object({
     produto:          z.string().min(1, "Nome do produto é obrigatório").max(50, "Máximo de 50 caracteres"),
     codigoBarras:     z.string().max(20, "Máximo de 20 caracteres").nullable(),
     referencia:       z.string().max(30, "Máximo de 30 caracteres").nullable(),
     marcaId:          z.string({ error: "Marca é obrigatória" }).min(1, "Selecione uma marca"),
-    unidadeMedidaId:  z.number({ error: "Unidade de medida é obrigatória" }).int().positive("Unidade de medida é obrigatória"),
+    unidadeMedidaId: z.string({ error: "Unidade de medida é obrigatória" }).min(1, "Selecione uma unidade de medida"),
     categoriaId:      z.string({ error: "Categoria é obrigatória" }).min(1, "Selecione uma categoria"),
     valorCompra:      z.number({ error: "Valor de compra inválido" }).min(0, "Valor de compra não pode ser negativo"),
     valorVenda:       z.number({ error: "Valor de venda inválido" }).min(0, "Valor de venda não pode ser negativo"),
@@ -42,16 +44,17 @@ type FormData = z.infer<typeof schema>
 interface ProdutoFormProps {
     produto?:   Produto | null
     marcas:     MarcaSelect[]
-    unidades:   UnidadeMedidaSelect[]
+    listaUnidades:   UnidadeMedidaSelect[]
     listaCategorias: CategoriaSelect[]
 }
 
-export function ProdutoForm({ produto, marcas: marcasIniciais, unidades, listaCategorias }: ProdutoFormProps) {
+export function ProdutoForm({ produto, marcas: marcasIniciais, listaUnidades, listaCategorias }: ProdutoFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
     const [categorias, setCategorias] = useState<CategoriaSelect[]>(listaCategorias)
     const [marcas, setMarcas] = useState<MarcaSelect[]>(marcasIniciais)
+    const [unidades, setUnidades]   = useState<UnidadeMedidaSelect[]>(listaUnidades)
 
     const { register, handleSubmit, setValue, watch, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -60,7 +63,7 @@ export function ProdutoForm({ produto, marcas: marcasIniciais, unidades, listaCa
             codigoBarras:     produto?.codigoBarras     ?? null,
             referencia:       produto?.referencia       ?? null,
             marcaId:          produto?.marcaId?.toString()          ?? '',
-            unidadeMedidaId:  produto?.unidadeMedidaId ?? 0,
+            unidadeMedidaId: produto?.unidadeMedidaId?.toString() ?? '',
             categoriaId:      produto?.categoriaId?.toString()      ?? '',
             valorCompra:      produto?.valorCompra      ?? 0,
             valorVenda:       produto?.valorVenda       ?? 0,
@@ -93,6 +96,15 @@ export function ProdutoForm({ produto, marcas: marcasIniciais, unidades, listaCa
     }, [setValue])
     
     useMarcaCadastrada(handleMarcaCriada)
+
+    const handleUnidadeCriada = useCallback((novaUnidade: UnidadeMedidaSelect) => {
+        setUnidades(prev =>
+            [...prev, novaUnidade].sort((a, b) => a.unidadeMedida.localeCompare(b.unidadeMedida, 'pt-BR'))
+        )
+        setValue('unidadeMedidaId', String(novaUnidade.id))
+    }, [setValue])
+
+    useUnidadeMedidaCadastrada(handleUnidadeCriada)
 
     const onSubmit = async (data: FormData) => {
         setLoading(true)
@@ -212,14 +224,18 @@ export function ProdutoForm({ produto, marcas: marcasIniciais, unidades, listaCa
                     </div>
                     <div>
                         <FormLabel required>Unidade de Medida</FormLabel>
-                        <FormSelect
-                            {...register('unidadeMedidaId', { valueAsNumber: true })}
-                        >
-                            <option value={0}>Selecione...</option>
-                            {unidades.map(u => (
-                                <option key={u.id} value={u.id}>{u.unidadeMedida}</option>
-                            ))}
-                        </FormSelect>
+                        <Controller
+                            name="unidadeMedidaId"
+                            control={control}
+                            render={({ field }) => (
+                                <UnidadeMedidaLookup
+                                    unidades={unidades}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={errors.unidadeMedidaId?.message}
+                                />
+                            )}
+                        />
                         <Erro campo="unidadeMedidaId" />
                     </div>
                 </div>

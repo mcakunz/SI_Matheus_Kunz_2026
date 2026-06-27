@@ -53,6 +53,34 @@ export async function salvarUnidadeMedida(formData: FormData) {
     }
 }
 
+export async function salvarUnidadeMedidaComRetorno(
+    formData: FormData
+): Promise<{ id: number; unidadeMedida: string }> {
+    const dados = {
+        unidadeMedida: (formData.get('unidadeMedida') as string || "").trim().toUpperCase(),
+        ativo:         formData.get('ativo') === 'true',
+    }
+
+    const validacao = unidadeMedidaSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+
+    const v = validacao.data
+
+    try {
+        const res = await pool.query<{ id: number; unidadeMedida: string }>(
+            `INSERT INTO tb_unidades_medida ("unidadeMedida", "ativo")
+                VALUES ($1, $2)
+             RETURNING id, "unidadeMedida"`,
+            [v.unidadeMedida, v.ativo]
+        )
+        revalidatePath('/unidades-medida')
+        return res.rows[0]
+    } catch (error: any) {
+        tratarErroDB(error, UNIDADE_MEDIDA_ERROR_LABELS)
+        throw error
+    }
+}
+
 export async function alternarStatusUnidadeMedida(id: number, statusAtual: boolean) {
     try {
         await pool.query(
