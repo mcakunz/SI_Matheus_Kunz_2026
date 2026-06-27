@@ -16,15 +16,17 @@ import { FormSelect } from "@/components/ui/FormSelect"
 import { FormTextArea } from "@/components/ui/FormTextArea"
 import { Produto, MarcaSelect, UnidadeMedidaSelect, CategoriaSelect } from "@/lib/types"
 import { useCategoriaCadastrada } from "@/lib/hooks/useCategoriaCadastrada"
+import { useMarcaCadastrada } from "@/lib/hooks/useMarcaCadastrada"
 import { CategoriaLookup } from "@/app/components/ui/CategoriaLookup"
+import { MarcaLookup } from "@/app/components/ui/MarcaLookup"
 
 const schema = z.object({
     produto:          z.string().min(1, "Nome do produto é obrigatório").max(50, "Máximo de 50 caracteres"),
     codigoBarras:     z.string().max(20, "Máximo de 20 caracteres").nullable(),
     referencia:       z.string().max(30, "Máximo de 30 caracteres").nullable(),
-    marcaId:          z.number({ error: "Marca é obrigatória" }).int().positive("Marca é obrigatória"),
+    marcaId:          z.string({ error: "Marca é obrigatória" }).min(1, "Selecione uma marca"),
     unidadeMedidaId:  z.number({ error: "Unidade de medida é obrigatória" }).int().positive("Unidade de medida é obrigatória"),
-    categoriaId:      z.string({ error: "Categoria é obrigatória" }).min(0, "Selecione uma categoria"),
+    categoriaId:      z.string({ error: "Categoria é obrigatória" }).min(1, "Selecione uma categoria"),
     valorCompra:      z.number({ error: "Valor de compra inválido" }).min(0, "Valor de compra não pode ser negativo"),
     valorVenda:       z.number({ error: "Valor de venda inválido" }).min(0, "Valor de venda não pode ser negativo"),
     quantidade:       z.number({ error: "Quantidade inválida" }).int().min(0, "Quantidade não pode ser negativa"),
@@ -44,11 +46,12 @@ interface ProdutoFormProps {
     listaCategorias: CategoriaSelect[]
 }
 
-export function ProdutoForm({ produto, marcas, unidades, listaCategorias }: ProdutoFormProps) {
+export function ProdutoForm({ produto, marcas: marcasIniciais, unidades, listaCategorias }: ProdutoFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
     const [categorias, setCategorias] = useState<CategoriaSelect[]>(listaCategorias)
+    const [marcas, setMarcas] = useState<MarcaSelect[]>(marcasIniciais)
 
     const { register, handleSubmit, setValue, watch, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -56,7 +59,7 @@ export function ProdutoForm({ produto, marcas, unidades, listaCategorias }: Prod
             produto:          produto?.produto          ?? '',
             codigoBarras:     produto?.codigoBarras     ?? null,
             referencia:       produto?.referencia       ?? null,
-            marcaId:          produto?.marcaId          ?? 0,
+            marcaId:          produto?.marcaId?.toString()          ?? '',
             unidadeMedidaId:  produto?.unidadeMedidaId ?? 0,
             categoriaId:      produto?.categoriaId?.toString()      ?? '',
             valorCompra:      produto?.valorCompra      ?? 0,
@@ -79,8 +82,17 @@ export function ProdutoForm({ produto, marcas, unidades, listaCategorias }: Prod
         )
         setValue('categoriaId', String(novaCategoria.id))
     }, [setValue])
-    
+
     useCategoriaCadastrada(handleCategoriaCriada)
+
+    const handleMarcaCriada = useCallback((novaMarca: MarcaSelect) => {
+        setMarcas(prev =>
+            [...prev, novaMarca].sort((a, b) => a.marca.localeCompare(b.marca, 'pt-BR'))
+        )
+        setValue('marcaId', String(novaMarca.id))
+    }, [setValue])
+    
+    useMarcaCadastrada(handleMarcaCriada)
 
     const onSubmit = async (data: FormData) => {
         setLoading(true)
@@ -185,15 +197,18 @@ export function ProdutoForm({ produto, marcas, unidades, listaCategorias }: Prod
                     </div>
                     <div>
                         <FormLabel required>Marca</FormLabel>
-                        <FormSelect
-                            {...register('marcaId', { valueAsNumber: true })}
-                        >
-                            <option value={0}>Selecione...</option>
-                            {marcas.map(m => (
-                                <option key={m.id} value={m.id}>{m.marca}</option>
-                            ))}
-                        </FormSelect>
-                        <Erro campo="marcaId" />
+                        <Controller
+                            name="marcaId"
+                            control={control}
+                            render={({ field }) => (
+                                <MarcaLookup
+                                    marcas={marcas}
+                                    value={field.value}
+                                    onChange={field.onChange}
+                                    error={errors.marcaId?.message}
+                                />
+                            )}
+                        />
                     </div>
                     <div>
                         <FormLabel required>Unidade de Medida</FormLabel>

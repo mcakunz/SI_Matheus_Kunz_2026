@@ -53,6 +53,34 @@ export async function salvarMarca(formData: FormData) {
     }
 }
 
+export async function salvarMarcaComRetorno(
+    formData: FormData
+): Promise<{ id: number; marca: string }> {
+    const dados = {
+        marca: (formData.get('marca') as string || "").trim(),
+        ativo: formData.get('ativo') === 'true',
+    }
+
+    const validacao = marcaSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+
+    const v = validacao.data
+
+    try {
+        const res = await pool.query<{ id: number; marca: string }>(
+            `INSERT INTO tb_marcas ("marca", "ativo")
+                VALUES ($1, $2)
+             RETURNING id, "marca"`,
+            [v.marca, v.ativo]
+        )
+        revalidatePath('/marcas')
+        return res.rows[0]
+    } catch (error: any) {
+        tratarErroDB(error, MARCA_ERROR_LABELS)
+        throw error
+    }
+}
+
 export async function alternarStatusMarca(id: number, statusAtual: boolean) {
     try {
         await pool.query(
