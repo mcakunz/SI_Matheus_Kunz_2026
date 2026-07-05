@@ -28,7 +28,6 @@ const schema = z.object({
     condicaoPagamento:   z.string().min(2, "O nome deve ter no mínimo 2 caracteres.").max(100),
     numeroParcelas:      z.number().int().min(1, "Mínimo 1 parcela."),
     diasPrimeiraParcela: z.number().int().min(0, "Dias não pode ser negativo."),
-    diasEntreParcelas:   z.number().int().min(0, "Dias não pode ser negativo."),
     percentualJuros:     z.number().min(0).max(100, "Máximo 100%."),
     percentualMulta:     z.number().min(0).max(100, "Máximo 100%."),
     percentualDesconto:  z.number().min(0).max(100, "Máximo 100%."),
@@ -77,7 +76,6 @@ export function CondicaoPagamentoForm({
             condicaoPagamento:   condicao?.condicaoPagamento ?? '',
             numeroParcelas:      condicao?.numeroParcelas    ?? 1,
             diasPrimeiraParcela: condicao?.diasPrimeiraParcela ?? 0,
-            diasEntreParcelas:   condicao?.diasEntreParcelas   ?? 0,
             percentualJuros:     Number(condicao?.percentualJuros    ?? 0),
             percentualMulta:     Number(condicao?.percentualMulta    ?? 0),
             percentualDesconto:  Number(condicao?.percentualDesconto ?? 0),
@@ -107,7 +105,6 @@ export function CondicaoPagamentoForm({
         formData.append('condicaoPagamento',   data.condicaoPagamento)
         formData.append('numeroParcelas',      String(data.numeroParcelas))
         formData.append('diasPrimeiraParcela', String(data.diasPrimeiraParcela))
-        formData.append('diasEntreParcelas',   String(data.diasEntreParcelas))
         formData.append('percentualJuros',     String(data.percentualJuros))
         formData.append('percentualMulta',     String(data.percentualMulta))
         formData.append('percentualDesconto',  String(data.percentualDesconto))
@@ -162,7 +159,7 @@ export function CondicaoPagamentoForm({
                 </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <div>
                     <FormLabel required>Nº de Parcelas</FormLabel>
                     <FormInput
@@ -183,16 +180,6 @@ export function CondicaoPagamentoForm({
                         inputMode="numeric"
                     />
                     <Erro campo="diasPrimeiraParcela" />
-                </div>
-                <div>
-                    <FormLabel required>Entre Parcelas (dias)</FormLabel>
-                    <FormInput
-                        type="number"
-                        {...register('diasEntreParcelas', { valueAsNumber: true })}
-                        min={0}
-                        inputMode="numeric"
-                    />
-                    <Erro campo="diasEntreParcelas" />
                 </div>
             </div>
 
@@ -369,4 +356,3 @@ export function CondicaoPagamentoForm({
         </form>
     )
 }
-  

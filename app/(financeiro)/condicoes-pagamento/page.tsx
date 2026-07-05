@@ -11,7 +11,6 @@ export default async function CondicoesPagamentoPage() {
                 "condicaoPagamento",
                 "numeroParcelas",
                 "diasPrimeiraParcela",
-                "diasEntreParcelas",
                 "percentualJuros",
                 "percentualMulta",
                 "percentualDesconto",

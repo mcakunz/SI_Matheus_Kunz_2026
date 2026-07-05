@@ -25,7 +25,6 @@ const columns: GridColDef[] = [
         ),
     },
     { field: 'diasPrimeiraParcela', headerName: '1ª Parcela (dias)', width: 150, renderCell: (params) => `${params.value} dias` },
-    { field: 'diasEntreParcelas',   headerName: 'Entre Parcelas (dias)', width: 180, renderCell: (params) => `${params.value} dias` },
     {
         field: 'percentualJuros',
         headerName: 'Juros',

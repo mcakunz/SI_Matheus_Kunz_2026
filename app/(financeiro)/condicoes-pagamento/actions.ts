@@ -24,7 +24,6 @@ const condicaoPagamentoSchema = z.object({
     condicaoPagamento:   z.string().min(2, "O nome deve ter no mínimo 2 caracteres.").max(100),
     numeroParcelas:      z.coerce.number().int().min(1, "Informe pelo menos 1 parcela."),
     diasPrimeiraParcela: z.coerce.number().int().min(0, "Dias não pode ser negativo."),
-    diasEntreParcelas:   z.coerce.number().int().min(0, "Dias não pode ser negativo."),
     percentualJuros:     z.coerce.number().min(0).max(100, "Percentual inválido."),
     percentualMulta:     z.coerce.number().min(0).max(100, "Percentual inválido."),
     percentualDesconto:  z.coerce.number().min(0).max(100, "Percentual inválido."),
@@ -68,7 +67,6 @@ export async function salvarCondicaoPagamento(formData: FormData) {
         condicaoPagamento:   (formData.get('condicaoPagamento') as string || "").trim(),
         numeroParcelas:      formData.get('numeroParcelas'),
         diasPrimeiraParcela: formData.get('diasPrimeiraParcela'),
-        diasEntreParcelas:   formData.get('diasEntreParcelas'),
         percentualJuros:     formData.get('percentualJuros'),
         percentualMulta:     formData.get('percentualMulta'),
         percentualDesconto:  formData.get('percentualDesconto'),
@@ -95,15 +93,14 @@ export async function salvarCondicaoPagamento(formData: FormData) {
                     SET "condicaoPagamento"   = $1,
                         "numeroParcelas"      = $2,
                         "diasPrimeiraParcela" = $3,
-                        "diasEntreParcelas"   = $4,
-                        "percentualJuros"     = $5,
-                        "percentualMulta"     = $6,
-                        "percentualDesconto"  = $7,
-                        "ativo"               = $8
-                  WHERE id = $9`,
+                        "percentualJuros"     = $4,
+                        "percentualMulta"     = $5,
+                        "percentualDesconto"  = $6,
+                        "ativo"               = $7
+                  WHERE id = $8`,
                   [
                     v.condicaoPagamento, v.numeroParcelas, v.diasPrimeiraParcela,
-                    v.diasEntreParcelas, v.percentualJuros, v.percentualMulta,
+                    v.percentualJuros, v.percentualMulta,
                     v.percentualDesconto, v.ativo, id,
                   ]
             )
@@ -117,13 +114,13 @@ export async function salvarCondicaoPagamento(formData: FormData) {
             const res = await client.query<{ id: number }>(
                 `INSERT INTO tb_condicoes_pagamento (
                     "condicaoPagamento", "numeroParcelas", "diasPrimeiraParcela",
-                    "diasEntreParcelas", "percentualJuros", "percentualMulta",
+                    "percentualJuros", "percentualMulta",
                     "percentualDesconto", "ativo"
-                ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+                ) VALUES ($1,$2,$3,$4,$5,$6,$7)
                 RETURNING id`,
                 [
                     v.condicaoPagamento, v.numeroParcelas, v.diasPrimeiraParcela,
-                    v.diasEntreParcelas, v.percentualJuros, v.percentualMulta,
+                    v.percentualJuros, v.percentualMulta,
                     v.percentualDesconto, v.ativo,
                 ]
             )
@@ -158,7 +155,6 @@ export async function salvarCondicaoPagamentoComRetorno(
         condicaoPagamento:   (formData.get('condicaoPagamento') as string || "").trim(),
         numeroParcelas:      formData.get('numeroParcelas'),
         diasPrimeiraParcela: formData.get('diasPrimeiraParcela'),
-        diasEntreParcelas:   formData.get('diasEntreParcelas'),
         percentualJuros:     formData.get('percentualJuros'),
         percentualMulta:     formData.get('percentualMulta'),
         percentualDesconto:  formData.get('percentualDesconto'),
@@ -178,13 +174,13 @@ export async function salvarCondicaoPagamentoComRetorno(
         const res = await client.query<{ id: number; condicaoPagamento: string }>(
             `INSERT INTO tb_condicoes_pagamento (
                 "condicaoPagamento", "numeroParcelas", "diasPrimeiraParcela",
-                "diasEntreParcelas", "percentualJuros", "percentualMulta",
+                "percentualJuros", "percentualMulta",
                 "percentualDesconto", "ativo"
-            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7)
             RETURNING id, "condicaoPagamento"`,
             [
                 v.condicaoPagamento, v.numeroParcelas, v.diasPrimeiraParcela,
-                v.diasEntreParcelas, v.percentualJuros, v.percentualMulta,
+                v.percentualJuros, v.percentualMulta,
                 v.percentualDesconto, v.ativo,
             ]
         )
