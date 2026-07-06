@@ -1,8 +1,8 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useRef, useState } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useForm, useFieldArray } from "react-hook-form"
+import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarCondicaoPagamento, salvarCondicaoPagamentoComRetorno } from "../actions"
@@ -12,10 +12,11 @@ import { HiPlus, HiTrash } from "react-icons/hi"
 import { Button } from "@/components/ui/Button"
 import { FormInput } from "@/components/ui/FormInput"
 import { FormLabel } from "@/components/ui/FormLabel"
-import { FormSelect } from "@/components/ui/FormSelect"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { CondicaoPagamentoCompleto, ParcelaCondicao, FormaPagamentoSelect } from "@/lib/types"
 import { emitirCondicaoPagamentoCadastrada } from "@/lib/hooks/useCondicaoPagamentoCadastrado"
+import { useFormaPagamentoCadastrada } from "@/lib/hooks/useFormaPagamentoCadastrada"
+import { FormaPagamentoLookup } from "@/app/components/ui/FormaPagamentoLookup"
 
 const parcelaSchema = z.object({
     numero:           z.number().int().positive(),
@@ -70,7 +71,9 @@ export function CondicaoPagamentoForm({
     const searchParams = useSearchParams()
     const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
-    const { register, handleSubmit, watch, control, formState: { errors } } = useForm<FormData>({
+    const [formasPagamento, setFormasPagamento] = useState<FormaPagamentoSelect[]>(listaFormasPagamento)
+
+    const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             condicaoPagamento:   condicao?.condicaoPagamento ?? '',
@@ -92,6 +95,26 @@ export function CondicaoPagamentoForm({
     })
 
     const { fields, append, remove } = useFieldArray({ control, name: 'parcelas' })
+
+    const parcelaAtivaRef = useRef<string | null>(null)
+
+    const handleFormaPagamentoCriada = useCallback((novaForma: FormaPagamentoSelect) => {
+        setFormasPagamento(prev =>
+            [...prev, novaForma].sort((a, b) =>
+                a.formaPagamento.localeCompare(b.formaPagamento, 'pt-BR')
+            )
+        )
+
+        const idAlvo = parcelaAtivaRef.current
+        if (idAlvo) {
+            const index = fields.findIndex(f => f.id === idAlvo)
+            if (index !== -1) {
+                setValue(`parcelas.${index}.formaPagamentoId`, String(novaForma.id), { shouldValidate: true })
+            }
+        }
+    }, [fields, setValue])
+
+    useFormaPagamentoCadastrada(handleFormaPagamentoCriada)
 
     const parcelasWatch = watch('parcelas')
     const totalPercentual = parcelasWatch?.reduce((acc, p) => acc + Number(p.percentual || 0), 0) ?? 0
@@ -271,18 +294,19 @@ export function CondicaoPagamentoForm({
                                     inputMode="numeric"
                                 />
 
-                                <div>
-                                    <FormSelect {...register(`parcelas.${index}.formaPagamentoId`)}>
-                                        <option value="">Selecione...</option>
-                                        {listaFormasPagamento.map((f) => (
-                                            <option key={f.id} value={f.id}>{f.formaPagamento}</option>
-                                        ))}
-                                    </FormSelect>
-                                    {errors.parcelas?.[index]?.formaPagamentoId && (
-                                        <p className="text-xs text-red-500 mt-1">
-                                            {errors.parcelas[index]?.formaPagamentoId?.message}
-                                        </p>
-                                    )}
+                                <div onFocus={() => { parcelaAtivaRef.current = field.id }}>
+                                        <Controller
+                                            name={`parcelas.${index}.formaPagamentoId`}
+                                            control={control}
+                                            render={({ field: formaPagamentoField }) => (
+                                                <FormaPagamentoLookup
+                                                    formas={formasPagamento}
+                                                    value={formaPagamentoField.value}
+                                                    onChange={formaPagamentoField.onChange}
+                                                    error={errors.parcelas?.[index]?.formaPagamentoId?.message}
+                                                />
+                                        )}
+                                    />
                                 </div>
 
                                 <FormInput

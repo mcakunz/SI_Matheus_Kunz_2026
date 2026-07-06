@@ -57,6 +57,37 @@ export async function salvarFormaPagamento(formData: FormData) {
         revalidatePath('/formas-pagamento')
 }
 
+export async function salvarFormaPagamentoComRetorno(
+    formData: FormData
+): Promise<{ id: number; formaPagamento: string }> {
+
+    const dados = {
+        formaPagamento: (formData.get('formaPagamento') as string || "").trim(),
+        descricao:      (formData.get('descricao')      as string || "").trim(),
+        ativo:          formData.get('ativo') === 'true',
+    }
+
+    const validacao = formaPagamentoSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+
+    const v = validacao.data
+
+    try {
+        const res = await pool.query<{ id: number; formaPagamento: string }>(
+            `INSERT INTO tb_formas_pagamento ("formaPagamento", "descricao", "ativo")
+             VALUES ($1, $2, $3)
+             RETURNING id, "formaPagamento"`,
+            [v.formaPagamento, v.descricao, v.ativo]
+        )
+
+        revalidatePath('/formas-pagamento')
+        return res.rows[0]
+    } catch (error: any) {
+        tratarErroDB(error, FORMA_PAGAMENTO_ERROR_LABELS)
+        throw new Error(error.message)
+    }
+}
+
 export async function alternarStatusFormaPagamento(id: number, statusAtual: boolean) {
     try {
         await pool.query(
