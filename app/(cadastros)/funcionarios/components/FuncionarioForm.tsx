@@ -239,7 +239,7 @@ export function FuncionarioForm({
     return (
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-5 text-slate-900">
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 md:gap-6">
                 <div>
                     <FormLabel required>Tipo</FormLabel>
                     <FormSelect {...register('tipo')}>
@@ -256,8 +256,8 @@ export function FuncionarioForm({
                     </div>
                 </div>
             </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
+            
+            <div className="grid grid-cols-1 md:grid-cols-[1fr_300px_150px] gap-4 md:gap-6">
                 <div>
                     <FormLabel required>Nome Completo</FormLabel>
                     <FormInput {...register('funcionario')} placeholder="Nome do funcionário" />
