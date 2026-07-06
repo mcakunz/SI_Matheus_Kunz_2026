@@ -169,7 +169,7 @@ export function CondicaoPagamentoForm({
 
             <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 md:gap-6 items-start">
                 <div>
-                    <FormLabel required>Descrição</FormLabel>
+                    <FormLabel required>Condição de pagamento</FormLabel>
                     <FormInput
                         {...register('condicaoPagamento')}
                         placeholder="Ex: 30/60/90 dias"

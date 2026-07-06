@@ -79,7 +79,7 @@ export function FormaPagamentoForm({ forma }: FormaPagamentoFormProps) {
 
             <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 md:gap-6 items-start">
                 <div>
-                    <FormLabel required>Nome</FormLabel>
+                    <FormLabel required>Forma de pagamento</FormLabel>
                     <FormInput
                         {...register('formaPagamento')}
                         placeholder="Ex: Boleto Bancário"

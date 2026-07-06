@@ -36,8 +36,6 @@ export default async function EstadoPage({ params }: EstadoPageProps) {
             estado = result.rows[0]
         }
 
-        const titulo = isNovo ? "Novo Estado" : estado!.estado
-
         return (
             <div className="p-6 mx-auto">
                 <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
@@ -53,7 +51,9 @@ export default async function EstadoPage({ params }: EstadoPageProps) {
 
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-8">
                     <div className="mb-8">
-                        <h1 className="text-2xl font-bold text-slate-800">{titulo}</h1>
+                        <h1 className="text-2xl font-bold text-slate-800">
+                            {isNovo ? "Novo Estado" : estado?.estado}
+                        </h1>
                         {!isNovo && estado && (
                             <p className="text-sm text-slate-400 mt-1">
                                 ID #{estado.id} · {estado.uf} · {estado.pais}
