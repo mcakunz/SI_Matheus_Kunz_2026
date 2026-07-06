@@ -1,0 +1,37 @@
+@startuml Condicoes de Pagamento - Casos de Uso
+
+left to right direction
+
+skinparam usecase {
+    BackgroundColor #FFFFFF
+    BorderColor #888780
+    ActorBorderColor #0F6E56
+    ActorBackgroundColor #E1F5EE
+    ArrowColor #5F5E5A
+    FontSize 12
+}
+skinparam packageStyle rectangle
+skinparam packageBorderColor #9FE1CB
+skinparam packageBackgroundColor #F5FDFB
+
+actor "Usuário\nAutenticado" as User
+
+package "Gerenciar Condições de Pagamento" {
+    usecase "Listar condições de pagamento"                as UC1
+    usecase "Cadastrar nova condição de pagamento"          as UC2
+    usecase "Editar condição de pagamento"                 as UC3
+    usecase "Ativar / inativar condição de pagamento"      as UC4
+    usecase "Excluir condição de pagamento"                as UC5
+    usecase "Cadastrar nova forma de pagamento"            as UC6
+}
+
+User --> UC1
+
+UC1 <.. UC2  : <<extend>>
+UC1 <.. UC3  : <<extend>>
+UC1 <.. UC4  : <<extend>>
+UC1 <.. UC5  : <<extend>>
+
+UC2 <.. UC6  : <<extend>>
+
+@enduml

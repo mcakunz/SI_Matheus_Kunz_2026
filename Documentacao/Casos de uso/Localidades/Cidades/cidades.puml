@@ -1,0 +1,44 @@
+@startuml Cidades - Casos de Uso
+
+left to right direction
+
+skinparam usecase {
+    BackgroundColor #FFFFFF
+    BorderColor #888780
+    ActorBorderColor #0F6E56
+    ActorBackgroundColor #E1F5EE
+    ArrowColor #5F5E5A
+    FontSize 12
+}
+skinparam packageStyle rectangle
+skinparam packageBorderColor #9FE1CB
+skinparam packageBackgroundColor #F5FDFB
+
+actor "Usuário\nAutenticado" as User
+
+package "Gerenciar Cidades" {
+    usecase "Listar cidades"                              as UC1
+    usecase "Buscar cidade por nome"                      as UC2
+    usecase "Cadastrar nova cidade"                       as UC3
+    usecase "Editar cidade"                               as UC4
+    usecase "Ativar / inativar cidade"                    as UC5
+    usecase "Excluir cidade"                              as UC6
+    usecase "Selecionar estado vinculado\n(EstadoLookup)" as UC7
+    usecase "Cadastrar novo estado"                       as UC8
+}
+
+User --> UC1
+User --> UC2
+
+UC1 <.. UC3 : <<extend>>
+UC1 <.. UC4 : <<extend>>
+UC1 <.. UC5 : <<extend>>
+UC1 <.. UC6 : <<extend>>
+
+UC3  ..> UC7  : <<include>>
+UC4  ..> UC7  : <<include>>
+
+UC7  <.. UC8  : <<extend>>
+
+
+@enduml

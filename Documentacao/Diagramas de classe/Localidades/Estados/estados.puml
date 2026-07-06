@@ -1,0 +1,104 @@
+@startuml Estado - Diagrama de Classes
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #888780
+    HeaderBackgroundColor #E1F5EE
+    HeaderBorderColor #0F6E56
+    FontSize 13
+    AttributeFontSize 12
+}
+skinparam ArrowColor #0F6E56
+
+class Pais {
+    + id : number
+    + pais : string
+    + ativo : boolean
+}
+
+class Estado {
+    + id : number
+    + estado : string
+    + uf : string
+    + paisId : number
+    + ativo : boolean
+    + dataCadastro : string
+    + dataAlteracao : string | null
+}
+
+class EstadoComPais {
+    + pais : string | null
+}
+
+class EstadoSelect << (T,#9FE1CB) tipo >> {
+    + id : number
+    + estado : string
+    + paisId : number
+}
+
+class EstadoActions << (S,#FAC775) server >> {
+    + salvarEstado(formData) : Promise<void>
+    + salvarEstadoComRetorno(formData) : Promise<EstadoSelect>
+    + alternarStatusEstado(id, statusAtual) : Promise<void>
+    + excluirEstado(id) : Promise<void>
+}
+
+class EstadoForm << (C,#B5D4F4) component >> {
+    - estado : EstadoComPais | null
+    - listaPaises : PaisSelect[]
+    - loading : boolean
+    - abertoPorLookup : boolean
+    + onSubmit(data) : void
+}
+
+class EstadosClientTable << (C,#B5D4F4) component >> {
+    - estados : EstadoComPais[]
+    - estadoSelecionado : EstadoComPais | null
+    - loadingStatus : boolean
+    + handleAlternarStatus() : void
+    + handleExcluir() : void
+}
+
+class EstadoLookup << (C,#B5D4F4) component >> {
+    - estados : EstadoSelect[]
+    - value : string
+    + onChange(id) : void
+}
+
+class BaseLookup << (C,#B5D4F4) component >> {
+    - items : LookupItem[]
+    - value : string
+    - pathCadastro : string
+    - pathLabel : string
+    + onChange(id) : void
+}
+
+class usePaisCadastrado << (H,#AFA9EC) hook >> {
+    + emitirPaisCadastrado(pais) : void
+    + usePaisCadastrado(callback) : void
+}
+
+class useEstadoCadastrado << (H,#AFA9EC) hook >> {
+    + emitirEstadoCadastrado(estado) : void
+    + useEstadoCadastrado(callback) : void
+}
+
+Pais "1" --> "0..*" Estado : possui
+
+Estado <|-- EstadoComPais
+Estado ..> EstadoSelect : <<pick>>
+
+EstadoActions ..> Estado : <<persiste>>
+
+EstadoForm ..> EstadoActions          : chama
+EstadoForm ..> useEstadoCadastrado    : <<emite broadcast>>
+EstadoForm ..> usePaisCadastrado      : <<escuta broadcast>>
+
+EstadoLookup *-- BaseLookup           : compõe
+EstadoLookup ..> EstadoSelect         : usa
+
+EstadosClientTable ..> EstadoActions  : chama
+EstadosClientTable ..> EstadoComPais  : exibe
+
+@enduml

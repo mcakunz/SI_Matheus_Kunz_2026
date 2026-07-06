@@ -1,0 +1,118 @@
+@startuml Cidade - Diagrama de Classes
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #888780
+    HeaderBackgroundColor #E1F5EE
+    HeaderBorderColor #0F6E56
+    FontSize 13
+    AttributeFontSize 12
+}
+skinparam ArrowColor #0F6E56
+
+
+class Estado {
+    + id : number
+    + estado : string
+    + uf : string
+    + paisId : number
+    + ativo : boolean
+}
+
+class Cidade {
+    + id : number
+    + cidade : string
+    + codigoIbge : string
+    + estadoId : number
+    + ativo : boolean
+    + dataCadastro : string
+    + dataAlteracao : string | null
+}
+
+class CidadeComEstado {
+    + estado : string | null
+}
+
+class CidadeSelect << (T,#9FE1CB) tipo >> {
+    + id : number
+    + cidade : string
+    + estadoId : number
+}
+
+class EstadoSelect << (T,#9FE1CB) tipo >> {
+    + id : number
+    + estado : string
+    + paisId : number
+}
+
+
+class CidadeActions << (S,#FAC775) server >> {
+    + salvarCidade(formData) : Promise<void>
+    + salvarCidadeComRetorno(formData) : Promise<CidadeSelect>
+    + alternarStatusCidade(id, statusAtual) : Promise<void>
+    + excluirCidade(id) : Promise<void>
+}
+
+
+class CidadeForm << (C,#B5D4F4) component >> {
+    - cidade : CidadeComEstado | null
+    - listaEstados : EstadoSelect[]
+    - loading : boolean
+    - abertoPorLookup : boolean
+    + onSubmit(data) : void
+}
+
+class CidadesClientTable << (C,#B5D4F4) component >> {
+    - cidades : CidadeComEstado[]
+    - cidadeSelecionada : CidadeComEstado | null
+    - loadingStatus : boolean
+    + handleAlternarStatus() : void
+    + handleExcluir() : void
+}
+
+class CidadeLookup << (C,#B5D4F4) component >> {
+    - cidades : CidadeSelect[]
+    - value : string
+    + onChange(id) : void
+}
+
+class BaseLookup << (C,#B5D4F4) component >> {
+    - items : LookupItem[]
+    - value : string
+    - pathCadastro : string
+    - pathLabel : string
+    + onChange(id) : void
+}
+
+class useEstadoCadastrado << (H,#AFA9EC) hook >> {
+    + emitirEstadoCadastrado(estado) : void
+    + useEstadoCadastrado(callback) : void
+}
+
+class useCidadeCadastrada << (H,#AFA9EC) hook >> {
+    + emitirCidadeCadastrada(cidade) : void
+    + useCidadeCadastrada(callback) : void
+}
+
+
+Estado "1" --> "0..*" Cidade : possui
+
+Cidade <|-- CidadeComEstado
+
+Cidade ..> CidadeSelect : <<pick>>
+
+CidadeActions ..> Cidade : <<persiste>>
+
+CidadeForm ..> CidadeActions         : chama
+CidadeForm ..> useCidadeCadastrada   : <<emite broadcast>>
+CidadeForm ..> useEstadoCadastrado   : <<escuta broadcast>>
+CidadeForm ..> EstadoSelect          : usa
+
+CidadeLookup *-- BaseLookup : compõe
+CidadeLookup ..> CidadeSelect : usa
+
+CidadesClientTable ..> CidadeActions : chama
+CidadesClientTable ..> CidadeComEstado : exibe
+
+@enduml

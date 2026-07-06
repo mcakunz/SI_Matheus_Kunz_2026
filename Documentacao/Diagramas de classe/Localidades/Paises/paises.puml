@@ -1,0 +1,89 @@
+@startuml País - Diagrama de Classes
+
+skinparam classAttributeIconSize 0
+skinparam class {
+    BackgroundColor #FFFFFF
+    BorderColor #888780
+    HeaderBackgroundColor #E1F5EE
+    HeaderBorderColor #0F6E56
+    FontSize 13
+    AttributeFontSize 12
+}
+skinparam ArrowColor #0F6E56
+
+class Pais {
+    + id : number
+    + pais : string
+    + codigo : string
+    + sigla : string
+    + moeda : string
+    + nacionalidade : string
+    + ativo : boolean
+    + dataCadastro : string
+    + dataAlteracao : string | null
+    + usuarioCadastroId : number | null
+    + usuarioCadastro : string | null
+    + usuarioAlteracaoId : number | null
+    + usuarioAlteracao : string | null
+}
+
+class PaisSelect << (T,#9FE1CB) tipo >> {
+    + id : number
+    + pais : string
+}
+
+class PaisActions << (S,#FAC775) server >> {
+    + salvarPais(formData) : Promise<void>
+    + salvarPaisComRetorno(formData) : Promise<PaisSelect>
+    + alternarStatusPais(id, statusAtual) : Promise<void>
+    + excluirPais(id) : Promise<void>
+}
+
+class PaisForm << (C,#B5D4F4) component >> {
+    - pais : Pais | null
+    - loading : boolean
+    - abertoPorLookup : boolean
+    + onSubmit(data) : void
+}
+
+class PaisesClientTable << (C,#B5D4F4) component >> {
+    - paises : Pais[]
+    - paisSelecionado : Pais | null
+    - loadingStatus : boolean
+    + handleAlternarStatus() : void
+    + handleExcluir() : void
+}
+
+class PaisLookup << (C,#B5D4F4) component >> {
+    - paises : PaisSelect[]
+    - value : string
+    + onChange(id) : void
+}
+
+class BaseLookup << (C,#B5D4F4) component >> {
+    - items : LookupItem[]
+    - value : string
+    - pathCadastro : string
+    - pathLabel : string
+    + onChange(id) : void
+}
+
+class usePaisCadastrado << (H,#AFA9EC) hook >> {
+    + emitirPaisCadastrado(pais) : void
+    + usePaisCadastrado(callback) : void
+}
+
+Pais ..> PaisSelect : <<pick>>
+
+PaisActions ..> Pais : <<persiste>>
+
+PaisForm ..> PaisActions         : chama
+PaisForm ..> usePaisCadastrado   : <<emite broadcast>>
+
+PaisLookup *-- BaseLookup        : compõe
+PaisLookup ..> PaisSelect        : usa
+
+PaisesClientTable ..> PaisActions : chama
+PaisesClientTable ..> Pais        : exibe
+
+@enduml
