@@ -9,9 +9,11 @@ interface CidadeLookupProps {
     onChange: (id: string) => void
     required?: boolean
     error?: string
+    /** Chamado quando uma nova cidade é criada pelo modal de cadastro rápido. */
+    onCriado?: (novo: CidadeSelect) => void
 }
 
-export function CidadeLookup({ cidades, value, onChange, required, error }: CidadeLookupProps) {
+export function CidadeLookup({ cidades, value, onChange, required, error, onCriado }: CidadeLookupProps) {
     const items = cidades.map(c => ({ id: c.id, label: c.cidade }))
 
     return (
@@ -27,6 +29,8 @@ export function CidadeLookup({ cidades, value, onChange, required, error }: Cida
             pathCadastro="/cidades"
             pathLabel="Cadastrar nova cidade"
             editTitle={label => `Editar ${label}`}
+            tipoCadastro="cidade"
+            onCriado={onCriado}
         />
     )
 }

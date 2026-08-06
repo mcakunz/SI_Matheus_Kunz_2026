@@ -4,6 +4,7 @@ import "./globals.css"
 import { NuqsAdapter } from "nuqs/adapters/next/app"
 import { Figtree } from "next/font/google";
 import { cn } from "@/lib/utils";
+import { CadastroModalProvider } from "@/lib/cadastroModal/CadastroModalProvider"
 
 const figtree = Figtree({subsets:['latin'],variable:'--font-sans'});
 
@@ -28,9 +29,11 @@ export default function RootLayout({
       <body>
         <NuqsAdapter>
           <ToasterProvider />
-          <Sidebar sessao={SESSAO_DEV}>
-            {children}
-          </Sidebar>
+          <CadastroModalProvider>
+            <Sidebar sessao={SESSAO_DEV}>
+              {children}
+            </Sidebar>
+          </CadastroModalProvider>
         </NuqsAdapter>
       </body>
     </html>

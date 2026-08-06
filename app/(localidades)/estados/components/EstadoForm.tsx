@@ -1,12 +1,12 @@
 "use client"
 
-import { useCallback, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useCallback, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarEstado, salvarEstadoComRetorno } from "../actions"
-import { emitirEstadoCadastrado } from "@/lib/hooks/useEstadoCadastrado"
+import { listarPaisesAtivos } from "../../paises/actions"
 import toast from "react-hot-toast"
 
 import { Button } from "@/components/ui/Button"
@@ -15,7 +15,7 @@ import { FormLabel } from "@/components/ui/FormLabel"
 import { EstadoComPais, PaisSelect } from "@/lib/types"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { PaisLookup } from "@/app/components/ui/PaisLookup"
-import { usePaisCadastrado } from "@/lib/hooks/usePaisCadastrado"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types"
 
 const schema = z.object({
     estado:  z.string().min(2, "O nome do estado deve ter no mínimo 2 caracteres.").max(100),
@@ -26,18 +26,29 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface EstadoFormProps {
+interface EstadoFormProps extends QuickCreateFormProps<{ id: number; estado: string; paisId: number }> {
     estado?: EstadoComPais | null
-    listaPaises: PaisSelect[]
+    /**
+     * Opcional: quando a página server-side já tem a lista (fluxo normal
+     * de página cheia), ela é passada aqui. Quando o form é aberto dentro
+     * do modal de cadastro rápido (ex: a partir do CidadeForm), essa prop
+     * não existe e o form busca a lista sozinho.
+     */
+    listaPaises?: PaisSelect[]
 }
 
-export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoFormProps) {
+export function EstadoForm({ estado, listaPaises: listaPaisesProp, onSuccess, onCancel }: EstadoFormProps) {
     const router = useRouter()
-    const searchParams = useSearchParams()
     const [loading, setLoading] = useState(false)
-    const [listaPaises, setListaPaises] = useState<PaisSelect[]>(listaPaisesIniciais)
+    const [listaPaises, setListaPaises] = useState<PaisSelect[]>(listaPaisesProp ?? [])
+    const [carregandoPaises, setCarregandoPaises] = useState(!listaPaisesProp)
 
-    const abertoPorLookup = searchParams.get('origem') === 'lookup'
+    useEffect(() => {
+        if (listaPaisesProp) return
+        listarPaisesAtivos()
+            .then(setListaPaises)
+            .finally(() => setCarregandoPaises(false))
+    }, [listaPaisesProp])
 
     const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -56,8 +67,6 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
         setValue('pais_id', String(novoPais.id))
     }, [setValue])
 
-    usePaisCadastrado(handlePaisCriado)
-
     const onSubmit = async (data: FormData) => {
         setLoading(true)
         const formData = new FormData()
@@ -70,10 +79,10 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
         })
 
         try {
-            if (abertoPorLookup && !estado?.id) {
+            if (onSuccess) {
                 const resultado = await salvarEstadoComRetorno(formData)
                 toast.success("Estado cadastrado com sucesso!")
-                emitirEstadoCadastrado({ id: resultado.id, estado: resultado.estado, paisId: resultado.paisId })
+                onSuccess(resultado)
             } else {
                 await salvarEstado(formData)
                 toast.success(estado ? "Estado atualizado com sucesso!" : "Estado cadastrado com sucesso!")
@@ -84,6 +93,11 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/estados")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -139,9 +153,13 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
                                 onChange={field.onChange}
                                 required
                                 error={errors.pais_id?.message}
+                                onCriado={handlePaisCriado}
                             />
                         )}
                     />
+                    {carregandoPaises && (
+                        <p className="text-xs text-slate-400 mt-1">Carregando países...</p>
+                    )}
                 </div>
             </div>
 
@@ -166,7 +184,7 @@ export function EstadoForm({ estado, listaPaises: listaPaisesIniciais }: EstadoF
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/estados")}
+                    onClick={cancelar}
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

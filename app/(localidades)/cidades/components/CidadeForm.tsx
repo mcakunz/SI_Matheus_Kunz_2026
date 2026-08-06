@@ -1,11 +1,12 @@
 "use client"
 
-import { useCallback, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useCallback, useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarCidade, salvarCidadeComRetorno } from "../actions"
+import { listarEstadosAtivos } from "../../estados/actions"
 import toast from "react-hot-toast"
 
 import { Button } from "@/components/ui/Button"
@@ -14,8 +15,7 @@ import { FormLabel } from "@/components/ui/FormLabel"
 import { CidadeComEstado, EstadoSelect } from "@/lib/types"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { EstadoLookup } from "@/app/components/ui/EstadoLookup"
-import { useEstadoCadastrado } from "@/lib/hooks/useEstadoCadastrado"
-import { emitirCidadeCadastrada } from "@/lib/hooks/useCidadeCadastrada"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types"
 
 const schema = z.object({
     cidade:      z.string().min(2, "O nome da cidade deve ter no mínimo 2 caracteres.").max(100),
@@ -26,18 +26,24 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface CidadeFormProps {
+interface CidadeFormProps extends QuickCreateFormProps<{ id: number; cidade: string; estadoId: number }> {
     cidade?: CidadeComEstado | null
-    listaEstados: EstadoSelect[]
+    /** Opcional: se não vier (form aberto dentro do modal), a lista é buscada sozinha. */
+    listaEstados?: EstadoSelect[]
 }
 
-export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: CidadeFormProps) {
+export function CidadeForm({ cidade, listaEstados: listaEstadosProp, onSuccess, onCancel }: CidadeFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
-    const [listaEstados, setListaEstados] = useState<EstadoSelect[]>(listaEstadosIniciais)
+    const [listaEstados, setListaEstados] = useState<EstadoSelect[]>(listaEstadosProp ?? [])
+    const [carregandoEstados, setCarregandoEstados] = useState(!listaEstadosProp)
 
-    const searchParams    = useSearchParams()
-    const abertoPorLookup = searchParams.get('origem') === 'lookup'
+    useEffect(() => {
+        if (listaEstadosProp) return
+        listarEstadosAtivos()
+            .then(setListaEstados)
+            .finally(() => setCarregandoEstados(false))
+    }, [listaEstadosProp])
 
     const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -61,10 +67,10 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
         })
 
         try {
-            if (abertoPorLookup && !cidade?.id) {
+            if (onSuccess) {
                 const resultado = await salvarCidadeComRetorno(formData)
                 toast.success("Cidade cadastrada com sucesso!")
-                emitirCidadeCadastrada({ id: resultado.id, cidade: resultado.cidade, estadoId: resultado.estadoId })
+                onSuccess(resultado)
             } else {
                 await salvarCidade(formData)
                 toast.success(cidade ? "Cidade atualizada com sucesso!" : "Cidade cadastrada com sucesso!")
@@ -77,14 +83,17 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
         }
     }
 
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/cidades")
+    }
+
     const handleEstadoCriado = useCallback((novoEstado: EstadoSelect) => {
         setListaEstados(prev =>
             [...prev, novoEstado].sort((a, b) => a.estado.localeCompare(b.estado, 'pt-BR'))
         )
         setValue('estado_id', String(novoEstado.id))
     }, [setValue])
-
-    useEstadoCadastrado(handleEstadoCriado)
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
         errors[campo] ? <p className="text-xs text-red-500 mt-1">{errors[campo]?.message}</p> : null
@@ -142,9 +151,13 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
                                 onChange={field.onChange}
                                 required
                                 error={errors.estado_id?.message}
+                                onCriado={handleEstadoCriado}
                             />
                         )}
                     />
+                    {carregandoEstados && (
+                        <p className="text-xs text-slate-400 mt-1">Carregando estados...</p>
+                    )}
                 </div>
             </div>
 
@@ -169,7 +182,7 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosIniciais }: Cidad
                 </Button>
                 <button
                     type="button"
-                    onClick={() => abertoPorLookup ? window.close() : router.push("/cidades")}
+                    onClick={cancelar}
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

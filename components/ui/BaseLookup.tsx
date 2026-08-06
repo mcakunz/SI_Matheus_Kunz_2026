@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react"
 import { Search, ExternalLink, X, ChevronDown, Plus } from "lucide-react"
+import { useCadastroModal } from "@/lib/cadastroModal/CadastroModalProvider"
+import { TipoCadastroModal } from "@/lib/cadastroModal/types"
 
 export interface LookupItem {
     id: number | string
@@ -16,11 +18,15 @@ interface BaseLookupProps {
     error?: string
     placeholder?: string
     pesquisaPlaceholder?: string
-    mensagemVazia?: string
     msgSemResultadoEncontrado?: string
-    pathCadastro: string        
-    pathLabel: string       
+    /** Usado apenas para o link de "editar" o item já selecionado (abre em nova guia). */
+    pathCadastro: string
+    pathLabel: string
     editTitle?: (label: string) => string
+    /** Chave registrada em lib/cadastroModal/registry.tsx — controla qual Form abre no modal de "+". */
+    tipoCadastro: TipoCadastroModal
+    /** Chamado com o registro recém-criado (além da seleção automática, que já é feita aqui). */
+    onCriado?: (novo: any) => void
 }
 
 export function BaseLookup({
@@ -34,11 +40,14 @@ export function BaseLookup({
     pathCadastro,
     pathLabel,
     editTitle = label => `Editar ${label}`,
+    tipoCadastro,
+    onCriado,
 }: BaseLookupProps) {
     const [aberto, setAberto] = useState(false)
     const [busca, setBusca] = useState('')
     const inputRef = useRef<HTMLInputElement>(null)
     const containerRef = useRef<HTMLDivElement>(null)
+    const { abrirCadastro } = useCadastroModal()
 
     const itemAtual = items.find(i => String(i.id) === (value ?? ''))
 
@@ -80,10 +89,13 @@ export function BaseLookup({
         setAberto(false)
     }
 
-    const abrirCadastro = (e: React.MouseEvent) => {
+    const abrirCadastroRapido = (e: React.MouseEvent) => {
         e.stopPropagation()
         setAberto(false)
-        window.open(`${pathCadastro}/novo?origem=lookup`, '_blank')
+        abrirCadastro(tipoCadastro, (novo: any) => {
+            onChange(String(novo.id))
+            onCriado?.(novo)
+        })
     }
 
     return (
@@ -132,7 +144,7 @@ export function BaseLookup({
 
                     <button
                         type="button"
-                        onClick={abrirCadastro}
+                        onClick={abrirCadastroRapido}
                         title={pathLabel}
                         className="p-0.5 text-slate-400 hover:text-emerald-600 transition-colors"
                     >
@@ -197,7 +209,7 @@ export function BaseLookup({
                     <div className="px-2 py-1.5 border-t border-slate-100 bg-slate-50">
                         <button
                             type="button"
-                            onClick={abrirCadastro}
+                            onClick={abrirCadastroRapido}
                             className="w-full flex items-center justify-center gap-1.5 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
                         >
                             <Plus size={13} />

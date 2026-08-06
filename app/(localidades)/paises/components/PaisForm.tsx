@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -13,7 +13,7 @@ import { FormInput }  from "@/components/ui/FormInput"
 import { FormLabel }  from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { Pais }       from "@/lib/types"
-import { emitirPaisCadastrado } from "@/lib/hooks/usePaisCadastrado"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types"
 
 import { formatarData } from "@/lib/utils/date"
 
@@ -28,17 +28,13 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface PaisFormProps {
+interface PaisFormProps extends QuickCreateFormProps<{ id: number; pais: string }> {
     pais?: Pais | null
 }
 
-
-export function PaisForm({ pais }: PaisFormProps) {
-    const router       = useRouter()
-    const searchParams = useSearchParams()
+export function PaisForm({ pais, onSuccess, onCancel }: PaisFormProps) {
+    const router = useRouter()
     const [loading, setLoading] = useState(false)
-
-    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -63,10 +59,10 @@ export function PaisForm({ pais }: PaisFormProps) {
         })
 
         try {
-            if (abertoPorLookup && !pais) {
+            if (onSuccess) {
                 const novo = await salvarPaisComRetorno(formData)
                 toast.success("País cadastrado com sucesso!")
-                emitirPaisCadastrado(novo)
+                onSuccess(novo)
             } else {
                 await salvarPais(formData)
                 toast.success(pais ? "País atualizado com sucesso!" : "País cadastrado com sucesso!")
@@ -74,8 +70,14 @@ export function PaisForm({ pais }: PaisFormProps) {
             }
         } catch (err: any) {
             toast.error(err.message)
+        } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/paises")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -181,7 +183,7 @@ export function PaisForm({ pais }: PaisFormProps) {
                 </Button>
                 <button
                     type="button"
-                    onClick={() => abertoPorLookup ? window.close() : router.push("/paises")}
+                    onClick={cancelar}
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

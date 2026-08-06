@@ -4,6 +4,7 @@ import { DBErrorLabels, tratarErroDB } from "@/lib/utils/errors"
 import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { CidadeSelect } from "@/lib/types"
 
 const cidadeSchema = z.object({
     ativo:      z.boolean(),
@@ -107,4 +108,16 @@ export async function excluirCidade(id: number) {
     }
 
     revalidatePath('/cidades')
+}
+
+/**
+ * Lista simplificada (id + cidade + estadoId) usada em selects/lookups.
+ * Útil, por exemplo, para um futuro CidadeLookup dentro do ClienteForm
+ * quando aberto pelo modal de cadastro rápido (sem SSR disponível).
+ */
+export async function listarCidadesAtivas(): Promise<CidadeSelect[]> {
+    const result = await pool.query<CidadeSelect>(
+        `SELECT id, cidade, "estadoId" FROM tb_cidades WHERE ativo = true ORDER BY cidade ASC`
+    )
+    return result.rows
 }

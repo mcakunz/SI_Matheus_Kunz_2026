@@ -383,6 +383,7 @@ export interface FuncionarioTelefone {
 export type PaisSelect              = Pick<Pais,             'id' | 'pais'>
 export type EstadoSelect            = Pick<Estado,           'id' | 'estado' | 'paisId'>
 export type CidadeSelect            = Pick<Cidade,           'id' | 'cidade' | 'estadoId'>
+export type ClienteSelect           = Pick<Cliente,          'id' | 'cliente'>
 export type CondicaoPagamentoSelect = Pick<CondicaoPagamento,'id' | 'condicaoPagamento'>
 export type FormaPagamentoSelect    = Pick<FormaPagamento,   'id' | 'formaPagamento'>
 export type TransportadoraSelect    = Pick<Transportadora,   'id' | 'razaoSocialNome'>

@@ -6,6 +6,7 @@ import { obterSessao } from "@/lib/auth/session"
 import { exigirPermissao } from "@/lib/auth/permissoes"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { PaisSelect } from "@/lib/types"
 
 const paisSchema = z.object({
     pais:           z.string().min(2, "O nome do país deve ter no mínimo 2 caracteres.").max(100, "O nome do país é muito longo."),
@@ -136,4 +137,15 @@ export async function excluirPais(id: number) {
     }
 
     revalidatePath('/paises')
+}
+
+/**
+ * Lista simplificada (id + pais) usada em selects/lookups.
+ * Reaproveitada tanto pela página /paises quanto pelo PaisForm quando
+ * ele é aberto dentro do modal de cadastro rápido (sem SSR disponível).
+ */
+export async function listarPaisesAtivos(): Promise<PaisSelect[]> {
+    return query<PaisSelect>(
+        `SELECT id, pais FROM tb_paises WHERE ativo = true ORDER BY pais ASC`
+    )
 }

@@ -9,9 +9,11 @@ interface EstadoLookupProps {
     onChange: (id: string) => void
     required?: boolean
     error?: string
+    /** Chamado quando um novo estado é criado pelo modal de cadastro rápido. */
+    onCriado?: (novo: EstadoSelect) => void
 }
 
-export function EstadoLookup({ estados, value, onChange, required, error }: EstadoLookupProps) {
+export function EstadoLookup({ estados, value, onChange, required, error, onCriado }: EstadoLookupProps) {
     const items = estados.map(e => ({ id: e.id, label: e.estado }))
 
     return (
@@ -27,6 +29,8 @@ export function EstadoLookup({ estados, value, onChange, required, error }: Esta
             pathCadastro="/estados"
             pathLabel="Cadastrar novo estado"
             editTitle={label => `Editar ${label}`}
+            tipoCadastro="estado"
+            onCriado={onCriado}
         />
     )
 }

@@ -1,57 +1,74 @@
 "use client"
 
 import { useEffect } from "react"
-
-type ModalSize = 'sm' | 'md' | 'lg' | 'xl'
+import { X } from "lucide-react"
 
 interface ModalProps {
     isOpen: boolean
-    onClose: () => void
     title: string
+    onClose: () => void
     children: React.ReactNode
-    size?: ModalSize
+    /** Índice de empilhamento — 0 é o primeiro modal, 1 o próximo aberto por cima, etc. */
+    nivel?: number
+    maxWidth?: string
+    /**
+     * Se false, esta instância ignora a tecla ESC. Necessário quando há
+     * modais empilhados: se todos escutassem ESC, uma única tecla fecharia
+     * todos de uma vez. Quem empilha (ex: CadastroModalProvider) deve
+     * passar true só para o modal do topo.
+     */
+    escFecha?: boolean
 }
 
-const sizeClasses: Record<ModalSize, string> = {
-    sm: 'w-[400px]',
-    md: 'w-[520px]',
-    lg: 'w-[720px]',
-    xl: 'w-[960px]',
-}
-
-export function Modal({ isOpen, onClose, title, children, size = 'md' }: ModalProps) {
+export function Modal({ isOpen, title, onClose, children, nivel = 0, maxWidth = "max-w-2xl", escFecha = true }: ModalProps) {
+    // Trava o scroll da página de fundo enquanto qualquer instância estiver aberta.
     useEffect(() => {
         if (!isOpen) return
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === 'Escape') onClose()
+        document.body.style.overflow = "hidden"
+        return () => { document.body.style.overflow = "" }
+    }, [isOpen])
+
+    // Só a instância do topo (escFecha=true) deve reagir a ESC.
+    useEffect(() => {
+        if (!isOpen || !escFecha) return
+        function onKeyDown(e: KeyboardEvent) {
+            if (e.key === "Escape") onClose()
         }
-        document.addEventListener('keydown', handleKeyDown)
-        return () => document.removeEventListener('keydown', handleKeyDown)
-    }, [isOpen, onClose])
+        document.addEventListener("keydown", onKeyDown)
+        return () => document.removeEventListener("keydown", onKeyDown)
+    }, [isOpen, escFecha, onClose])
 
     if (!isOpen) return null
 
+    const zBase = 50 + nivel * 10
+
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-            onClick={onClose}
-        >
+        <div className="fixed inset-0 flex items-start justify-center overflow-y-auto py-10 px-4" style={{ zIndex: zBase }}>
+            {/* Fundo com fade + blur para puxar o foco para o modal */}
             <div
-                className={`bg-white rounded-lg shadow-xl ${sizeClasses[size]} max-w-[calc(100vw-2rem)] flex flex-col max-h-[90vh]`}
-                onClick={(e) => e.stopPropagation()}
+                className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity"
+                style={{ zIndex: zBase }}
+                onClick={onClose}
+            />
+
+            {/* Borda e sombra mais fortes que um card comum, pra não se misturar com a página branca atrás */}
+            <div
+                className={`relative w-full ${maxWidth} bg-white border-2 border-slate-300 rounded-xl shadow-2xl`}
+                style={{ zIndex: zBase + 1 }}
             >
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 shrink-0">
-                    <h2 className="text-lg font-bold text-slate-800">{title}</h2>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+                    <h2 className="text-lg font-semibold text-slate-800">{title}</h2>
                     <button
+                        type="button"
                         onClick={onClose}
-                        className="text-slate-400 hover:text-slate-700 text-2xl leading-none transition-colors"
+                        className="p-1 text-slate-400 hover:text-slate-700 transition-colors rounded"
                         aria-label="Fechar"
                     >
-                        &times;
+                        <X size={18} />
                     </button>
                 </div>
 
-                <div className="px-6 py-5 overflow-y-auto">
+                <div className="p-6">
                     {children}
                 </div>
             </div>

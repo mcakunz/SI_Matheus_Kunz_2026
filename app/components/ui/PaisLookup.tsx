@@ -9,9 +9,11 @@ interface PaisLookupProps {
     onChange: (id: string) => void
     required?: boolean
     error?: string
+    /** Chamado quando um novo país é criado pelo modal de cadastro rápido. */
+    onCriado?: (novo: PaisSelect) => void
 }
 
-export function PaisLookup({ paises, value, onChange, required, error }: PaisLookupProps) {
+export function PaisLookup({ paises, value, onChange, required, error, onCriado }: PaisLookupProps) {
     const items = paises.map(p => ({ id: p.id, label: p.pais }))
 
     return (
@@ -27,6 +29,8 @@ export function PaisLookup({ paises, value, onChange, required, error }: PaisLoo
             pathCadastro="/paises"
             pathLabel="Cadastrar novo país"
             editTitle={label => `Editar ${label}`}
+            tipoCadastro="pais"
+            onCriado={onCriado}
         />
     )
 }
