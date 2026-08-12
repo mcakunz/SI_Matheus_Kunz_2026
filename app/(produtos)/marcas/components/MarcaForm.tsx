@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/Button"
 import { FormInput } from "@/components/ui/FormInput"
 import { FormLabel } from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
-import { Marca } from "@/lib/types"
-import { emitirMarcaCadastrada } from "@/lib/hooks/useMarcaCadastrada"
+import { Marca, MarcaSelect } from "@/lib/types"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types" 
 
 const schema = z.object({
     marca: z.string().min(1, "Marca é obrigatória").max(50, "Máximo de 50 caracteres"),
@@ -22,16 +22,13 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface MarcaFormProps {
+interface MarcaFormProps extends QuickCreateFormProps<MarcaSelect> {
     marca?: Marca | null
 }
 
-export function MarcaForm({ marca }: MarcaFormProps) {
+export function MarcaForm({ marca, onSuccess, onCancel }: MarcaFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
-
-    const searchParams = useSearchParams()
-    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -50,23 +47,28 @@ export function MarcaForm({ marca }: MarcaFormProps) {
         formData.append('ativo', String(data.ativo))
 
         try {
-            if (abertoPorLookup && !marca?.id) {
+            if (onSuccess) { 
                 const resultado = await salvarMarcaComRetorno(formData)
                 toast.success("Marca cadastrada com sucesso!")
-                emitirMarcaCadastrada({
+                onSuccess({
                     id:    resultado.id,
                     marca: resultado.marca,
                 })
             } else {
-            await salvarMarca(formData)
-            toast.success(marca ? "Marca atualizada com sucesso!" : "Marca cadastrada com sucesso!")
-            router.push("/marcas")
+                await salvarMarca(formData)
+                toast.success(marca ? "Marca atualizada com sucesso!" : "Marca cadastrada com sucesso!")
+                router.push("/marcas")
             }
         } catch (err: any) {
             toast.error(err.message)
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/marcas")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -111,7 +113,7 @@ export function MarcaForm({ marca }: MarcaFormProps) {
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/marcas")}
+                    onClick={cancelar} 
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

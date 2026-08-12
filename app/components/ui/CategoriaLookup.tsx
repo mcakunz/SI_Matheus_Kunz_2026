@@ -1,6 +1,6 @@
 "use client"
 
-import { BaseLookup } from "../../../components/ui/BaseLookup"
+import { BaseLookup } from "@/components/ui/BaseLookup"
 import { CategoriaSelect } from "@/lib/types"
 
 interface CategoriaProps {
@@ -9,9 +9,10 @@ interface CategoriaProps {
     onChange: (id: string) => void
     required?: boolean
     error?: string
+    onCriado?: (novo: CategoriaSelect) => void 
 }
 
-export function CategoriaLookup({ categorias, value, onChange, required, error }: CategoriaProps) {
+export function CategoriaLookup({ categorias, value, onChange, required, error, onCriado }: CategoriaProps) {
     const items = categorias.map(c => ({ id: c.id, label: c.categoria }))
 
     return (
@@ -27,6 +28,8 @@ export function CategoriaLookup({ categorias, value, onChange, required, error }
             pathCadastro="/categorias"
             pathLabel="Cadastrar nova categoria"
             editTitle={label => `Editar ${label}`}
+            tipoCadastro="categoria" 
+            onCriado={onCriado}      
         />
     )
 }

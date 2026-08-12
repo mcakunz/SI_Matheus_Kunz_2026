@@ -45,12 +45,61 @@ export const cadastroModalRegistry: Record<TipoCadastroModal, CadastroModalConfi
             { loading }
         ),
     },
-
     cliente: {
         titulo: "Novo Cliente",
         Componente: dynamic(
             () => import("@/app/(cadastros)/clientes/components/ClienteForm").then(m => m.ClienteForm),
             { loading }
         ),
+    },
+    condicaoPagamento: {
+        titulo: "Nova Condição de Pagamento",
+        Componente: dynamic(
+            () => import("@/app/(financeiro)/condicoes-pagamento/components/CondicaoPagamentoForm").then(m => m.CondicaoPagamentoForm),
+            { loading }
+        ),
+    },
+    formaPagamento: {
+        titulo: "Nova Forma de Pagamento",
+        Componente: dynamic(
+            () => import("@/app/(financeiro)/formas-pagamento/components/FormaPagamentoForm").then(m => m.FormaPagamentoForm),
+            { loading }
+        ),
+    },
+    transportadora: {
+        titulo: "Nova Transportadora",
+        Componente: dynamic(() => import("@/app/(cadastros)/transportadoras/components/TransportadoraForm").then(m => m.TransportadoraForm), { loading }),
+    },
+    fornecedor: {
+        titulo: "Novo Fornecedor",
+        Componente: dynamic(() => import("@/app/(cadastros)/fornecedores/components/FornecedorForm").then(m => m.FornecedorForm), { loading }),
+    },
+    veiculo: {
+        titulo: "Novo Veículo",
+        Componente: dynamic(() => import("@/app/(cadastros)/veiculos/components/VeiculoForm").then(m => m.VeiculoForm), { loading }),
+    },
+    funcaoFuncionario: {
+        titulo: "Nova Função de Funcionário",
+        Componente: dynamic(() => import("@/app/(cadastros)/funcoes-funcionario/components/FuncaoFuncionarioForm").then(m => m.FuncaoFuncionarioForm), { loading }),
+    },
+    funcionario: {
+        titulo: "Novo Funcionário",
+        Componente: dynamic(() => import("@/app/(cadastros)/funcionarios/components/FuncionarioForm").then(m => m.FuncionarioForm), { loading }),
+    },
+    produto: {
+        titulo: "Novo Produto",
+        Componente: dynamic(() => import("@/app/(produtos)/produtos/components/ProdutoForm").then(m => m.ProdutoForm), { loading }),
+    },
+    categoria: {
+        titulo: "Nova Categoria",
+        Componente: dynamic(() => import("@/app/(produtos)/categorias/components/CategoriaForm").then(m => m.CategoriaForm), { loading }),
+    },
+    marca: {
+        titulo: "Nova Marca",
+        Componente: dynamic(() => import("@/app/(produtos)/marcas/components/MarcaForm").then(m => m.MarcaForm), { loading }),
+    },
+    unidadeMedida: {
+        titulo: "Nova Unidade de Medida",
+        Componente: dynamic(() => import("@/app/(produtos)/unidades-medida/components/UnidadeMedidaForm").then(m => m.UnidadeMedidaForm), { loading }),
     },
 }

@@ -102,3 +102,13 @@ export async function excluirMarca(id: number) {
         tratarErroDB(error, MARCA_ERROR_LABELS)
     }
 }
+
+/**
+ * Lista simplificada (id + marca) usada em selects/lookups.
+ */
+export async function listarMarcasAtivas(): Promise<{ id: number; marca: string }[]> {
+    const result = await pool.query<{ id: number; marca: string }>(
+        `SELECT id, "marca" FROM tb_marcas WHERE ativo = true ORDER BY "marca" ASC`
+    )
+    return result.rows
+}

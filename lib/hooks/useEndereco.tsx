@@ -1,9 +1,6 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { UseFormSetValue } from 'react-hook-form';
 import { PaisSelect, EstadoSelect, CidadeSelect } from '@/lib/types';
-import { usePaisCadastrado } from '@/lib/hooks/usePaisCadastrado';
-import { useEstadoCadastrado } from '@/lib/hooks/useEstadoCadastrado';
-import { useCidadeCadastrada } from '@/lib/hooks/useCidadeCadastrada';
 
 export function useEndereco(
     setValue: UseFormSetValue<any>,
@@ -15,9 +12,28 @@ export function useEndereco(
 ) {
     const [paisSelecionado,   setPaisSelecionado]   = useState<number | ''>(paisInicial)
     const [estadoSelecionado, setEstadoSelecionado] = useState<number | ''>(estadoInicial)
+    
     const [listaPaises,  setListaPaises]  = useState<PaisSelect[]>(listaPaisesInicial)
     const [listaEstados, setListaEstados] = useState<EstadoSelect[]>(listaEstadosInicial)
     const [listaCidades, setListaCidades] = useState<CidadeSelect[]>(listaCidadesInicial)
+
+    useEffect(() => {
+        if (listaPaisesInicial.length > 0 && listaPaises.length === 0) {
+            setListaPaises(listaPaisesInicial)
+        }
+    }, [listaPaisesInicial, listaPaises.length])
+
+    useEffect(() => {
+        if (listaEstadosInicial.length > 0 && listaEstados.length === 0) {
+            setListaEstados(listaEstadosInicial)
+        }
+    }, [listaEstadosInicial, listaEstados.length])
+
+    useEffect(() => {
+        if (listaCidadesInicial.length > 0 && listaCidades.length === 0) {
+            setListaCidades(listaCidadesInicial)
+        }
+    }, [listaCidadesInicial, listaCidades.length])
 
     const handlePaisChange = useCallback((id: string) => {
         const val = id ? Number(id) : ''
@@ -56,10 +72,6 @@ export function useEndereco(
         setEstadoSelecionado(novaCidade.estadoId)
         setValue('cidadeId', String(novaCidade.id))
     }, [setValue])
-
-    usePaisCadastrado(handlePaisCriado)
-    useEstadoCadastrado(handleEstadoCriado)
-    useCidadeCadastrada(handleCidadeCriada)
 
     const estadosFiltrados = paisSelecionado
         ? listaEstados.filter(e => e.paisId === paisSelecionado)

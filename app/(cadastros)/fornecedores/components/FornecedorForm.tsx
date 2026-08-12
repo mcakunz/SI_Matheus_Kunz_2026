@@ -1,13 +1,19 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { salvarFornecedor } from "../actions"
+import { salvarFornecedor, salvarFornecedorComRetorno } from "../actions"
 import toast from "react-hot-toast"
 import { HiPlus, HiTrash, HiStar } from "react-icons/hi"
+
+import { listarPaisesAtivos } from "@/app/(localidades)/paises/actions"
+import { listarEstadosAtivos } from "@/app/(localidades)/estados/actions"
+import { listarCidadesAtivas } from "@/app/(localidades)/cidades/actions"
+import { listarCondicoesPagamentoAtivas } from "@/app/(financeiro)/condicoes-pagamento/actions"
+import { listarTransportadorasAtivas } from "@/app/(cadastros)/transportadoras/actions"
 
 import { Button } from "@/components/ui/Button"
 import { FormInput } from "@/components/ui/FormInput"
@@ -36,9 +42,7 @@ import { EmailList } from "@/app/components/ui/EmailList"
 import { TelefoneList } from "@/app/components/ui/TelefoneList"
 import { TIPOS_EMAIL_FORNECEDOR, TIPOS_TELEFONE_FORNECEDOR } from "@/lib/TiposContato"
 import { CondicaoPagamentoLookup } from "@/app/components/ui/CondicaoPagamentoLookup"
-import { useCondicaoPagamentoCadastrada } from "@/lib/hooks/useCondicaoPagamentoCadastrado"
-import { useTranportadoraCadastrada } from "@/lib/hooks/useTransportadoraCadastrada"
-
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types"
 
 const fornecedorEmailSchema = z.object({
     id:        z.number().optional(),
@@ -119,15 +123,15 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface FornecedorFormProps {
+interface FornecedorFormProps extends QuickCreateFormProps<{ id: number; fornecedor: string }> {
     fornecedor?:          FornecedorView | null
     emailsIniciais?:      FornecedorEmail[]
     telefonesIniciais?:   FornecedorTelefone[]
-    listaCidades:         CidadeSelect[]
-    listaEstados:         EstadoSelect[]
-    listaPaises:          PaisSelect[]
-    listaCondicoes:       CondicaoPagamentoSelect[]
-    listaTransportadoras: TransportadoraSelect[]
+    listaCidades?:        CidadeSelect[]
+    listaEstados?:        EstadoSelect[]
+    listaPaises?:         PaisSelect[]
+    listaCondicoes?:      CondicaoPagamentoSelect[]
+    listaTransportadoras?: TransportadoraSelect[]
 }
 
 export function FornecedorForm({
@@ -139,15 +143,41 @@ export function FornecedorForm({
     listaPaises,
     listaCondicoes,
     listaTransportadoras,
+    onSuccess,
+    onCancel,
 }: FornecedorFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
-    const [condicoes, setCondicoes] = useState<CondicaoPagamentoSelect[]>(listaCondicoes)
-    const [transportadoras, setTransportadoras] = useState<TransportadoraSelect[]>(listaTransportadoras)
+    const [paises, setPaises]                   = useState<PaisSelect[]>(listaPaises ?? [])
+    const [estados, setEstados]                 = useState<EstadoSelect[]>(listaEstados ?? [])
+    const [cidades, setCidades]                 = useState<CidadeSelect[]>(listaCidades ?? [])
+    const [condicoes, setCondicoes]             = useState<CondicaoPagamentoSelect[]>(listaCondicoes ?? [])
+    const [transportadoras, setTransportadoras] = useState<TransportadoraSelect[]>(listaTransportadoras ?? [])
 
-    const cidadeInicial = listaCidades.find(c => c.id === fornecedor?.cidadeId)
-    const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
+    const [carregandoListas, setCarregandoListas] = useState(!listaPaises || !listaCondicoes || !listaTransportadoras)
+
+    useEffect(() => {
+        if (listaPaises && listaEstados && listaCidades && listaCondicoes && listaTransportadoras) return
+        Promise.all([
+            listarPaisesAtivos(),
+            listarEstadosAtivos(),
+            listarCidadesAtivas(),
+            listarCondicoesPagamentoAtivas(),
+            listarTransportadorasAtivas(),
+        ])
+            .then(([p, e, c, cp, t]) => {
+                setPaises(p)
+                setEstados(e)
+                setCidades(c)
+                setCondicoes(cp)
+                setTransportadoras(t)
+            })
+            .finally(() => setCarregandoListas(false))
+    }, [listaPaises, listaEstados, listaCidades, listaCondicoes, listaTransportadoras])
+
+    const cidadeInicial = cidades.find(c => c.id === fornecedor?.cidadeId)
+    const estadoInicial = estados.find(e => e.id === cidadeInicial?.estadoId)
 
     const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -197,13 +227,16 @@ export function FornecedorForm({
         cidadesFiltradas,
         handlePaisChange,
         handleEstadoChange,
+        handlePaisCriado,
+        handleEstadoCriado,
+        handleCidadeCriada,
     } = useEndereco(
         setValue,
         estadoInicial?.paisId ?? '',
         estadoInicial?.id     ?? '',
-        listaPaises,
-        listaEstados,
-        listaCidades,
+        paises,
+        estados,
+        cidades,
     )
 
     const handleCondicaoCriada = useCallback((novaCondicao: CondicaoPagamentoSelect) => {
@@ -212,21 +245,17 @@ export function FornecedorForm({
                 a.condicaoPagamento.localeCompare(b.condicaoPagamento, 'pt-BR')
             )
         )
-        setValue('condicaoPagamentoId', String(novaCondicao.id))
+        setValue('condicaoPagamentoId', String(novaCondicao.id), { shouldValidate: true })
     }, [setValue])
 
-    useCondicaoPagamentoCadastrada(handleCondicaoCriada)
-
     const handleTransportadoraCriada = useCallback((novaTransportadora: TransportadoraSelect) => {
-    setTransportadoras(prev =>
-        [...prev, novaTransportadora].sort((a, b) =>
-            a.razaoSocialNome.localeCompare(b.razaoSocialNome, 'pt-BR')
+        setTransportadoras(prev =>
+            [...prev, novaTransportadora].sort((a, b) =>
+                a.razaoSocialNome.localeCompare(b.razaoSocialNome, 'pt-BR')
+            )
         )
-    )
-    setValue('transportadoraId', String(novaTransportadora.id))
-}, [setValue])
-
-    useTranportadoraCadastrada(handleTransportadoraCriada)
+        setValue('transportadoraId', String(novaTransportadora.id), { shouldValidate: true })
+    }, [setValue])
 
     const tipoPessoa = watch("tipo")
     const isPF = tipoPessoa === "F"
@@ -273,14 +302,25 @@ export function FornecedorForm({
         formData.append('telefones', JSON.stringify(payload.telefones))
 
         try {
-            await salvarFornecedor(formData)
-            toast.success(fornecedor ? "Fornecedor atualizado com sucesso!" : "Fornecedor cadastrado com sucesso!")
-            router.push("/fornecedores")
+            if (onSuccess) {
+                const resultado = await salvarFornecedorComRetorno(formData)
+                toast.success("Fornecedor cadastrado com sucesso!")
+                onSuccess(resultado)
+            } else {
+                await salvarFornecedor(formData)
+                toast.success(fornecedor ? "Fornecedor atualizado com sucesso!" : "Fornecedor cadastrado com sucesso!")
+                router.push("/fornecedores")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/fornecedores")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -386,6 +426,7 @@ export function FornecedorForm({
                             paises={paisesAtualizados}
                             value={String(paisSelecionado)}
                             onChange={handlePaisChange}
+                            onCriado={handlePaisCriado}
                         />
                     </div>
                     <div>
@@ -394,6 +435,7 @@ export function FornecedorForm({
                             estados={estadosFiltrados}
                             value={String(estadoSelecionado)}
                             onChange={handleEstadoChange}
+                            onCriado={handleEstadoCriado}
                         />
                     </div>
                     <div>
@@ -407,6 +449,7 @@ export function FornecedorForm({
                                     value={field.value}
                                     onChange={field.onChange}
                                     error={errors.cidadeId?.message}
+                                    onCriado={handleCidadeCriada}
                                 />
                             )}
                         />
@@ -438,6 +481,7 @@ export function FornecedorForm({
                                 value={field.value}
                                 onChange={field.onChange}
                                 error={errors.condicaoPagamentoId?.message}
+                                onCriado={handleCondicaoCriada}
                             />
                         )}
                     />
@@ -448,7 +492,7 @@ export function FornecedorForm({
                         <Erro campo="limiteCredito" />
                     </div>
                     <div>
-                        <FormLabel required>Transportadora</FormLabel>
+                        <FormLabel>Transportadora</FormLabel>
                         <Controller
                             name="transportadoraId"
                             control={control}
@@ -458,11 +502,13 @@ export function FornecedorForm({
                                     value={field.value}
                                     onChange={field.onChange}
                                     error={errors.transportadoraId?.message}
+                                    onCriado={handleTransportadoraCriada}
                                 />
                             )}
                         />
                     </div>
                 </div>
+                {carregandoListas && <p className="text-xs text-slate-400 mt-2">Carregando listas...</p>}
             </div>
 
             <EmailList
@@ -513,8 +559,8 @@ export function FornecedorForm({
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/fornecedores")}
-                    className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate:900 transition-colors"
+                    onClick={cancelar}
+                    className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar
                 </button>

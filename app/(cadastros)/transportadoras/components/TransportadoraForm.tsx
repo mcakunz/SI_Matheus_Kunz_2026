@@ -1,12 +1,16 @@
 "use client"
 
-import { useCallback, useState }                      from "react"
-import { useRouter, useSearchParams }                                  from "next/navigation"
-import { useForm, useFieldArray, Controller }         from "react-hook-form"
-import { zodResolver }                                from "@hookform/resolvers/zod"
-import { z }                                          from "zod"
-import { salvarTransportadora, salvarTransportadoraComRetorno }                       from "../actions"
-import toast                                          from "react-hot-toast"
+import { useCallback, useState, useEffect }                       from "react"
+import { useRouter }                                              from "next/navigation"
+import { useForm, useFieldArray, Controller }                     from "react-hook-form"
+import { zodResolver }                                            from "@hookform/resolvers/zod"
+import { z }                                                      from "zod"
+import { salvarTransportadora, salvarTransportadoraComRetorno }   from "../actions"
+import { listarPaisesAtivos }                                     from "@/app/(localidades)/paises/actions"
+import { listarEstadosAtivos }                                    from "@/app/(localidades)/estados/actions"
+import { listarCidadesAtivas }                                    from "@/app/(localidades)/cidades/actions"
+import { listarCondicoesPagamentoAtivas }                         from "@/app/(financeiro)/condicoes-pagamento/actions"
+import toast                                                      from "react-hot-toast"
 
 import { Button }          from "@/components/ui/Button"
 import { FormInput }       from "@/components/ui/FormInput"
@@ -20,6 +24,7 @@ import { PaisLookup }      from "@/app/components/ui/PaisLookup"
 import { EstadoLookup }    from "@/app/components/ui/EstadoLookup"
 import { CidadeLookup }    from "@/app/components/ui/CidadeLookup"
 import { CondicaoPagamentoLookup } from "@/app/components/ui/CondicaoPagamentoLookup"
+import { listarVeiculosAtivos } from "@/app/(cadastros)/veiculos/actions" 
 
 import {
     TransportadoraView,
@@ -32,15 +37,12 @@ import {
     VeiculoSelect,
 } from "@/lib/types"
 
-import { validarIE, validarRG }                             from "@/lib/utils/validacoes"
-import { mascaraCPF, mascaraCNPJ, mascaraTelefone }         from "@/lib/utils/mascaras"
-import { useEndereco }                                      from "@/lib/hooks/useEndereco"
+import { validarIE, validarRG }                                 from "@/lib/utils/validacoes"
+import { mascaraCPF, mascaraCNPJ, mascaraTelefone }             from "@/lib/utils/mascaras"
+import { useEndereco }                                          from "@/lib/hooks/useEndereco"
 import { TIPOS_EMAIL_TRANSPORTADORA, TIPOS_TELEFONE_TRANSPORTADORA } from "@/lib/TiposContato"
-import { useCondicaoPagamentoCadastrada }                   from "@/lib/hooks/useCondicaoPagamentoCadastrado"
 import { useVeiculoCadastrado } from "@/lib/hooks/useVeiculoCadastrado"
-import { getValueOptions } from "@mui/x-data-grid/internals"
-import { emitirTransportadoraCadastrada } from "@/lib/hooks/useTransportadoraCadastrada"
-
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types"
 
 const transportadoraEmailSchema = z.object({
     id:        z.number().optional(),
@@ -111,16 +113,16 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface TransportadoraFormProps {
+interface TransportadoraFormProps extends QuickCreateFormProps<{ id: number; razaoSocialNome: string }> {
     transportadora?:    TransportadoraView | null
     emailsIniciais?:    TransportadoraEmail[]
     telefonesIniciais?: TransportadoraTelefone[]
     veiculosIniciais?:  VeiculoSelect[]
-    listaVeiculos:      VeiculoSelect[]
-    listaCidades:       CidadeSelect[]
-    listaEstados:       EstadoSelect[]
-    listaPaises:        PaisSelect[]
-    listaCondicoes:     CondicaoPagamentoSelect[]
+    listaVeiculos?:     VeiculoSelect[]
+    listaCidades?:      CidadeSelect[]
+    listaEstados?:      EstadoSelect[]
+    listaPaises?:       PaisSelect[]
+    listaCondicoes?:    CondicaoPagamentoSelect[]
 }
 
 export function TransportadoraForm({
@@ -133,25 +135,48 @@ export function TransportadoraForm({
     listaEstados,
     listaPaises,
     listaCondicoes,
+    onSuccess,
+    onCancel,
 }: TransportadoraFormProps) {
     const router  = useRouter()
     const [loading, setLoading] = useState(false)
 
-    const [condicoes, setCondicoes] = useState<CondicaoPagamentoSelect[]>(listaCondicoes)
-    const [veiculos, setVeiculos]   = useState<VeiculoSelect[]>(listaVeiculos)
+    const [paises, setPaises]       = useState<PaisSelect[]>(listaPaises ?? [])
+    const [estados, setEstados]     = useState<EstadoSelect[]>(listaEstados ?? [])
+    const [cidades, setCidades]     = useState<CidadeSelect[]>(listaCidades ?? [])
+    const [condicoes, setCondicoes] = useState<CondicaoPagamentoSelect[]>(listaCondicoes ?? [])
+    const [veiculos, setVeiculos]   = useState<VeiculoSelect[]>(listaVeiculos ?? [])
+    
+    const [carregandoListas, setCarregandoListas] = useState(!listaPaises || !listaCondicoes)
 
-    const cidadeInicial = listaCidades.find(c => c.id === transportadora?.cidadeId)
-    const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
+    useEffect(() => {
+        if (listaPaises && listaEstados && listaCidades && listaCondicoes && listaVeiculos) return
+        Promise.all([
+            listarPaisesAtivos(),
+            listarEstadosAtivos(),
+            listarCidadesAtivas(),
+            listarCondicoesPagamentoAtivas(),
+            listarVeiculosAtivos(), 
+        ])
+            .then(([p, e, c, cp, v]) => { 
+                setPaises(p)
+                setEstados(e)
+                setCidades(c)
+                setCondicoes(cp)
+                setVeiculos(v) 
+            })
+            .finally(() => setCarregandoListas(false))
+    }, [listaPaises, listaEstados, listaCidades, listaCondicoes, listaVeiculos])
 
-    const searchParams = useSearchParams()
-    const abertoPorLookup = searchParams.get('origem') === 'lookup'
+    const cidadeInicial = cidades.find(c => c.id === transportadora?.cidadeId)
+    const estadoInicial = estados.find(e => e.id === cidadeInicial?.estadoId)
 
     const { register, handleSubmit, watch, setValue, getValues, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             tipo:                  (transportadora?.tipo as 'F' | 'J') ?? 'J',
             ativo:                 transportadora ? transportadora.ativo : true,
-            razaoSocialNome:           transportadora?.razaoSocialNome           ?? '',
+            razaoSocialNome:           transportadora?.razaoSocialNome            ?? '',
             nomeFantasiaApelido:   transportadora?.nomeFantasiaApelido   ?? '',
             cnpj: transportadora?.cnpj
                                      ? (transportadora.cnpj.replace(/\D/g, '').length === 11
@@ -159,11 +184,11 @@ export function TransportadoraForm({
                                          : mascaraCNPJ(transportadora.cnpj))
                                      : '',
             rgIe:                  transportadora?.rgIe          ?? '',
-            cep:                   transportadora?.cep            ?? '',
-            endereco:              transportadora?.endereco       ?? '',
-            numero:                transportadora?.numero         ?? '',
+            cep:                   transportadora?.cep           ?? '',
+            endereco:              transportadora?.endereco      ?? '',
+            numero:                transportadora?.numero        ?? '',
             complemento:           transportadora?.complemento   ?? '',
-            bairro:                transportadora?.bairro         ?? '',
+            bairro:                transportadora?.bairro        ?? '',
             cidadeId:              transportadora?.cidadeId?.toString()            ?? '',
             condicaoPagamentoId:   transportadora?.condicaoPagamentoId?.toString() ?? '',
             limiteCredito:         transportadora?.limiteCredito?.toString()        ?? '0',
@@ -186,13 +211,16 @@ export function TransportadoraForm({
         cidadesFiltradas,
         handlePaisChange,
         handleEstadoChange,
+        handlePaisCriado,
+        handleEstadoCriado,
+        handleCidadeCriada,
     } = useEndereco(
         setValue,
         estadoInicial?.paisId ?? '',
         estadoInicial?.id     ?? '',
-        listaPaises,
-        listaEstados,
-        listaCidades,
+        paises,
+        estados,
+        cidades,
     )
 
     const { fields: emailFields,    append: appendEmail,    remove: removeEmail    } = useFieldArray({ control, name: "emails" })
@@ -206,24 +234,12 @@ export function TransportadoraForm({
         setValue('condicaoPagamentoId', String(novaCondicao.id))
     }, [setValue])
 
-    useCondicaoPagamentoCadastrada(handleCondicaoCriada)
 
     const handleVeiculoCriado = useCallback((novoVeiculo: VeiculoSelect) => {
         setVeiculos(prev =>
             [...prev, novoVeiculo].sort((a, b) => a.placa.localeCompare(b.placa, 'pt-BR'))
         )
-
-        const veiculosAtuais = getValues('veiculos')
-        const indexVazio = veiculosAtuais.findIndex((v: any) => !v.veiculoId)
-
-        if (indexVazio >= 0) {
-        setValue(`veiculos.${indexVazio}.veiculoId`, String(novoVeiculo.id))
-        } else {
-            appendVeiculo({ veiculoId: String(novoVeiculo.id) })
-        }
-    }, [appendVeiculo, getValues, setValue])
-
-    useVeiculoCadastrado(handleVeiculoCriado)
+    }, [])
 
     const marcarEmailPrincipal    = (index: number) => emailFields.forEach((_, i)    => setValue(`emails.${i}.principal`,    i === index))
     const marcarTelefonePrincipal = (index: number) => telefoneFields.forEach((_, i) => setValue(`telefones.${i}.principal`, i === index))
@@ -255,13 +271,10 @@ export function TransportadoraForm({
         formData.append('veiculos',  JSON.stringify(veiculos))
 
         try {
-            if (abertoPorLookup && !transportadora?.id) {
+            if (onSuccess) {
                 const resultado = await salvarTransportadoraComRetorno(formData)
                 toast.success("Transportadora cadastrada com sucesso!")
-                emitirTransportadoraCadastrada({
-                    id: resultado.id,
-                    razaoSocialNome: resultado.razaoSocialNome,
-                })
+                onSuccess(resultado)
             } else {
                 await salvarTransportadora(formData)
                 toast.success(transportadora ? "Transportadora atualizada com sucesso!" : "Transportadora cadastrada com sucesso!")
@@ -272,6 +285,11 @@ export function TransportadoraForm({
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/transportadoras")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -381,11 +399,21 @@ export function TransportadoraForm({
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6">
                     <div>
                         <FormLabel required>País</FormLabel>
-                        <PaisLookup paises={paisesAtualizados} value={String(paisSelecionado)} onChange={handlePaisChange} />
+                        <PaisLookup 
+                            paises={paisesAtualizados} 
+                            value={String(paisSelecionado)} 
+                            onChange={handlePaisChange} 
+                            onCriado={handlePaisCriado}
+                        />
                     </div>
                     <div>
                         <FormLabel required>Estado</FormLabel>
-                        <EstadoLookup estados={estadosFiltrados} value={String(estadoSelecionado)} onChange={handleEstadoChange} />
+                        <EstadoLookup 
+                            estados={estadosFiltrados} 
+                            value={String(estadoSelecionado)} 
+                            onChange={handleEstadoChange} 
+                            onCriado={handleEstadoCriado}
+                        />
                     </div>
                     <div>
                         <FormLabel required>Cidade</FormLabel>
@@ -393,7 +421,13 @@ export function TransportadoraForm({
                             name="cidadeId"
                             control={control}
                             render={({ field }) => (
-                                <CidadeLookup cidades={cidadesFiltradas} value={field.value} onChange={field.onChange} error={errors.cidadeId?.message} />
+                                <CidadeLookup 
+                                    cidades={cidadesFiltradas} 
+                                    value={field.value} 
+                                    onChange={field.onChange} 
+                                    error={errors.cidadeId?.message} 
+                                    onCriado={handleCidadeCriada}
+                                />
                             )}
                         />
                     </div>
@@ -413,6 +447,7 @@ export function TransportadoraForm({
                                 value={field.value}
                                 onChange={field.onChange}
                                 error={errors.condicaoPagamentoId?.message}
+                                onCriado={handleCondicaoCriada}
                             />
                         )}
                     />
@@ -455,7 +490,10 @@ export function TransportadoraForm({
                 control={control}
                 errors={errors.veiculos}
                 listaVeiculos={veiculos}
+                onCriado={handleVeiculoCriado} 
             />
+
+            {carregandoListas && <p className="text-xs text-slate-400 mt-1">Carregando listas...</p>}
 
             <div>
                 <FormLabel>Observações</FormLabel>
@@ -483,7 +521,7 @@ export function TransportadoraForm({
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/transportadoras")}
+                    onClick={cancelar}
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

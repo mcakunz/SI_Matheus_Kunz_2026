@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -13,7 +13,8 @@ import { FormInput } from "@/components/ui/FormInput"
 import { FormLabel } from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { FormaPagamento } from "@/lib/types"
-import { emitirFormaPagamentoCadastrada } from "@/lib/hooks/useFormaPagamentoCadastrada"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types" 
+
 const schema = z.object({
     formaPagamento: z.string().min(2, "O nome deve ter no mínimo 2 caracteres.").max(50),
     descricao:      z.string().max(100, "A descrição deve ter no máximo 100 caracteres."),
@@ -22,16 +23,13 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface FormaPagamentoFormProps {
+interface FormaPagamentoFormProps extends QuickCreateFormProps<{ id: number; formaPagamento: string }> {
     forma?: FormaPagamento | null
 }
 
-export function FormaPagamentoForm({ forma }: FormaPagamentoFormProps) {
+export function FormaPagamentoForm({ forma, onSuccess, onCancel }: FormaPagamentoFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
-
-    const searchParams = useSearchParams()
-    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -52,13 +50,10 @@ export function FormaPagamentoForm({ forma }: FormaPagamentoFormProps) {
         formData.append('ativo',          String(data.ativo))
 
         try {
-            if (abertoPorLookup && !forma?.id) {
+            if (onSuccess) { 
                 const resultado = await salvarFormaPagamentoComRetorno(formData)
                 toast.success("Forma de pagamento cadastrada com sucesso!")
-                emitirFormaPagamentoCadastrada({
-                    id: resultado.id,
-                    formaPagamento: resultado.formaPagamento,
-                })
+                onSuccess(resultado)
             } else {
                 await salvarFormaPagamento(formData)
                 toast.success(forma ? "Forma de pagamento atualizada com sucesso!" : "Forma de pagamento cadastrada com sucesso!")
@@ -69,6 +64,11 @@ export function FormaPagamentoForm({ forma }: FormaPagamentoFormProps) {
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/formas-pagamento")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -123,7 +123,7 @@ export function FormaPagamentoForm({ forma }: FormaPagamentoFormProps) {
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/formas-pagamento")}
+                    onClick={cancelar} 
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -12,26 +12,23 @@ import { Button } from "@/components/ui/Button"
 import { FormInput } from "@/components/ui/FormInput"
 import { FormLabel } from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
-import { Categoria } from "@/lib/types"
-import { emitirCategoriaCadastrada } from "@/lib/hooks/useCategoriaCadastrada"
+import { Categoria, CategoriaSelect } from "@/lib/types"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types" 
 
 const schema = z.object({
-    categoria:      z.string().max(50),
+    categoria:      z.string().min(1, "Categoria é obrigatória").max(50, "Máximo de 50 caracteres"),
     ativo:          z.boolean(),
 })
 
 type FormData = z.infer<typeof schema>
 
-interface CategoriaFormProps {
+interface CategoriaFormProps extends QuickCreateFormProps<CategoriaSelect> {
     categoria?: Categoria | null
 }
 
-export function CategoriaForm({ categoria }: CategoriaFormProps) {
+export function CategoriaForm({ categoria, onSuccess, onCancel }: CategoriaFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
-
-    const searchParams = useSearchParams()
-    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -50,14 +47,13 @@ export function CategoriaForm({ categoria }: CategoriaFormProps) {
         formData.append('ativo',          String(data.ativo))
 
         try {
-            if (abertoPorLookup && !categoria?.id) {
+            if (onSuccess) { 
                 const resultado = await salvarCategoriaComRetorno(formData)
                 toast.success("Categoria cadastrada com sucesso!")
-                emitirCategoriaCadastrada({
+                onSuccess({
                     id:        resultado.id,
                     categoria: resultado.categoria,
                 })
-
             } else {
                 await salvarCategoria(formData)
                 toast.success(categoria ? "Categoria atualizada com sucesso!" : "Categoria cadastrada com sucesso!")
@@ -68,6 +64,11 @@ export function CategoriaForm({ categoria }: CategoriaFormProps) {
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/categorias")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -112,7 +113,7 @@ export function CategoriaForm({ categoria }: CategoriaFormProps) {
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/categorias")}
+                    onClick={cancelar} 
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

@@ -9,9 +9,10 @@ interface TransportadoraProps {
     onChange: (id: string) => void
     required?: boolean
     error?: string
+    onCriado?: (novo: TransportadoraSelect) => void 
 }
 
-export function TransportadoraLookup({ transportadoras, value, onChange, required, error }: TransportadoraProps) {
+export function TransportadoraLookup({ transportadoras, value, onChange, required, error, onCriado }: TransportadoraProps) {
     const items = transportadoras.map(t => ({ id: t.id, label: t.razaoSocialNome }))
 
     return (
@@ -27,6 +28,8 @@ export function TransportadoraLookup({ transportadoras, value, onChange, require
             pathCadastro="/transportadoras"
             pathLabel="Cadastrar nova transportadora"
             editTitle={label => `Editar ${label}`}
+            tipoCadastro="transportadora" 
+            onCriado={onCriado}           
         />
     )
 }

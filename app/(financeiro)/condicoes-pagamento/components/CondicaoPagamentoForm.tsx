@@ -1,11 +1,12 @@
 "use client"
 
-import { useCallback, useRef, useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useCallback, useRef, useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarCondicaoPagamento, salvarCondicaoPagamentoComRetorno } from "../actions"
+import { listarFormasPagamentoAtivas } from "@/app/(financeiro)/formas-pagamento/actions" 
 import toast from "react-hot-toast"
 import { HiPlus, HiTrash } from "react-icons/hi"
 
@@ -14,9 +15,8 @@ import { FormInput } from "@/components/ui/FormInput"
 import { FormLabel } from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { CondicaoPagamentoCompleto, ParcelaCondicao, FormaPagamentoSelect } from "@/lib/types"
-import { emitirCondicaoPagamentoCadastrada } from "@/lib/hooks/useCondicaoPagamentoCadastrado"
-import { useFormaPagamentoCadastrada } from "@/lib/hooks/useFormaPagamentoCadastrada"
 import { FormaPagamentoLookup } from "@/app/components/ui/FormaPagamentoLookup"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types"
 
 const parcelaSchema = z.object({
     numero:           z.number().int().positive(),
@@ -54,24 +54,31 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface CondicaoPagamentoFormProps {
+interface CondicaoPagamentoFormProps extends QuickCreateFormProps<{ id: number; condicaoPagamento: string }> {
     condicao?:           CondicaoPagamentoCompleto | null
     parcelas?:           ParcelaCondicao[]
-    listaFormasPagamento: FormaPagamentoSelect[]
+    listaFormasPagamento?: FormaPagamentoSelect[] 
 }
 
 export function CondicaoPagamentoForm({
     condicao,
     parcelas = [],
-    listaFormasPagamento,
+    listaFormasPagamento: listaFormasPagamentoProp,
+    onSuccess,
+    onCancel
 }: CondicaoPagamentoFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
-    const searchParams = useSearchParams()
-    const abertoPorLookup = searchParams.get('origem') === 'lookup'
+    const [formasPagamento, setFormasPagamento] = useState<FormaPagamentoSelect[]>(listaFormasPagamentoProp ?? [])
+    const [carregandoFormas, setCarregandoFormas] = useState(!listaFormasPagamentoProp)
 
-    const [formasPagamento, setFormasPagamento] = useState<FormaPagamentoSelect[]>(listaFormasPagamento)
+    useEffect(() => {
+        if (listaFormasPagamentoProp) return
+        listarFormasPagamentoAtivas()
+            .then(setFormasPagamento)
+            .finally(() => setCarregandoFormas(false))
+    }, [listaFormasPagamentoProp])
 
     const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -114,8 +121,6 @@ export function CondicaoPagamentoForm({
         }
     }, [fields, setValue])
 
-    useFormaPagamentoCadastrada(handleFormaPagamentoCriada)
-
     const parcelasWatch = watch('parcelas')
     const totalPercentual = parcelasWatch?.reduce((acc, p) => acc + Number(p.percentual || 0), 0) ?? 0
     const totalOk = Math.abs(totalPercentual - 100) <= 0.01
@@ -141,13 +146,10 @@ export function CondicaoPagamentoForm({
         })
         
         try {
-            if (abertoPorLookup && !condicao?.id) {
+            if (onSuccess) {
                 const resultado = await salvarCondicaoPagamentoComRetorno(formData)
                 toast.success("Condição de pagamento cadastrada com sucesso!")
-                emitirCondicaoPagamentoCadastrada({
-                    id: resultado.id,
-                    condicaoPagamento: resultado.condicaoPagamento,
-                })
+                onSuccess(resultado)
             } else {
                 await salvarCondicaoPagamento(formData)
                 toast.success(condicao ? "Condição atualizada com sucesso!" : "Condição cadastrada com sucesso!")
@@ -158,7 +160,11 @@ export function CondicaoPagamentoForm({
         } finally {
             setLoading(false)
         }
+    }
 
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/condicoes-pagamento")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -295,16 +301,17 @@ export function CondicaoPagamentoForm({
                                 />
 
                                 <div onFocus={() => { parcelaAtivaRef.current = field.id }}>
-                                        <Controller
-                                            name={`parcelas.${index}.formaPagamentoId`}
-                                            control={control}
-                                            render={({ field: formaPagamentoField }) => (
-                                                <FormaPagamentoLookup
-                                                    formas={formasPagamento}
-                                                    value={formaPagamentoField.value}
-                                                    onChange={formaPagamentoField.onChange}
-                                                    error={errors.parcelas?.[index]?.formaPagamentoId?.message}
-                                                />
+                                    <Controller
+                                        name={`parcelas.${index}.formaPagamentoId`}
+                                        control={control}
+                                        render={({ field: formaPagamentoField }) => (
+                                            <FormaPagamentoLookup
+                                                formas={formasPagamento}
+                                                value={formaPagamentoField.value}
+                                                onChange={formaPagamentoField.onChange}
+                                                error={errors.parcelas?.[index]?.formaPagamentoId?.message}
+                                                onCriado={handleFormaPagamentoCriada} 
+                                            />
                                         )}
                                     />
                                 </div>
@@ -348,6 +355,10 @@ export function CondicaoPagamentoForm({
                 {errors.parcelas?.root && (
                     <p className="text-xs text-red-500 mt-2">{errors.parcelas.root.message}</p>
                 )}
+                
+                {carregandoFormas && (
+                    <p className="text-xs text-slate-400 mt-1">Carregando formas de pagamento...</p>
+                )}
             </div>
 
             {condicao && (
@@ -371,7 +382,7 @@ export function CondicaoPagamentoForm({
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/condicoes-pagamento")}
+                    onClick={cancelar}
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

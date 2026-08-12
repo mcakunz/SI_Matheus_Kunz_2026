@@ -1,6 +1,6 @@
 "use client"
 
-import { BaseLookup } from "../../../components/ui/BaseLookup"
+import { BaseLookup } from "@/components/ui/BaseLookup"
 import { FuncaoFuncionarioSelect } from "@/lib/types"
 
 interface FuncaoFuncionarioProps {
@@ -9,9 +9,10 @@ interface FuncaoFuncionarioProps {
     onChange: (id: string) => void
     required?: boolean
     error?: string
+    onCriado?: (novo: FuncaoFuncionarioSelect) => void 
 }
 
-export function FuncaoFuncionarioLookup({ funcoes, value, onChange, required, error }: FuncaoFuncionarioProps) {
+export function FuncaoFuncionarioLookup({ funcoes, value, onChange, required, error, onCriado }: FuncaoFuncionarioProps) {
     const items = funcoes.map(f => ({ id: f.id, label: f.funcaoFuncionario }))
 
     return (
@@ -27,6 +28,8 @@ export function FuncaoFuncionarioLookup({ funcoes, value, onChange, required, er
             pathCadastro="/funcoes-funcionario"
             pathLabel="Cadastrar nova função"
             editTitle={label => `Editar ${label}`}
+            tipoCadastro="funcaoFuncionario" 
+            onCriado={onCriado}              
         />
     )
 }

@@ -14,6 +14,7 @@ interface VeiculoListProps<T extends FieldValues> {
     control:       Control<T>
     errors?:       any
     listaVeiculos: VeiculoSelect[]
+    onCriado?:     (novo: VeiculoSelect) => void 
 }
 
 export function VeiculoList<T extends FieldValues>({
@@ -24,6 +25,7 @@ export function VeiculoList<T extends FieldValues>({
     control,
     errors,
     listaVeiculos,
+    onCriado, 
 }: VeiculoListProps<T>) {
 
     const veiculosWatched      = (watch as UseFormWatch<FieldValues>)('veiculos') ?? []
@@ -82,6 +84,7 @@ export function VeiculoList<T extends FieldValues>({
                                             value={f.value}
                                             onChange={f.onChange}
                                             error={errors?.[index]?.veiculoId?.message}
+                                            onCriado={onCriado} 
                                         />
                                 )}
                                 />
@@ -107,5 +110,3 @@ export function VeiculoList<T extends FieldValues>({
         </div>
     )
 }
-
-

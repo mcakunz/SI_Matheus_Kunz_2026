@@ -133,7 +133,7 @@ export async function salvarTransportadora(formData: FormData) {
                         "complemento"         = $13,
                         "bairro"              = $14,
                         "observacoes"         = $15
-                  WHERE id = $16`,
+                 WHERE id = $16`,
                 [
                     v.razaoSocialNome, v.nomeFantasiaApelido ?? null, v.cnpj, v.tipo,
                     v.cidadeId, v.condicaoPagamentoId, v.limiteCredito, v.ativo,
@@ -280,6 +280,7 @@ export async function salvarTransportadoraComRetorno(
     } catch (error: any) {
         await client.query('ROLLBACK')
         tratarErroDB(error, TRANSPORTADORA_DB_ERROR_LABELS)
+        throw new Error(error.message)
     } finally {
         client.release()
     }
@@ -306,4 +307,14 @@ export async function excluirTransportadora(id: number) {
     }
 
     revalidatePath('/transportadoras')
+}
+
+/**
+ * Lista simplificada (id + razaoSocialNome) usada em selects/lookups.
+ */
+export async function listarTransportadorasAtivas(): Promise<{ id: number; razaoSocialNome: string }[]> {
+    const result = await pool.query<{ id: number; razaoSocialNome: string }>(
+        `SELECT id, "razaoSocialNome" FROM tb_transportadoras WHERE ativo = true ORDER BY "razaoSocialNome" ASC`
+    )
+    return result.rows
 }

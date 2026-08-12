@@ -30,13 +30,13 @@ const produtoSchema = z.object({
     ativo:            z.boolean(),
 })
 
-export async function salvarProduto(formData: FormData) {
+function parseDadosProduto(formData: FormData) {
     const codigoBarras = (formData.get('codigoBarras') as string || "").trim() || null
     const referencia   = (formData.get('referencia')   as string || "").trim() || null
     const descricao    = (formData.get('descricao')    as string || "").trim() || null
     const observacoes  = (formData.get('observacoes')  as string || "").trim() || null
 
-    const dados = {
+    return {
         produto:          (formData.get('produto') as string || "").trim(),
         codigoBarras,
         referencia,
@@ -52,7 +52,10 @@ export async function salvarProduto(formData: FormData) {
         observacoes,
         ativo:            formData.get('ativo') === 'true',
     }
+}
 
+export async function salvarProduto(formData: FormData) {
+    const dados = parseDadosProduto(formData)
     const validacao = produtoSchema.safeParse(dados)
     if (!validacao.success) throw new Error(validacao.error.issues[0].message)
 
@@ -112,6 +115,41 @@ export async function salvarProduto(formData: FormData) {
     }
 }
 
+export async function salvarProdutoComRetorno(
+    formData: FormData
+): Promise<{ id: number; produto: string }> {
+    const dados = parseDadosProduto(formData)
+    const validacao = produtoSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+
+    const v = validacao.data
+
+    try {
+        const res = await pool.query<{ id: number; produto: string }>(
+            `INSERT INTO tb_produtos
+                ("produto", "codigoBarras", "referencia",
+                 "marcaId", "unidadeMedidaId", "categoriaId",
+                 "valorCompra", "valorVenda",
+                 "quantidade", "quantidadeMinima", "percentualLucro",
+                 "descricao", "observacoes", "ativo")
+             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+             RETURNING id, "produto"`,
+            [
+                v.produto, v.codigoBarras, v.referencia,
+                v.marcaId, v.unidadeMedidaId, v.categoriaId,
+                v.valorCompra, v.valorVenda,
+                v.quantidade, v.quantidadeMinima, v.percentualLucro,
+                v.descricao, v.observacoes, v.ativo,
+            ]
+        )
+        revalidatePath('/produtos')
+        return res.rows[0]
+    } catch (error: any) {
+        tratarErroDB(error, PRODUTO_ERROR_LABELS)
+        throw new Error(error.message)
+    }
+}
+
 export async function alternarStatusProduto(id: number, statusAtual: boolean) {
     try {
         await pool.query(
@@ -131,4 +169,14 @@ export async function excluirProduto(id: number) {
     } catch (error: any) {
         tratarErroDB(error, PRODUTO_ERROR_LABELS)
     }
+}
+
+/**
+ * Lista simplificada usada em selects/lookups.
+ */
+export async function listarProdutosAtivos(): Promise<{ id: number; produto: string }[]> {
+    const result = await pool.query<{ id: number; produto: string }>(
+        `SELECT id, "produto" FROM tb_produtos WHERE ativo = true ORDER BY "produto" ASC`
+    )
+    return result.rows
 }

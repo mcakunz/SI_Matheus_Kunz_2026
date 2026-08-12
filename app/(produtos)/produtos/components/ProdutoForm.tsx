@@ -1,33 +1,35 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { salvarProduto } from "../actions"
+import { salvarProduto, salvarProdutoComRetorno } from "../actions"
 import toast from "react-hot-toast"
+
+import { listarCategoriasAtivas } from "../../categorias/actions"
+import { listarMarcasAtivas } from "../../marcas/actions"
+import { listarUnidadesMedidaAtivas } from "../../unidades-medida/actions"
 
 import { Button } from "@/components/ui/Button"
 import { FormInput } from "@/components/ui/FormInput"
 import { FormLabel } from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
-import { FormSelect } from "@/components/ui/FormSelect"
 import { FormTextArea } from "@/components/ui/FormTextArea"
 import { Produto, MarcaSelect, UnidadeMedidaSelect, CategoriaSelect } from "@/lib/types"
-import { useCategoriaCadastrada } from "@/lib/hooks/useCategoriaCadastrada"
-import { useMarcaCadastrada } from "@/lib/hooks/useMarcaCadastrada"
+
 import { CategoriaLookup } from "@/app/components/ui/CategoriaLookup"
 import { MarcaLookup } from "@/app/components/ui/MarcaLookup"
 import { UnidadeMedidaLookup } from "@/app/components/ui/UnidadeMedidaLookup"
-import { useUnidadeMedidaCadastrada } from "@/lib/hooks/useUnidadeMedidaCadastrada"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types" 
 
 const schema = z.object({
     produto:          z.string().min(1, "Nome do produto é obrigatório").max(50, "Máximo de 50 caracteres"),
     codigoBarras:     z.string().max(20, "Máximo de 20 caracteres").nullable(),
     referencia:       z.string().max(30, "Máximo de 30 caracteres").nullable(),
     marcaId:          z.string({ error: "Marca é obrigatória" }).min(1, "Selecione uma marca"),
-    unidadeMedidaId: z.string({ error: "Unidade de medida é obrigatória" }).min(1, "Selecione uma unidade de medida"),
+    unidadeMedidaId:  z.string({ error: "Unidade de medida é obrigatória" }).min(1, "Selecione uma unidade de medida"),
     categoriaId:      z.string({ error: "Categoria é obrigatória" }).min(1, "Selecione uma categoria"),
     valorCompra:      z.number({ error: "Valor de compra inválido" }).min(0, "Valor de compra não pode ser negativo"),
     valorVenda:       z.number({ error: "Valor de venda inválido" }).min(0, "Valor de venda não pode ser negativo"),
@@ -41,20 +43,36 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface ProdutoFormProps {
-    produto?:   Produto | null
-    listaMarcas:     MarcaSelect[]
-    listaUnidades:   UnidadeMedidaSelect[]
-    listaCategorias: CategoriaSelect[]
+interface ProdutoFormProps extends QuickCreateFormProps<{ id: number; produto: string }> {
+    produto?:         Produto | null
+    listaMarcas?:     MarcaSelect[]
+    listaUnidades?:   UnidadeMedidaSelect[]
+    listaCategorias?: CategoriaSelect[]
 }
 
-export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategorias }: ProdutoFormProps) {
+export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategorias, onSuccess, onCancel }: ProdutoFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
-    const [categorias, setCategorias] = useState<CategoriaSelect[]>(listaCategorias)
-    const [marcas, setMarcas] = useState<MarcaSelect[]>(listaMarcas)
-    const [unidades, setUnidades]   = useState<UnidadeMedidaSelect[]>(listaUnidades)
+    const [categorias, setCategorias] = useState<CategoriaSelect[]>(listaCategorias ?? [])
+    const [marcas, setMarcas]         = useState<MarcaSelect[]>(listaMarcas ?? [])
+    const [unidades, setUnidades]     = useState<UnidadeMedidaSelect[]>(listaUnidades ?? [])
+    const [carregandoListas, setCarregandoListas] = useState(!listaMarcas || !listaUnidades || !listaCategorias)
+
+    useEffect(() => {
+        if (listaMarcas && listaUnidades && listaCategorias) return
+        Promise.all([
+            listarMarcasAtivas(),
+            listarUnidadesMedidaAtivas(),
+            listarCategoriasAtivas(),
+        ])
+            .then(([m, u, c]) => {
+                setMarcas(m)
+                setUnidades(u)
+                setCategorias(c)
+            })
+            .finally(() => setCarregandoListas(false))
+    }, [listaMarcas, listaUnidades, listaCategorias])
 
     const { register, handleSubmit, setValue, watch, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -63,7 +81,7 @@ export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategori
             codigoBarras:     produto?.codigoBarras     ?? null,
             referencia:       produto?.referencia       ?? null,
             marcaId:          produto?.marcaId?.toString()          ?? '',
-            unidadeMedidaId: produto?.unidadeMedidaId?.toString() ?? '',
+            unidadeMedidaId:  produto?.unidadeMedidaId?.toString()  ?? '',
             categoriaId:      produto?.categoriaId?.toString()      ?? '',
             valorCompra:      produto?.valorCompra      ?? 0,
             valorVenda:       produto?.valorVenda       ?? 0,
@@ -83,28 +101,23 @@ export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategori
         setCategorias(prev =>
             [...prev, novaCategoria].sort((a, b) => a.categoria.localeCompare(b.categoria, 'pt-BR'))
         )
-        setValue('categoriaId', String(novaCategoria.id))
+        setValue('categoriaId', String(novaCategoria.id), { shouldValidate: true })
     }, [setValue])
-
-    useCategoriaCadastrada(handleCategoriaCriada)
 
     const handleMarcaCriada = useCallback((novaMarca: MarcaSelect) => {
         setMarcas(prev =>
             [...prev, novaMarca].sort((a, b) => a.marca.localeCompare(b.marca, 'pt-BR'))
         )
-        setValue('marcaId', String(novaMarca.id))
+        setValue('marcaId', String(novaMarca.id), { shouldValidate: true })
     }, [setValue])
     
-    useMarcaCadastrada(handleMarcaCriada)
-
     const handleUnidadeCriada = useCallback((novaUnidade: UnidadeMedidaSelect) => {
         setUnidades(prev =>
             [...prev, novaUnidade].sort((a, b) => a.unidadeMedida.localeCompare(b.unidadeMedida, 'pt-BR'))
         )
-        setValue('unidadeMedidaId', String(novaUnidade.id))
+        setValue('unidadeMedidaId', String(novaUnidade.id), { shouldValidate: true })
     }, [setValue])
 
-    useUnidadeMedidaCadastrada(handleUnidadeCriada)
 
     const onSubmit = async (data: FormData) => {
         setLoading(true)
@@ -127,14 +140,25 @@ export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategori
         formData.append('ativo',            String(data.ativo))
 
         try {
-            await salvarProduto(formData)
-            toast.success(produto ? "Produto atualizado com sucesso!" : "Produto cadastrado com sucesso!")
-            router.push("/produtos")
+            if (onSuccess) { 
+                const resultado = await salvarProdutoComRetorno(formData)
+                toast.success("Produto cadastrado com sucesso!")
+                onSuccess(resultado)
+            } else {
+                await salvarProduto(formData)
+                toast.success(produto ? "Produto atualizado com sucesso!" : "Produto cadastrado com sucesso!")
+                router.push("/produtos")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/produtos")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -203,6 +227,7 @@ export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategori
                                     value={field.value}
                                     onChange={field.onChange}
                                     error={errors.categoriaId?.message}
+                                    onCriado={handleCategoriaCriada} 
                                 />
                             )}
                         />
@@ -218,6 +243,7 @@ export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategori
                                     value={field.value}
                                     onChange={field.onChange}
                                     error={errors.marcaId?.message}
+                                    onCriado={handleMarcaCriada} 
                                 />
                             )}
                         />
@@ -233,12 +259,13 @@ export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategori
                                     value={field.value}
                                     onChange={field.onChange}
                                     error={errors.unidadeMedidaId?.message}
+                                    onCriado={handleUnidadeCriada} 
                                 />
                             )}
                         />
-                        <Erro campo="unidadeMedidaId" />
                     </div>
                 </div>
+                {carregandoListas && <p className="text-xs text-slate-400 mt-2">Carregando listas...</p>}
             </div>
 
             <div>
@@ -354,7 +381,7 @@ export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategori
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/produtos")}
+                    onClick={cancelar} 
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

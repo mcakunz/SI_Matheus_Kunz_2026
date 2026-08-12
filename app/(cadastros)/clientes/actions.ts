@@ -5,6 +5,7 @@ import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 import { nullableString, parseJsonField } from "@/lib/utils/helpers"
+import { ClienteSelect } from "@/lib/types"
 
 const clienteEmailSchema = z.object({
     id:        z.number().optional(),
@@ -47,7 +48,8 @@ const CLIENTE_DB_ERROR_LABELS: DBErrorLabels = {
     foreignKey: "Este cliente não pode ser excluído pois possui notas fiscais ou contas vinculadas.",
 }
 
-export async function salvarCliente(formData: FormData) {
+/** Lê e valida o FormData comum às duas actions de salvar (criar/editar e criar-com-retorno). */
+function lerDadosCliente(formData: FormData) {
     const dados = {
         cliente:             (formData.get('cliente') as string).trim(),
         cpfCnpj:             (formData.get('cpfCnpj') as string).replace(/\D/g, ''),
@@ -71,11 +73,16 @@ export async function salvarCliente(formData: FormData) {
     const validacao = clienteSchema.safeParse(dados)
     if (!validacao.success) throw new Error(validacao.error.issues[0].message)
 
-    const v = validacao.data
-    const id = formData.get('id')
+    return {
+        v:         validacao.data,
+        emails:    parseJsonField(formData.get('emails'),    z.array(clienteEmailSchema)),
+        telefones: parseJsonField(formData.get('telefones'), z.array(clienteTelefoneSchema)),
+    }
+}
 
-    const emails    = parseJsonField(formData.get('emails'),    z.array(clienteEmailSchema))
-    const telefones = parseJsonField(formData.get('telefones'), z.array(clienteTelefoneSchema))
+export async function salvarCliente(formData: FormData) {
+    const { v, emails, telefones } = lerDadosCliente(formData)
+    const id = formData.get('id')
 
     const client = await pool.connect()
     try {
@@ -167,6 +174,66 @@ export async function salvarCliente(formData: FormData) {
     revalidatePath('/clientes')
 }
 
+/**
+ * Variante "criar e devolver o registro" — usada quando o ClienteForm é
+ * aberto dentro do modal de cadastro rápido (ex: futuro ClienteLookup em
+ * um PedidoForm). Só cria (não edita) e retorna o suficiente para
+ * selecionar o cliente recém-criado no form que o chamou.
+ */
+export async function salvarClienteComRetorno(formData: FormData): Promise<{ id: number; cliente: string }> {
+    const { v, emails, telefones } = lerDadosCliente(formData)
+
+    const client = await pool.connect()
+    try {
+        await client.query('BEGIN')
+
+        const res = await client.query<{ id: number; cliente: string }>(
+            `INSERT INTO tb_clientes (
+                "cliente", "cpfCnpj", "tipo", "cidadeId",
+                "condicaoPagamentoId", "limiteCredito", "ativo",
+                "apelido", "rgInscricaoEstadual", "cep", "endereco",
+                "numero", "complemento", "bairro",
+                "dataNascimento", "sexo", "observacao"
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
+            RETURNING id, cliente`,
+            [
+                v.cliente, v.cpfCnpj, v.tipo, v.cidadeId,
+                v.condicaoPagamentoId ?? null, v.limiteCredito, v.ativo,
+                v.apelido, v.rgInscricaoEstadual, v.cep, v.endereco,
+                v.numero, v.complemento, v.bairro,
+                v.dataNascimento, v.sexo, v.observacao
+            ]
+        )
+        const clienteId = res.rows[0].id
+
+        for (const email of emails) {
+            await client.query(
+                `INSERT INTO tb_cliente_email ("clienteId", "email", "tipo", "principal", "ativo")
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [clienteId, email.email.toLowerCase().trim(), email.tipo, email.principal, email.ativo]
+            )
+        }
+
+        for (const tel of telefones) {
+            await client.query(
+                `INSERT INTO tb_cliente_telefone ("clienteId", "telefone", "tipo", "principal", "ativo")
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [clienteId, tel.telefone, tel.tipo, tel.principal, tel.ativo]
+            )
+        }
+
+        await client.query('COMMIT')
+        revalidatePath('/clientes')
+        return res.rows[0]
+    } catch (error: any) {
+        await client.query('ROLLBACK')
+        tratarErroDB(error, CLIENTE_DB_ERROR_LABELS)
+        throw error
+    } finally {
+        client.release()
+    }
+}
+
 export async function alternarStatusCliente(id: number, statusAtual: boolean) {
     try {
         await pool.query(`UPDATE tb_clientes SET "ativo" = $1 WHERE id = $2`, [!statusAtual, id])
@@ -179,4 +246,16 @@ export async function excluirCliente(id: number) {
         await pool.query(`DELETE FROM tb_clientes WHERE id = $1`, [id])
     } catch (error: any) { tratarErroDB(error, CLIENTE_DB_ERROR_LABELS) }
     revalidatePath('/clientes')
+}
+
+/**
+ * Lista simplificada (id + cliente) usada em selects/lookups — ex.: um
+ * futuro ClienteLookup dentro de um PedidoForm aberto pelo modal de
+ * cadastro rápido (sem SSR disponível).
+ */
+export async function listarClientesAtivos(): Promise<ClienteSelect[]> {
+    const result = await pool.query<ClienteSelect>(
+        `SELECT id, cliente FROM tb_clientes WHERE ativo = true ORDER BY cliente ASC`
+    )
+    return result.rows
 }

@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -12,8 +12,8 @@ import { Button } from "@/components/ui/Button"
 import { FormInput } from "@/components/ui/FormInput"
 import { FormLabel } from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
-import { UnidadeMedida } from "@/lib/types"
-import { emitirUnidadeMedidaCadastrada } from "@/lib/hooks/useUnidadeMedidaCadastrada"
+import { UnidadeMedida, UnidadeMedidaSelect } from "@/lib/types"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types" 
 
 const schema = z.object({
     unidadeMedida: z.string().min(1, "Unidade de medida é obrigatória").max(3, "Máximo de 3 caracteres"),
@@ -22,16 +22,13 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface UnidadeMedidaFormProps {
+interface UnidadeMedidaFormProps extends QuickCreateFormProps<UnidadeMedidaSelect> {
     unidade?: UnidadeMedida | null
 }
 
-export function UnidadeMedidaForm({ unidade }: UnidadeMedidaFormProps) {
+export function UnidadeMedidaForm({ unidade, onSuccess, onCancel }: UnidadeMedidaFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
-
-    const searchParams = useSearchParams()
-    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -50,10 +47,10 @@ export function UnidadeMedidaForm({ unidade }: UnidadeMedidaFormProps) {
         formData.append('ativo', String(data.ativo))
 
         try {
-            if (abertoPorLookup && !unidade?.id) {
+            if (onSuccess) { 
                 const resultado = await salvarUnidadeMedidaComRetorno(formData)
                 toast.success("Unidade de medida cadastrada com sucesso!")
-                emitirUnidadeMedidaCadastrada({
+                onSuccess({
                     id:            resultado.id,
                     unidadeMedida: resultado.unidadeMedida,
                 })
@@ -67,6 +64,11 @@ export function UnidadeMedidaForm({ unidade }: UnidadeMedidaFormProps) {
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/unidades-medida")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -112,7 +114,7 @@ export function UnidadeMedidaForm({ unidade }: UnidadeMedidaFormProps) {
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/unidades-medida")}
+                    onClick={cancelar} 
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

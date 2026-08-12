@@ -79,11 +79,11 @@ const FUNCIONARIO_DB_ERROR_LABELS: DBErrorLabels = {
     foreignKey: "Este funcionário não pode ser excluído pois possui vínculos com outros registros.",
 }
 
-export async function salvarFuncionario(formData: FormData) {
+function parseDadosFuncionario(formData: FormData) {
     const emails    = JSON.parse(formData.get('emails')    as string ?? '[]')
     const telefones = JSON.parse(formData.get('telefones') as string ?? '[]')
 
-    const dados = {
+    return {
         funcionario:         (formData.get('funcionario') as string).trim(),
         apelido:             nullableString(formData.get('apelido')),
         cpfCnpj:             (formData.get('cpfCnpj') as string).replace(/\D/g, ''),
@@ -108,7 +108,10 @@ export async function salvarFuncionario(formData: FormData) {
         observacao:          nullableString(formData.get('observacao')),
         ativo:               formData.get('ativo') === 'true',
     }
+}
 
+export async function salvarFuncionario(formData: FormData) {
+    const dados = parseDadosFuncionario(formData)
     const validacao = funcionarioSchema.safeParse(dados)
     if (!validacao.success) throw new Error(validacao.error.issues[0].message)
 
@@ -149,8 +152,8 @@ export async function salvarFuncionario(formData: FormData) {
                     v.cep, v.endereco, v.numero, v.complemento, v.bairro,
                     v.cidadeId, v.funcaoFuncionarioId,
                     v.dataNascimento, v.dataAdmissao, v.dataDemissao ?? null,
-                    v.cnh, v.dataValidadeCnh ?? null,
-                    v.sexo, v.salario, v.tipo, v.observacao, v.ativo,
+                    v.cnh ?? null, v.dataValidadeCnh ?? null,
+                    v.sexo, v.salario, v.tipo, v.observacao ?? null, v.ativo,
                     Number(id)
                 ]
             )
@@ -197,7 +200,7 @@ export async function salvarFuncionario(formData: FormData) {
                 await client.query(
                     `DELETE FROM tb_funcionario_telefone WHERE "funcionarioId" = $1`,
                     [Number(id)]
-            )
+                )
             }
 
             for (const tel of v.telefones) {
@@ -229,12 +232,12 @@ export async function salvarFuncionario(formData: FormData) {
                 ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
                 RETURNING id`, 
                 [
-                    v.funcionario, v.apelido, v.cpfCnpj, v.rgInscricaoEstadual,
-                    v.cep, v.endereco, v.numero, v.complemento, v.bairro,
+                    v.funcionario, v.apelido ?? null, v.cpfCnpj, v.rgInscricaoEstadual ?? null,
+                    v.cep, v.endereco, v.numero, v.complemento ?? null, v.bairro,
                     v.cidadeId, v.funcaoFuncionarioId,
                     v.dataNascimento, v.dataAdmissao, v.dataDemissao ?? null,
-                    v.cnh, v.dataValidadeCnh ?? null, v.sexo, v.salario,
-                    v.tipo, v.observacao, v.ativo
+                    v.cnh ?? null, v.dataValidadeCnh ?? null, v.sexo, v.salario,
+                    v.tipo, v.observacao ?? null, v.ativo
                 ]
             )
 
@@ -268,6 +271,69 @@ export async function salvarFuncionario(formData: FormData) {
     revalidatePath('/funcionarios')
 }
 
+export async function salvarFuncionarioComRetorno(
+    formData: FormData
+): Promise<{ id: number; funcionario: string }> {
+    const dados = parseDadosFuncionario(formData)
+    const validacao = funcionarioSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+
+    const v = validacao.data
+
+    const client = await pool.connect()
+    try {
+        await client.query('BEGIN')
+
+        const res = await client.query<{ id: number; funcionario: string }>(
+            `INSERT INTO tb_funcionarios (
+                "funcionario", "apelido", "cpfCnpj", "rgInscricaoEstadual",
+                "cep", "endereco", "numero", "complemento", "bairro",
+                "cidadeId", "funcaoFuncionarioId",
+                "dataNascimento", "dataAdmissao", "dataDemissao",
+                "cnh", "dataValidadeCnh", "sexo", "salario",
+                "tipo", "observacao", "ativo"
+            ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
+            RETURNING id, "funcionario"`, 
+            [
+                v.funcionario, v.apelido ?? null, v.cpfCnpj, v.rgInscricaoEstadual ?? null,
+                v.cep, v.endereco, v.numero, v.complemento ?? null, v.bairro,
+                v.cidadeId, v.funcaoFuncionarioId,
+                v.dataNascimento, v.dataAdmissao, v.dataDemissao ?? null,
+                v.cnh ?? null, v.dataValidadeCnh ?? null, v.sexo, v.salario,
+                v.tipo, v.observacao ?? null, v.ativo
+            ]
+        )
+
+        const novoId = res.rows[0].id
+
+        for (const email of v.emails) {
+            await client.query(
+                `INSERT INTO tb_funcionario_email ("funcionarioId","email","tipo","principal","ativo")
+                 VALUES ($1,$2,$3,$4,$5)`,
+                [novoId, email.email, email.tipo, email.principal, email.ativo]
+            )
+        }
+
+        for (const tel of v.telefones) {
+            await client.query(
+                `INSERT INTO tb_funcionario_telefone ("funcionarioId","telefone","tipo","principal","ativo")
+                 VALUES ($1,$2,$3,$4,$5)`,
+                [novoId, tel.telefone, tel.tipo, tel.principal, tel.ativo]
+            )
+        }
+
+        await client.query('COMMIT')
+        revalidatePath('/funcionarios')
+        return res.rows[0]
+    } catch (error: any) {
+        await client.query('ROLLBACK')
+        tratarErroDB(error, FUNCIONARIO_DB_ERROR_LABELS)
+        throw new Error(error.message)
+    } finally {
+        client.release()
+    }
+}
+
 export async function alternarStatusFuncionario(id: number, statusAtual: boolean) {
     try {
         await pool.query(`UPDATE tb_funcionarios SET "ativo" = $1 WHERE id = $2`, [!statusAtual, id])
@@ -280,4 +346,14 @@ export async function excluirFuncionario(id: number) {
         await pool.query(`DELETE FROM tb_funcionarios WHERE id = $1`, [id])
     } catch (error: any) { tratarErroDB(error, FUNCIONARIO_DB_ERROR_LABELS) }
     revalidatePath('/funcionarios')
+}
+
+/**
+ * Lista simplificada (id + funcionario) usada em selects/lookups.
+ */
+export async function listarFuncionariosAtivos(): Promise<{ id: number; funcionario: string }[]> {
+    const result = await pool.query<{ id: number; funcionario: string }>(
+        `SELECT id, "funcionario" FROM tb_funcionarios WHERE ativo = true ORDER BY "funcionario" ASC`
+    )
+    return result.rows
 }

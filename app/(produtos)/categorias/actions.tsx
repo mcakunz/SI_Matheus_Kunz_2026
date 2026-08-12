@@ -105,3 +105,13 @@ export async function excluirCategoria(id: number) {
 
     revalidatePath('/categorias')
 }
+
+/**
+ * Lista simplificada (id + categoria) usada em selects/lookups.
+ */
+export async function listarCategoriasAtivas(): Promise<{ id: number; categoria: string }[]> {
+    const result = await pool.query<{ id: number; categoria: string }>(
+        `SELECT id, "categoria" FROM tb_categorias WHERE ativo = true ORDER BY "categoria" ASC`
+    )
+    return result.rows
+}

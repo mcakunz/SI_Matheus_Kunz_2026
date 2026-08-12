@@ -229,3 +229,15 @@ export async function excluirCondicaoPagamento(id: number) {
     
     revalidatePath('/condicoes-pagamento')
 }
+
+/**
+ * Lista simplificada (id + condicaoPagamento) usada em selects/lookups.
+ * Útil, por exemplo, para popular combobox/selects em formulários de clientes ou vendas
+ * quando aberto pelo modal de cadastro rápido (sem SSR disponível).
+ */
+export async function listarCondicoesPagamentoAtivas(): Promise<{ id: number; condicaoPagamento: string }[]> {
+    const result = await pool.query<{ id: number; condicaoPagamento: string }>(
+        `SELECT id, "condicaoPagamento" FROM tb_condicoes_pagamento WHERE ativo = true ORDER BY "condicaoPagamento" ASC`
+    )
+    return result.rows
+}

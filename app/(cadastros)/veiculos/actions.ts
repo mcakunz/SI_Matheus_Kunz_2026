@@ -124,3 +124,13 @@ export async function excluirVeiculo(id: number) {
 
     revalidatePath('/veiculos')
 }
+
+/**
+ * Lista simplificada usada em selects/lookups.
+ */
+export async function listarVeiculosAtivos(): Promise<{ id: number; placa: string; modelo: string; marca: string }[]> {
+    const result = await pool.query<{ id: number; placa: string; modelo: string; marca: string }>(
+        `SELECT id, "placa", "modelo", "marca" FROM tb_veiculos WHERE ativo = true ORDER BY "modelo" ASC`
+    )
+    return result.rows
+}

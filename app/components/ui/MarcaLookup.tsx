@@ -1,6 +1,6 @@
 "use client"
 
-import { BaseLookup } from "../../../components/ui/BaseLookup"
+import { BaseLookup } from "@/components/ui/BaseLookup"
 import { MarcaSelect } from "@/lib/types"
 
 interface MarcaProps {
@@ -9,9 +9,10 @@ interface MarcaProps {
     onChange: (id: string) => void
     required?: boolean
     error?: string
+    onCriado?: (novo: MarcaSelect) => void 
 }
 
-export function MarcaLookup({ marcas, value, onChange, required, error }: MarcaProps) {
+export function MarcaLookup({ marcas, value, onChange, required, error, onCriado }: MarcaProps) {
     const items = marcas.map(m => ({ id: m.id, label: m.marca }))
 
     return (
@@ -27,6 +28,8 @@ export function MarcaLookup({ marcas, value, onChange, required, error }: MarcaP
             pathCadastro="/marcas"
             pathLabel="Cadastrar nova marca"
             editTitle={label => `Editar ${label}`}
+            tipoCadastro="marca" 
+            onCriado={onCriado}  
         />
     )
 }

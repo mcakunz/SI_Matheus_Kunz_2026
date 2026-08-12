@@ -9,9 +9,10 @@ interface FormaPagamentoLookupProps {
     onChange: (id: string) => void
     required?: boolean
     error?: string
+    onCriado?: (novo: FormaPagamentoSelect) => void 
 }
 
-export function FormaPagamentoLookup({ formas, value, onChange, required, error }: FormaPagamentoLookupProps) {
+export function FormaPagamentoLookup({ formas, value, onChange, required, error, onCriado }: FormaPagamentoLookupProps) {
     const items = formas.map(f => ({ id: f.id, label: f.formaPagamento }))
 
     return (
@@ -27,6 +28,8 @@ export function FormaPagamentoLookup({ formas, value, onChange, required, error 
             pathCadastro="/formas-pagamento"
             pathLabel="Cadastrar nova forma de pagamento"
             editTitle={label => `Editar ${label}`}
+            tipoCadastro="formaPagamento" 
+            onCriado={onCriado}           
         />
     )
 }

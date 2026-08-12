@@ -1,6 +1,6 @@
 "use client"
 
-import { BaseLookup } from "../../../components/ui/BaseLookup"
+import { BaseLookup } from "@/components/ui/BaseLookup"
 import { UnidadeMedidaSelect } from "@/lib/types"
 
 interface UnidadeMedidaProps {
@@ -9,9 +9,10 @@ interface UnidadeMedidaProps {
     onChange:  (id: string) => void
     required?: boolean
     error?:    string
+    onCriado?: (novo: UnidadeMedidaSelect) => void 
 }
 
-export function UnidadeMedidaLookup({ unidades, value, onChange, required, error }: UnidadeMedidaProps) {
+export function UnidadeMedidaLookup({ unidades, value, onChange, required, error, onCriado }: UnidadeMedidaProps) {
     const items = unidades.map(u => ({ id: u.id, label: u.unidadeMedida }))
 
     return (
@@ -27,6 +28,8 @@ export function UnidadeMedidaLookup({ unidades, value, onChange, required, error
             pathCadastro="/unidades-medida"
             pathLabel="Cadastrar nova unidade"
             editTitle={label => `Editar ${label}`}
+            tipoCadastro="unidadeMedida" 
+            onCriado={onCriado}          
         />
     )
 }

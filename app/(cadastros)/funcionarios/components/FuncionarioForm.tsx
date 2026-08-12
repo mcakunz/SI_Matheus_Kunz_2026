@@ -1,16 +1,21 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { salvarFuncionario } from "../actions"
+import { salvarFuncionario, salvarFuncionarioComRetorno } from "../actions"
 import toast from "react-hot-toast"
 
-import { Button } from "@/components/ui/Button"
-import { FormInput } from "@/components/ui/FormInput"
-import { FormLabel } from "@/components/ui/FormLabel"
+import { listarPaisesAtivos }   from "@/app/(localidades)/paises/actions"
+import { listarEstadosAtivos }  from "@/app/(localidades)/estados/actions"
+import { listarCidadesAtivas }  from "@/app/(localidades)/cidades/actions"
+import { listarFuncoesFuncionarioAtivas } from "@/app/(cadastros)/funcoes-funcionario/actions" 
+
+import { Button }     from "@/components/ui/Button"
+import { FormInput }  from "@/components/ui/FormInput"
+import { FormLabel }  from "@/components/ui/FormLabel"
 import { FormSelect } from "@/components/ui/FormSelect"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { PaisLookup } from "@/app/components/ui/PaisLookup"
@@ -26,8 +31,8 @@ import {
 } from "@/lib/types"
 import { toDateString } from "@/lib/utils/helpers"
 import { TIPOS_EMAIL_FUNCIONARIO, TIPOS_TELEFONE_FUNCIONARIO } from "@/lib/TiposContato"
-import { useFuncaoCadastrada } from "@/lib/hooks/useFuncaoCadastrada"
 import { FuncaoFuncionarioLookup } from "@/app/components/ui/FuncaoFuncionarioLookup"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types" 
 
 const funcionarioEmailSchema = z.object({
     id:        z.number().optional(),
@@ -51,7 +56,8 @@ const schema = z.object({
     cpfCnpj:             z.string().min(11, "CPF inválido.").max(14),
     rgInscricaoEstadual: z.string().max(20).optional(),
     emails:              z.array(funcionarioEmailSchema),
-    telefones:           z.array(funcionarioTelefoneSchema),    cep:                 z.string().min(8, "CEP inválido.").max(9),
+    telefones:           z.array(funcionarioTelefoneSchema),
+    cep:                 z.string().min(8, "CEP inválido.").max(9),
     endereco:            z.string().min(1, "Informe o endereço.").max(100),
     numero:              z.string().min(1, "Informe o número.").max(10),
     complemento:         z.string().max(50).optional(),
@@ -98,12 +104,12 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface FuncionarioFormProps {
+interface FuncionarioFormProps extends QuickCreateFormProps<{ id: number; funcionario: string }> {
     funcionario?:       FuncionarioView | null
-    listaCidades:       CidadeSelect[]
-    listaEstados:       EstadoSelect[]
-    listaPaises:        PaisSelect[]
-    listaFuncoes:       FuncaoFuncionarioSelect[]
+    listaCidades?:      CidadeSelect[]
+    listaEstados?:      EstadoSelect[]
+    listaPaises?:       PaisSelect[]
+    listaFuncoes?:      FuncaoFuncionarioSelect[]
     emailsIniciais?:    FuncionarioEmail[]
     telefonesIniciais?: FuncionarioTelefone[]
 }
@@ -116,14 +122,39 @@ export function FuncionarioForm({
     listaFuncoes,
     emailsIniciais    = [],
     telefonesIniciais = [],
+    onSuccess,
+    onCancel,
 }: FuncionarioFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
-    const [funcoes, setFuncoes] = useState<FuncaoFuncionarioSelect[]>(listaFuncoes)
+    const [paises, setPaises]   = useState<PaisSelect[]>(listaPaises ?? [])
+    const [estados, setEstados] = useState<EstadoSelect[]>(listaEstados ?? [])
+    const [cidades, setCidades] = useState<CidadeSelect[]>(listaCidades ?? [])
+    const [funcoes, setFuncoes] = useState<FuncaoFuncionarioSelect[]>(listaFuncoes ?? [])
 
-    const cidadeInicial = listaCidades.find(c => c.id === funcionario?.cidadeId)
-    const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
+    const [carregandoListas, setCarregandoListas] = useState(!listaPaises || !listaFuncoes)
+
+    useEffect(() => {
+        if (listaPaises && listaEstados && listaCidades && listaFuncoes) return
+        Promise.all([
+            listarPaisesAtivos(),
+            listarEstadosAtivos(),
+            listarCidadesAtivas(),
+            listarFuncoesFuncionarioAtivas(),
+        ])
+            .then(([p, e, c, f]) => {
+                setPaises(p)
+                setEstados(e)
+                setCidades(c)
+                setFuncoes(f)
+            })
+            .finally(() => setCarregandoListas(false))
+    }, [listaPaises, listaEstados, listaCidades, listaFuncoes])
+
+
+    const cidadeInicial = cidades.find(c => c.id === funcionario?.cidadeId)
+    const estadoInicial = estados.find(e => e.id === cidadeInicial?.estadoId)
 
     const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -163,18 +194,21 @@ export function FuncionarioForm({
     const {
         paisSelecionado,
         estadoSelecionado,
-        listaPaises:     paisesAtualizados,
+        listaPaises:      paisesAtualizados,
         estadosFiltrados,
         cidadesFiltradas,
         handlePaisChange,
         handleEstadoChange,
+        handlePaisCriado,
+        handleEstadoCriado,
+        handleCidadeCriada,
     } = useEndereco(
         setValue,
         estadoInicial?.paisId ?? '',
         estadoInicial?.id     ?? '',
-        listaPaises,
-        listaEstados,
-        listaCidades,
+        paises,
+        estados,
+        cidades,
     )
 
     const funcaoSelecionadaId = watch('funcaoFuncionarioId')
@@ -198,9 +232,8 @@ export function FuncionarioForm({
         setValue('funcaoFuncionarioId', String(novaFuncao.id))
     }, [setValue])
     
-    useFuncaoCadastrada(handleFuncaoFuncionarioCriada)
 
-    const onSubmit = async (data: FormData) => {
+const onSubmit = async (data: FormData) => {
         setLoading(true)
         const formData = new FormData()
         if (funcionario?.id) formData.append('id', String(funcionario.id))
@@ -223,14 +256,25 @@ export function FuncionarioForm({
         formData.append('telefones', JSON.stringify(payload.telefones))
 
         try {
-            await salvarFuncionario(formData)
-            toast.success(funcionario ? "Funcionário atualizado com sucesso!" : "Funcionário cadastrado com sucesso!")
-            router.push("/funcionarios")
+            if (onSuccess) { 
+                const resultado = await salvarFuncionarioComRetorno(formData) 
+                toast.success("Funcionário cadastrado com sucesso!")
+                onSuccess(resultado)
+            } else { 
+                await salvarFuncionario(formData)
+                toast.success(funcionario ? "Funcionário atualizado com sucesso!" : "Funcionário cadastrado com sucesso!")
+                router.push("/funcionarios")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/funcionarios")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -371,6 +415,7 @@ export function FuncionarioForm({
                         paises={paisesAtualizados}
                         value={String(paisSelecionado)}
                         onChange={handlePaisChange}
+                        onCriado={handlePaisCriado}
                     />
                 </div>
                 <div>
@@ -379,6 +424,7 @@ export function FuncionarioForm({
                         estados={estadosFiltrados}
                         value={String(estadoSelecionado)}
                         onChange={handleEstadoChange}
+                        onCriado={handleEstadoCriado}
                     />
                 </div>
                 <div>
@@ -392,6 +438,7 @@ export function FuncionarioForm({
                                 value={field.value}
                                 onChange={field.onChange}
                                 error={errors.cidadeId?.message}
+                                onCriado={handleCidadeCriada}
                             />
                         )}
                     />
@@ -422,6 +469,7 @@ export function FuncionarioForm({
                                 value={field.value}
                                 onChange={field.onChange}
                                 error={errors.funcaoFuncionarioId?.message}
+                                onCriado={handleFuncaoFuncionarioCriada} 
                             />
                         )}
                     />
@@ -466,6 +514,8 @@ export function FuncionarioForm({
                 </div>
             )}
 
+            {carregandoListas && <p className="text-xs text-slate-400 mt-1">Carregando listas...</p>}
+
             <div>
                 <FormLabel>Observações</FormLabel>
                 <FormInput {...register('observacao')} placeholder="Observações adicionais" maxLength={150} />
@@ -492,7 +542,7 @@ export function FuncionarioForm({
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/funcionarios")}
+                    onClick={cancelar} 
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

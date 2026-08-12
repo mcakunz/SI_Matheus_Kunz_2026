@@ -5,7 +5,6 @@ import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
 
-
 const FORMA_PAGAMENTO_ERROR_LABELS: DBErrorLabels = {
     unique: {
         formaPagamento: "este nome de forma de pagamento",
@@ -29,32 +28,32 @@ export async function salvarFormaPagamento(formData: FormData) {
     const validacao = formaPagamentoSchema.safeParse(dados)
     if (!validacao.success) throw new Error(validacao.error.issues[0].message)
 
-        const v = validacao.data
-        const idInput = formData.get('id')
-        const id = idInput ? Number(idInput) : null
+    const v = validacao.data
+    const idInput = formData.get('id')
+    const id = idInput ? Number(idInput) : null
 
-        try {
-            if (id) {
-                await pool.query(
-                    `UPDATE tb_formas_pagamento
-                        SET "formaPagamento" = $1,
-                            "descricao"      = $2,
-                            "ativo"          = $3
-                     WHERE id = $4`,
-                    [v.formaPagamento, v.descricao, v.ativo, id]        
-                )
-            } else {
-                await pool.query(
-                    `INSERT INTO tb_formas_pagamento ("formaPagamento", "descricao", "ativo")
-                     VALUES ($1, $2, $3)`,
-                     [v.formaPagamento, v.descricao, v.ativo]
-                )
-            }
-        } catch (error: any) {
-            tratarErroDB(error, FORMA_PAGAMENTO_ERROR_LABELS)
+    try {
+        if (id) {
+            await pool.query(
+                `UPDATE tb_formas_pagamento
+                    SET "formaPagamento" = $1,
+                        "descricao"      = $2,
+                        "ativo"          = $3
+                 WHERE id = $4`,
+                [v.formaPagamento, v.descricao, v.ativo, id]        
+            )
+        } else {
+            await pool.query(
+                `INSERT INTO tb_formas_pagamento ("formaPagamento", "descricao", "ativo")
+                 VALUES ($1, $2, $3)`,
+                 [v.formaPagamento, v.descricao, v.ativo]
+            )
         }
+    } catch (error: any) {
+        tratarErroDB(error, FORMA_PAGAMENTO_ERROR_LABELS)
+    }
 
-        revalidatePath('/formas-pagamento')
+    revalidatePath('/formas-pagamento')
 }
 
 export async function salvarFormaPagamentoComRetorno(
@@ -109,4 +108,16 @@ export async function excluirFormaPagamento(id: number) {
     }
 
     revalidatePath('/formas-pagamento')
+}
+
+/**
+ * Lista simplificada (id + formaPagamento) usada em selects/lookups.
+ * Necessária para carregar a lista corretamente quando o modal
+ * de Condição de Pagamento é aberto via cadastro rápido.
+ */
+export async function listarFormasPagamentoAtivas(): Promise<{ id: number; formaPagamento: string }[]> {
+    const result = await pool.query<{ id: number; formaPagamento: string }>(
+        `SELECT id, "formaPagamento" FROM tb_formas_pagamento WHERE ativo = true ORDER BY "formaPagamento" ASC`
+    )
+    return result.rows
 }

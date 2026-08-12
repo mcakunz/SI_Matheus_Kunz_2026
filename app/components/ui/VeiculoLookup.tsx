@@ -1,6 +1,6 @@
 "use client"
 
-import { BaseLookup } from "../../../components/ui/BaseLookup"
+import { BaseLookup } from "@/components/ui/BaseLookup"
 import { VeiculoSelect } from "@/lib/types"
 
 interface VeiculoSelectProps {
@@ -9,9 +9,10 @@ interface VeiculoSelectProps {
     onChange: (id: string) => void
     required?: boolean
     error?: string
+    onCriado?: (novo: VeiculoSelect) => void 
 }
 
-export function VeiculoLookup({ veiculos, value, onChange, required, error }: VeiculoSelectProps) {
+export function VeiculoLookup({ veiculos, value, onChange, required, error, onCriado }: VeiculoSelectProps) {
     const items = veiculos.map(v => ({ id: v.id, label: v.modelo }))
 
     return (
@@ -27,6 +28,8 @@ export function VeiculoLookup({ veiculos, value, onChange, required, error }: Ve
             pathCadastro="/veiculos"
             pathLabel="Cadastrar novo veiculo."
             editTitle={label => `Editar ${label}`}
+            tipoCadastro="veiculo" 
+            onCriado={onCriado}    
         />
     )
 }

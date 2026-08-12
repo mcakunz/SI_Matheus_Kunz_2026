@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -13,7 +13,7 @@ import { FormInput }  from "@/components/ui/FormInput"
 import { FormLabel }  from "@/components/ui/FormLabel"
 import { FormSwitch } from "@/components/ui/FormSwitch"
 import { FuncaoFuncionario, FuncaoFuncionarioSelect } from "@/lib/types"
-import { emitirFuncaoCadastrada } from "@/lib/hooks/useFuncaoCadastrada"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types" 
 
 const schema = z.object({
     funcaoFuncionario: z.string().min(2, "A função deve ter no mínimo 2 caracteres.").max(100),
@@ -27,16 +27,13 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface FuncaoFuncionarioFormProps {
+interface FuncaoFuncionarioFormProps extends QuickCreateFormProps<FuncaoFuncionarioSelect> {
     funcao?: FuncaoFuncionario | null
 }
 
-export function FuncaoFuncionarioForm({ funcao }: FuncaoFuncionarioFormProps) {
+export function FuncaoFuncionarioForm({ funcao, onSuccess, onCancel }: FuncaoFuncionarioFormProps) {
     const router  = useRouter()
     const [loading, setLoading] = useState(false)
-
-    const searchParams = useSearchParams()
-    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
         resolver: zodResolver(schema),
@@ -63,15 +60,14 @@ export function FuncaoFuncionarioForm({ funcao }: FuncaoFuncionarioFormProps) {
         })
 
         try {
-            if (abertoPorLookup && !funcao?.id) {
+            if (onSuccess) { 
                 const resultado = await salvarFuncaoFuncionarioComRetorno(formData)
                 toast.success("Função cadastrada com sucesso!")
-                emitirFuncaoCadastrada({
+                onSuccess({
                     id: resultado.id,
                     funcaoFuncionario: resultado.funcaoFuncionario,
                     requerCnh:         resultado.requerCnh,
                 })
-
             } else {
                 await salvarFuncaoFuncionario(formData)
                 toast.success(funcao ? "Função atualizada com sucesso!" : "Função cadastrada com sucesso!")
@@ -82,6 +78,11 @@ export function FuncaoFuncionarioForm({ funcao }: FuncaoFuncionarioFormProps) {
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/funcoes-funcionario")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -173,7 +174,7 @@ export function FuncaoFuncionarioForm({ funcao }: FuncaoFuncionarioFormProps) {
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/funcoes-funcionario")}
+                    onClick={cancelar} 
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

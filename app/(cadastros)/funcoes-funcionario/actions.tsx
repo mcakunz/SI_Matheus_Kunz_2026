@@ -120,3 +120,13 @@ export async function excluirFuncaoFuncionario(id: number) {
     } catch (error: any) { tratarErroDB(error, FUNCAO_DB_ERROR_LABELS) }
     revalidatePath('/funcoes-funcionario')
 }
+
+/**
+ * Lista simplificada usada em selects/lookups.
+ */
+export async function listarFuncoesFuncionarioAtivas(): Promise<{ id: number; funcaoFuncionario: string; requerCnh: boolean }[]> {
+    const result = await pool.query<{ id: number; funcaoFuncionario: string; requerCnh: boolean }>(
+        `SELECT id, "funcaoFuncionario", "requerCnh" FROM tb_funcoes_funcionario WHERE ativo = true ORDER BY "funcaoFuncionario" ASC`
+    )
+    return result.rows
+}

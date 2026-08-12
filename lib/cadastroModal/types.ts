@@ -13,6 +13,17 @@ export interface TipoCadastroModalMap {
     estado: { id: number; estado: string; paisId: number }
     cidade: { id: number; cidade: string; estadoId: number }
     cliente: { id: number; cliente: string }
+    condicaoPagamento: { id: number; condicaoPagamento: string }
+    formaPagamento: { id: number; formaPagamento: string }
+    transportadora: { id: number; razaoSocialNome: string }
+    fornecedor: { id: number; fornecedor: string }
+    veiculo: { id: number; placa: string; modelo: string; marca: string }
+    funcaoFuncionario: { id: number; funcaoFuncionario: string; requerCnh: boolean }
+    funcionario: { id: number; funcionario: string }
+    produto: { id: number; produto: string }
+    categoria: { id: number; categoria: string }
+    marca: { id: number; marca: string }
+    unidadeMedida: { id: number; unidadeMedida: string }
 }
 
 export type TipoCadastroModal = keyof TipoCadastroModalMap

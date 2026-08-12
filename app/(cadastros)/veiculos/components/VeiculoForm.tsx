@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
@@ -15,7 +15,7 @@ import { FormSwitch } from "@/components/ui/FormSwitch"
 import { Veiculo }    from "@/lib/types"
 import { mascaraPlacaMercosul, mascaraPlacaPadrao } from "@/lib/utils/mascaras"
 import { isMercosul } from "@/lib/utils/helpers"
-import { emitirVeiculoCadastrado } from "@/lib/hooks/useVeiculoCadastrado"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types" 
 
 const schema = z.object({
 placa: z.string()
@@ -37,17 +37,13 @@ placa: z.string()
 })
 
 type FormData = z.infer<typeof schema>
-
-interface VeiculoFormProps {
+interface VeiculoFormProps extends QuickCreateFormProps<{ id: number; placa: string; modelo: string; marca: string }> {
     veiculo?: Veiculo | null
 }
 
-export function VeiculoForm({ veiculo }: VeiculoFormProps) {
+export function VeiculoForm({ veiculo, onSuccess, onCancel }: VeiculoFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
-
-    const searchParams = useSearchParams()
-    const abertoPorLookup = searchParams.get('origem') === 'lookup'
 
     const mercosulInicial  = veiculo?.placa ? isMercosul(veiculo.placa) : false
     const placaFormatada   = veiculo?.placa
@@ -60,8 +56,8 @@ export function VeiculoForm({ veiculo }: VeiculoFormProps) {
         resolver: zodResolver(schema),
         defaultValues: {
             placa:      placaFormatada,
-            modelo:     veiculo?.modelo          ?? '',
-            marca:      veiculo?.marca           ?? '',
+            modelo:     veiculo?.modelo         ?? '',
+            marca:      veiculo?.marca          ?? '',
             ano:        veiculo?.ano?.toString() ?? '',
             capacidade: veiculo?.capacidade?.toString() ?? '',
             ativo:      veiculo ? veiculo.ativo : true,
@@ -84,15 +80,10 @@ export function VeiculoForm({ veiculo }: VeiculoFormProps) {
         formData.append('ativo',      String(data.ativo))
 
         try {
-            if (abertoPorLookup && !veiculo?.id) {
+            if (onSuccess) { 
                 const resultado = await salvarVeiculoComRetorno(formData)
                 toast.success("Veiculo cadastrado com sucesso!")
-                emitirVeiculoCadastrado({
-                    id: resultado.id,
-                    placa: resultado.placa,
-                    modelo: resultado.modelo,
-                    marca: resultado.marca
-                })
+                onSuccess(resultado)
             } else {
                 await salvarVeiculo(formData)
                 toast.success(veiculo ? "Veículo atualizado com sucesso!" : "Veículo cadastrado com sucesso!")
@@ -103,6 +94,11 @@ export function VeiculoForm({ veiculo }: VeiculoFormProps) {
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/veiculos")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -224,7 +220,7 @@ export function VeiculoForm({ veiculo }: VeiculoFormProps) {
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/veiculos")}
+                    onClick={cancelar} 
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

@@ -1,11 +1,15 @@
 "use client"
 
-import { useCallback, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { salvarCliente } from "../actions"
+import { salvarCliente, salvarClienteComRetorno } from "../actions"
+import { listarPaisesAtivos } from "@/app/(localidades)/paises/actions"
+import { listarEstadosAtivos } from "@/app/(localidades)/estados/actions"
+import { listarCidadesAtivas } from "@/app/(localidades)/cidades/actions"
+import { listarCondicoesPagamentoAtivas } from "@/app/(financeiro)/condicoes-pagamento/actions"
 import toast from "react-hot-toast"
 
 import { Button } from "@/components/ui/Button"
@@ -27,7 +31,7 @@ import { TelefoneList } from "@/app/components/ui/TelefoneList"
 import { toDateString } from "@/lib/utils/helpers"
 import { TIPOS_EMAIL_CLIENTE_PF, TIPOS_EMAIL_CLIENTE_PJ, TIPOS_TELEFONE_CLIENTE_PF, TIPOS_TELEFONE_CLIENTE_PJ } from "@/lib/TiposContato"
 import { CondicaoPagamentoLookup } from "@/app/components/ui/CondicaoPagamentoLookup"
-import { useCondicaoPagamentoCadastrada } from "@/lib/hooks/useCondicaoPagamentoCadastrado"
+import { QuickCreateFormProps } from "@/lib/cadastroModal/types"
 
 const clienteEmailSchema = z.object({
     id:        z.number().optional(),
@@ -107,21 +111,60 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>
 
-interface ClienteFormProps {
-    cliente?:       ClienteView | null
-    listaCidades:   CidadeSelect[]
-    listaEstados:   EstadoSelect[]
-    listaPaises:    PaisSelect[]
-    emailsIniciais?:   ClienteEmail[]      
-    telefonesIniciais?: ClienteTelefone[]  
-    listaCondicoes: CondicaoPagamentoSelect[]
+interface ClienteFormProps extends QuickCreateFormProps<{ id: number; cliente: string }> {
+    cliente?: ClienteView | null
+    /** Opcionais: se não vierem (form aberto dentro do modal, sem SSR), as listas são buscadas sozinhas. */
+    listaCidades?:   CidadeSelect[]
+    listaEstados?:   EstadoSelect[]
+    listaPaises?:    PaisSelect[]
+    listaCondicoes?: CondicaoPagamentoSelect[]
+    emailsIniciais?:    ClienteEmail[]
+    telefonesIniciais?: ClienteTelefone[]
 }
 
-export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, listaCondicoes, emailsIniciais = [], telefonesIniciais = [] }: ClienteFormProps) {
+export function ClienteForm({
+    cliente,
+    listaCidades: listaCidadesProp,
+    listaEstados: listaEstadosProp,
+    listaPaises: listaPaisesProp,
+    listaCondicoes: listaCondicoesProp,
+    emailsIniciais = [],
+    telefonesIniciais = [],
+    onSuccess,
+    onCancel,
+}: ClienteFormProps) {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
-    
-    const [condicoes, setCondicoes] = useState<CondicaoPagamentoSelect[]>(listaCondicoes)
+
+    const [listaPaises, setListaPaises]   = useState<PaisSelect[]>(listaPaisesProp ?? [])
+    const [listaEstados, setListaEstados] = useState<EstadoSelect[]>(listaEstadosProp ?? [])
+    const [listaCidades, setListaCidades] = useState<CidadeSelect[]>(listaCidadesProp ?? [])
+    const [condicoes, setCondicoes]       = useState<CondicaoPagamentoSelect[]>(listaCondicoesProp ?? [])
+
+    const [carregandoEndereco, setCarregandoEndereco]   = useState(!listaPaisesProp || !listaEstadosProp || !listaCidadesProp)
+    const [carregandoCondicoes, setCarregandoCondicoes] = useState(!listaCondicoesProp)
+
+    useEffect(() => {
+        if (listaPaisesProp && listaEstadosProp && listaCidadesProp) return
+        Promise.all([
+            listarPaisesAtivos(),
+            listarEstadosAtivos(),
+            listarCidadesAtivas(),
+        ])
+            .then(([paises, estados, cidades]) => {
+                setListaPaises(paises)
+                setListaEstados(estados)
+                setListaCidades(cidades)
+            })
+            .finally(() => setCarregandoEndereco(false))
+    }, [])
+
+    useEffect(() => {
+        if (listaCondicoesProp) return
+        listarCondicoesPagamentoAtivas()
+            .then(setCondicoes)
+            .finally(() => setCarregandoCondicoes(false))
+    }, [])
 
     const cidadeInicial = listaCidades.find(c => c.id === cliente?.cidadeId)
     const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
@@ -167,6 +210,9 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
         cidadesFiltradas,
         handlePaisChange,
         handleEstadoChange,
+        handlePaisCriado,     
+        handleEstadoCriado,   
+        handleCidadeCriada,   
     } = useEndereco(
         setValue,
         estadoInicial?.paisId  ?? '',
@@ -184,8 +230,6 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
         )
         setValue('condicaoPagamentoId', String(novaCondicao.id))
     }, [setValue])
-
-    useCondicaoPagamentoCadastrada(handleCondicaoCriada)
 
     const tipoPessoa = watch("tipo")
     const isPF = tipoPessoa === "F"
@@ -229,14 +273,25 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
         formData.append('telefones', JSON.stringify(payload.telefones))
 
         try {
-            await salvarCliente(formData)
-            toast.success(cliente ? "Cliente atualizado com sucesso!" : "Cliente cadastrado com sucesso!")
-            router.push("/clientes")
+            if (onSuccess) {
+                const resultado = await salvarClienteComRetorno(formData)
+                toast.success("Cliente cadastrado com sucesso!")
+                onSuccess(resultado)
+            } else {
+                await salvarCliente(formData)
+                toast.success(cliente ? "Cliente atualizado com sucesso!" : "Cliente cadastrado com sucesso!")
+                router.push("/clientes")
+            }
         } catch (err: any) {
             toast.error(err.message)
         } finally {
             setLoading(false)
         }
+    }
+
+    const cancelar = () => {
+        if (onCancel) onCancel()
+        else router.push("/clientes")
     }
 
     const Erro = ({ campo }: { campo: keyof FormData }) =>
@@ -328,6 +383,7 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                         paises={paisesAtualizados}
                         value={String(paisSelecionado)}
                         onChange={handlePaisChange}
+                        onCriado={handlePaisCriado} 
                     />
                 </div>
                 <div>
@@ -336,6 +392,7 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                         estados={estadosFiltrados}
                         value={String(estadoSelecionado)}
                         onChange={handleEstadoChange}
+                        onCriado={handleEstadoCriado} 
                     />
                 </div>
                 <div>
@@ -349,10 +406,14 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                                 value={field.value}
                                 onChange={field.onChange}
                                 error={errors.cidadeId?.message}
+                                onCriado={handleCidadeCriada} 
                             />
                         )}
                     />
                 </div>
+                {carregandoEndereco && (
+                    <p className="text-xs text-slate-400 mt-1 md:col-span-3">Carregando países, estados e cidades...</p>
+                )}
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
@@ -432,9 +493,13 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                                 value={field.value}
                                 onChange={field.onChange}
                                 error={errors.condicaoPagamentoId?.message}
+                                onCriado={handleCondicaoCriada} 
                             />
                         )}
                     />
+                    {carregandoCondicoes && (
+                        <p className="text-xs text-slate-400 mt-1">Carregando condições de pagamento...</p>
+                    )}
                 </div>
                 <div>
                     <FormLabel required>Limite de Crédito (R$)</FormLabel>
@@ -469,7 +534,7 @@ export function ClienteForm({ cliente, listaCidades, listaEstados, listaPaises, 
                 </Button>
                 <button
                     type="button"
-                    onClick={() => router.push("/clientes")}
+                    onClick={cancelar}
                     className="px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
                 >
                     Cancelar

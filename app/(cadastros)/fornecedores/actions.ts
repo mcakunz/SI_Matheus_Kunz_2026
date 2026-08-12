@@ -18,7 +18,7 @@ const FORNECEDOR_DB_ERROR_LABELS: DBErrorLabels = {
 const fornecedorEmailSchema = z.object({
     id:        z.number().optional(),
     email:     z.string().email("E-mail inválido."),
-    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'FISCAL']),
+    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'FISCAL', 'OUTRO']),
     principal: z.boolean(),
     ativo:     z.boolean(),
 })
@@ -26,7 +26,7 @@ const fornecedorEmailSchema = z.object({
 const fornecedorTelefoneSchema = z.object({
     id:        z.number().optional(),
     telefone:  z.string().min(10, "Telefone inválido.").max(15),
-    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO']),
+    tipo:      z.enum(['COMERCIAL', 'FINANCEIRO', 'CELULAR', 'OUTRO']),
     principal: z.boolean(),
     ativo:     z.boolean(),
 })
@@ -53,23 +53,23 @@ const fornecedorSchema = z.object({
     const valor = data.rgInscricaoEstadual?.trim() ?? ''
     if (!valor) return
 
-if (data.tipo === 'F') {
-    if (!validarRG(valor)) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['rgInscricaoEstadual'],
-            message: "RG inválido. Informe entre 7 e 9 dígitos.",
-        })
+    if (data.tipo === 'F') {
+        if (!validarRG(valor)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['rgInscricaoEstadual'],
+                message: "RG inválido. Informe entre 7 e 9 dígitos.",
+            })
+        }
+    } else {
+        if (!validarIE(valor)) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['rgInscricaoEstadual'],
+                message: "Inscrição Estadual inválida. Informe entre 8 e 14 caracteres.",
+            })
+        }
     }
-} else {
-    if (!validarIE(valor)) {
-        ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['rgInscricaoEstadual'],
-            message: "Inscrição Estadual inválida. Informe entre 8 e 14 caracteres.",
-        })
-    }
-}
 })
 
 export async function salvarFornecedor(formData: FormData) {
@@ -197,6 +197,91 @@ export async function salvarFornecedor(formData: FormData) {
     revalidatePath('/fornecedores')
 }
 
+export async function salvarFornecedorComRetorno(
+    formData: FormData
+): Promise<{ id: number; fornecedor: string }> {
+    const dados = {
+        fornecedor:          (formData.get('fornecedor') as string).trim(),
+        cpfCnpj:             (formData.get('cpfCnpj') as string).replace(/\D/g, ''),
+        tipo:                formData.get('tipo') as string,
+        cidadeId:            formData.get('cidadeId'),
+        condicaoPagamentoId: formData.get('condicaoPagamentoId'),
+        limiteCredito:       formData.get('limiteCredito'),
+        ativo:               formData.get('ativo') === 'true',
+
+        apelido:             nullableString(formData.get('apelido')),
+        rgInscricaoEstadual: nullableString(formData.get('rgInscricaoEstadual')),
+        cep:                 nullableString(formData.get('cep'))?.replace(/\D/g, ''),
+        endereco:            nullableString(formData.get('endereco')),
+        numero:              nullableString(formData.get('numero')),
+        complemento:         nullableString(formData.get('complemento')),
+        bairro:              nullableString(formData.get('bairro')),
+        transportadoraId:    formData.get('transportadoraId')
+                                ? Number(formData.get('transportadoraId'))
+                                : null,
+        observacoes:         nullableString(formData.get('observacoes')),
+    }
+
+    const validacao = fornecedorSchema.safeParse(dados)
+    if (!validacao.success) throw new Error(validacao.error.issues[0].message)
+    
+    const v = validacao.data
+
+    const emails    = parseJsonField(formData.get('emails'),    z.array(fornecedorEmailSchema))
+    const telefones = parseJsonField(formData.get('telefones'), z.array(fornecedorTelefoneSchema))
+
+    const client = await pool.connect()
+    try {
+        await client.query('BEGIN')
+
+        const res = await client.query<{ id: number; fornecedor: string }>(
+            `INSERT INTO tb_fornecedores (
+                "fornecedor", "cpfCnpj", "tipo", "cidadeId",
+                "condicaoPagamentoId", "limiteCredito", "ativo",
+                "apelido", "rgInscricaoEstadual", "cep", "endereco",
+                "numero", "complemento", "bairro", "transportadoraId", "observacoes"
+            ) VALUES (
+                $1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16
+            ) RETURNING id, "fornecedor"`,
+            [
+                v.fornecedor, v.cpfCnpj, v.tipo, v.cidadeId,
+                v.condicaoPagamentoId, v.limiteCredito, v.ativo,
+                v.apelido, v.rgInscricaoEstadual, v.cep, v.endereco,
+                v.numero, v.complemento, v.bairro, v.transportadoraId ?? null,
+                v.observacoes
+            ]
+        )
+        const fornecedorId = res.rows[0].id
+
+        for (const email of emails) {
+            await client.query(
+                `INSERT INTO tb_fornecedor_email
+                    ("fornecedorId", "email", "tipo", "principal", "ativo")
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [fornecedorId, email.email.toLowerCase().trim(), email.tipo, email.principal, email.ativo]
+            )
+        }
+
+        for (const tel of telefones) {
+            await client.query(
+                `INSERT INTO tb_fornecedor_telefone
+                    ("fornecedorId", "telefone", "tipo", "principal", "ativo")
+                 VALUES ($1, $2, $3, $4, $5)`,
+                [fornecedorId, tel.telefone, tel.tipo, tel.principal, tel.ativo]
+            )
+        }
+
+        await client.query('COMMIT')
+        revalidatePath('/fornecedores')
+        return res.rows[0]
+    } catch (error: any) {
+        await client.query('ROLLBACK')
+        tratarErroDB(error, FORNECEDOR_DB_ERROR_LABELS)
+        throw new Error(error.message)
+    } finally {
+        client.release()
+    }
+}
 
 export async function alternarStatusFornecedor(id: number, statusAtual: boolean) {
     try {
@@ -219,4 +304,14 @@ export async function excluirFornecedor(id: number) {
     }
 
     revalidatePath('/fornecedores')
+}
+
+/**
+ * Lista simplificada (id + fornecedor) usada em selects/lookups.
+ */
+export async function listarFornecedoresAtivos(): Promise<{ id: number; fornecedor: string }[]> {
+    const result = await pool.query<{ id: number; fornecedor: string }>(
+        `SELECT id, "fornecedor" FROM tb_fornecedores WHERE ativo = true ORDER BY "fornecedor" ASC`
+    )
+    return result.rows
 }

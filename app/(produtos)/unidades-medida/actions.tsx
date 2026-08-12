@@ -101,3 +101,13 @@ export async function excluirUnidadeMedida(id: number) {
         tratarErroDB(error, UNIDADE_MEDIDA_ERROR_LABELS)
     }
 }
+
+/**
+ * Lista simplificada (id + unidadeMedida) usada em selects/lookups.
+ */
+export async function listarUnidadesMedidaAtivas(): Promise<{ id: number; unidadeMedida: string }[]> {
+    const result = await pool.query<{ id: number; unidadeMedida: string }>(
+        `SELECT id, "unidadeMedida" FROM tb_unidades_medida WHERE ativo = true ORDER BY "unidadeMedida" ASC`
+    )
+    return result.rows
+}
