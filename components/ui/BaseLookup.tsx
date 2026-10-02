@@ -27,6 +27,8 @@ interface BaseLookupProps {
     tipoCadastro: TipoCadastroModal
     /** Chamado com o registro recém-criado (além da seleção automática, que já é feita aqui). */
     onCriado?: (novo: any) => void
+    /** Trava o lookup: não deixa abrir o dropdown, criar novo item nem limpar a seleção atual. */
+    disabled?: boolean
 }
 
 export function BaseLookup({
@@ -42,6 +44,7 @@ export function BaseLookup({
     editTitle = label => `Editar ${label}`,
     tipoCadastro,
     onCriado,
+    disabled = false,
 }: BaseLookupProps) {
     const [aberto, setAberto] = useState(false)
     const [busca, setBusca] = useState('')
@@ -66,7 +69,17 @@ export function BaseLookup({
         return () => document.removeEventListener('mousedown', onClickOutside)
     }, [])
 
+    // Se o campo for travado enquanto o dropdown estiver aberto (ex.: usuário adicionou
+    // um produto com o lookup ainda aberto), fecha na hora.
+    useEffect(() => {
+        if (disabled && aberto) {
+            setAberto(false)
+            setBusca('')
+        }
+    }, [disabled, aberto])
+
     const abrir = () => {
+        if (disabled) return
         setAberto(true)
         setBusca('')
         setTimeout(() => inputRef.current?.focus(), 50)
@@ -78,12 +91,14 @@ export function BaseLookup({
     }
 
     const selecionar = (item: LookupItem) => {
+        if (disabled) return
         onChange(String(item.id))
         fechar()
     }
 
     const limpar = (e: React.MouseEvent) => {
         e.stopPropagation()
+        if (disabled) return
         onChange('')
         setBusca('')
         setAberto(false)
@@ -91,6 +106,7 @@ export function BaseLookup({
 
     const abrirCadastroRapido = (e: React.MouseEvent) => {
         e.stopPropagation()
+        if (disabled) return
         setAberto(false)
         abrirCadastro(tipoCadastro, (novo: any) => {
             onChange(String(novo.id))
@@ -101,20 +117,23 @@ export function BaseLookup({
     return (
         <div ref={containerRef} className="relative">
             <div
-                className={`flex items-center gap-2 w-full px-2 py-2 border rounded bg-white transition-all
-                    ${aberto
-                        ? 'border-emerald-500 ring-2 ring-emerald-500/20'
-                        : error
-                            ? 'border-red-400'
-                            : 'border-slate-300 hover:border-slate-400'
-                    } ${!aberto ? 'cursor-pointer' : ''}`}
-                onClick={!aberto ? abrir : undefined}
+                className={`flex items-center gap-2 w-full px-2 py-2 border rounded transition-all
+                    ${disabled
+                        ? 'bg-slate-100 cursor-not-allowed'
+                        : aberto
+                            ? 'bg-white border-emerald-500 ring-2 ring-emerald-500/20'
+                            : error
+                                ? 'bg-white border-red-400'
+                                : 'bg-white border-slate-300 hover:border-slate-400 cursor-pointer'
+                    }`}
+                onClick={!aberto && !disabled ? abrir : undefined}
+                aria-disabled={disabled}
             >
                 <Search size={15} className="text-slate-400 shrink-0" />
 
                 {!aberto && (
                     itemAtual
-                    ? <span className="flex-1 text-sm text-slate-800 truncate">{itemAtual.label}</span>
+                    ? <span className={`flex-1 text-sm truncate ${disabled ? 'text-slate-500' : 'text-slate-800'}`}>{itemAtual.label}</span>
                     : <span className="flex-1 text-sm text-slate-400">{placeholder}</span>
                 )}
 
@@ -142,16 +161,18 @@ export function BaseLookup({
                         </a>
                     )}
 
-                    <button
-                        type="button"
-                        onClick={abrirCadastroRapido}
-                        title={pathLabel}
-                        className="p-0.5 text-slate-400 hover:text-emerald-600 transition-colors"
-                    >
-                        <Plus size={14} />
-                    </button>
+                    {!disabled && (
+                        <button
+                            type="button"
+                            onClick={abrirCadastroRapido}
+                            title={pathLabel}
+                            className="p-0.5 text-slate-400 hover:text-emerald-600 transition-colors"
+                        >
+                            <Plus size={14} />
+                        </button>
+                    )}
 
-                    {!aberto && itemAtual && (
+                    {!aberto && itemAtual && !disabled && (
                         <button type="button" onClick={limpar} className="p-0.5 text-slate-400 hover:text-slate-700 transition-colors">
                             <X size={13} />
                         </button>
@@ -162,15 +183,17 @@ export function BaseLookup({
                         </button>
                     )}
 
-                    <ChevronDown
-                        size={14}
-                        className={`text-slate-400 transition-transform duration-150 ${aberto ? 'rotate-180' : ''} cursor-pointer`}
-                        onClick={aberto ? fechar : abrir}
-                    />
+                    {!disabled && (
+                        <ChevronDown
+                            size={14}
+                            className={`text-slate-400 transition-transform duration-150 ${aberto ? 'rotate-180' : ''} cursor-pointer`}
+                            onClick={aberto ? fechar : abrir}
+                        />
+                    )}
                 </div>
             </div>
 
-            {aberto && (
+            {aberto && !disabled && (
                 <div className="absolute z-50 mt-1 w-full min-w-[260px] bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
                     <ul className="max-h-52 overflow-y-auto">
                         {filtrados.length === 0 ? (

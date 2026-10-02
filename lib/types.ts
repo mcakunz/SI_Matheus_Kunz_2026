@@ -379,7 +379,58 @@ export interface FuncionarioTelefone {
     dataCadastro:  string
     dataAlteracao: string | null
 }
- 
+
+export interface ItemNotaEntrada {
+    notaNumero?: string
+    notaModelo?: string
+    notaSerie?: string
+    fornecedorId?: number
+    produtoId: number
+    produto?: string 
+    sequencia?: number
+    quantidade: number
+    valorUnitario: number
+    valorDesconto?: number
+    percentualDesconto?: number
+    valorTotal: number
+    rateioFrete?: number
+    rateioSeguro?: number
+    rateioOutras?: number
+    custoPrecoFinal?: number | null
+}
+
+export interface NotaEntrada {
+    numero: string
+    modelo: string
+    serie: string
+    fornecedorId: number
+    condicaoPagamentoId: number
+    formaPagamentoId: number
+    transportadoraId: number | null
+    dataEmissao: string
+    dataChegada: string | null
+    tipoFrete: string
+    valorProdutos: number
+    valorFrete: number
+    valorSeguro: number
+    outrasDespesas: number
+    valorDesconto: number
+    valorTotal: number
+    placaVeiculo: string | null
+    observacoes: string | null
+    situacao: string
+    ativo: boolean
+    dataCadastro: string
+    dataAlteracao: string | null
+}
+
+export interface NotaEntradaView extends NotaEntrada {
+    numeroNf: string
+    valorTotalNota: number
+    fornecedor: string | null
+    condicaoPagamento: string | null
+}
+
 export type PaisSelect              = Pick<Pais,             'id' | 'pais'>
 export type EstadoSelect            = Pick<Estado,           'id' | 'estado' | 'paisId'>
 export type CidadeSelect            = Pick<Cidade,           'id' | 'cidade' | 'estadoId'>
@@ -392,3 +443,7 @@ export type CategoriaSelect         = Pick<Categoria,        'id' | 'categoria'>
 export type MarcaSelect             = Pick<Marca,            'id' | 'marca'>
 export type UnidadeMedidaSelect     = Pick<UnidadeMedida,    'id' | 'unidadeMedida'>
 export type FuncaoFuncionarioSelect = Pick<FuncaoFuncionario,'id' | 'funcaoFuncionario' | 'requerCnh'>
+export type FornecedorSelect        = Pick<Fornecedor,       'id' | 'fornecedor'>
+export type ProdutoSelect = Pick<Produto, 'id' | 'produto' | 'valorCompra'> & {
+    unidadeMedida: string
+}

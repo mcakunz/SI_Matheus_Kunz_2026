@@ -117,7 +117,7 @@ export async function salvarProduto(formData: FormData) {
 
 export async function salvarProdutoComRetorno(
     formData: FormData
-): Promise<{ id: number; produto: string }> {
+): Promise<{ id: number; produto: string; valorCompra: number; unidadeMedida: string }> {
     const dados = parseDadosProduto(formData)
     const validacao = produtoSchema.safeParse(dados)
     if (!validacao.success) throw new Error(validacao.error.issues[0].message)
@@ -125,15 +125,26 @@ export async function salvarProdutoComRetorno(
     const v = validacao.data
 
     try {
-        const res = await pool.query<{ id: number; produto: string }>(
-            `INSERT INTO tb_produtos
-                ("produto", "codigoBarras", "referencia",
-                 "marcaId", "unidadeMedidaId", "categoriaId",
-                 "valorCompra", "valorVenda",
-                 "quantidade", "quantidadeMinima", "percentualLucro",
-                 "descricao", "observacoes", "ativo")
-             VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-             RETURNING id, "produto"`,
+        // Usa uma CTE porque um INSERT...RETURNING sozinho só devolve colunas da própria
+        // tb_produtos — mas "unidadeMedida" (o nome/abreviação) mora em tb_unidades_medida,
+        // então precisamos de um JOIN depois do INSERT pra trazer o nome já na mesma ida ao banco.
+        // Isso é necessário porque o produto pode ser criado "na hora" a partir do lookup
+        // dentro da Nota de Entrada, e quem chama essa função precisa já saber o valorCompra
+        // e a unidadeMedida pra exibir na linha do item assim que o produto é selecionado.
+        const res = await pool.query<{ id: number; produto: string; valorCompra: string; unidadeMedida: string }>(
+            `WITH novo AS (
+                INSERT INTO tb_produtos
+                    ("produto", "codigoBarras", "referencia",
+                     "marcaId", "unidadeMedidaId", "categoriaId",
+                     "valorCompra", "valorVenda",
+                     "quantidade", "quantidadeMinima", "percentualLucro",
+                     "descricao", "observacoes", "ativo")
+                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+                 RETURNING id, "produto", "valorCompra", "unidadeMedidaId"
+            )
+            SELECT novo.id, novo."produto", novo."valorCompra", u."unidadeMedida"
+            FROM novo
+            JOIN tb_unidades_medida u ON u.id = novo."unidadeMedidaId"`,
             [
                 v.produto, v.codigoBarras, v.referencia,
                 v.marcaId, v.unidadeMedidaId, v.categoriaId,
@@ -143,7 +154,10 @@ export async function salvarProdutoComRetorno(
             ]
         )
         revalidatePath('/produtos')
-        return res.rows[0]
+        const row = res.rows[0]
+        // colunas "numeric" do Postgres voltam como string via node-postgres (pra não perder
+        // precisão) — convertemos aqui pra já devolver number, como o restante do código espera.
+        return { id: row.id, produto: row.produto, valorCompra: Number(row.valorCompra), unidadeMedida: row.unidadeMedida }
     } catch (error: any) {
         tratarErroDB(error, PRODUTO_ERROR_LABELS)
         throw new Error(error.message)
@@ -173,10 +187,22 @@ export async function excluirProduto(id: number) {
 
 /**
  * Lista simplificada usada em selects/lookups.
+ * Inclui "valorCompra" (autopreencher valor unitário) e "unidadeMedida" (mostrar a unidade
+ * ao lado da quantidade) para uso em telas como a Nota de Entrada.
  */
-export async function listarProdutosAtivos(): Promise<{ id: number; produto: string }[]> {
-    const result = await pool.query<{ id: number; produto: string }>(
-        `SELECT id, "produto" FROM tb_produtos WHERE ativo = true ORDER BY "produto" ASC`
+export async function listarProdutosAtivos(): Promise<{ id: number; produto: string; valorCompra: number; unidadeMedida: string }[]> {
+    const result = await pool.query<{ id: number; produto: string; valorCompra: string; unidadeMedida: string }>(
+        `SELECT p.id, p."produto", p."valorCompra", u."unidadeMedida"
+         FROM tb_produtos p
+         JOIN tb_unidades_medida u ON u.id = p."unidadeMedidaId"
+         WHERE p.ativo = true
+         ORDER BY p."produto" ASC`
     )
-    return result.rows
+    // "valorCompra" é numeric(10,2) no Postgres e volta como string pelo driver — convertendo pra number aqui.
+    return result.rows.map(r => ({
+        id: r.id,
+        produto: r.produto,
+        valorCompra: Number(r.valorCompra),
+        unidadeMedida: r.unidadeMedida,
+    }))
 }

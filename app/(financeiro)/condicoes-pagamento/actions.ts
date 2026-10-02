@@ -4,6 +4,7 @@ import { DBErrorLabels, tratarErroDB } from "@/lib/utils/errors"
 import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { ParcelaCondicao } from "@/lib/types"
 
 
 const CONDICAO_PAGAMENTO_ERROR_LABELS: DBErrorLabels = {
@@ -239,5 +240,22 @@ export async function listarCondicoesPagamentoAtivas(): Promise<{ id: number; co
     const result = await pool.query<{ id: number; condicaoPagamento: string }>(
         `SELECT id, "condicaoPagamento" FROM tb_condicoes_pagamento WHERE ativo = true ORDER BY "condicaoPagamento" ASC`
     )
+    return result.rows
+}
+
+/**
+ * Lista as parcelas configuradas para UMA condição de pagamento específica, já com o nome
+ * da forma de pagamento de cada parcela resolvido via join. Usada em telas que precisam
+ * mostrar o quadro de parcelas (vencimento e valor) de uma nota, como Notas de Entrada e
+ * Notas de Saída, a partir da condição de pagamento escolhida.
+ */
+export async function listarParcelasPorCondicao(condicaoPagamentoId: number): Promise<ParcelaCondicao[]> {
+    const result = await pool.query<ParcelaCondicao>(`
+        SELECT pc.*, fp."formaPagamento"
+        FROM tb_parcelas_condicao_pagamento pc
+        INNER JOIN tb_formas_pagamento fp ON fp.id = pc."formaPagamentoId"
+        WHERE pc."condicaoPagamentoId" = $1
+        ORDER BY pc.numero ASC
+    `, [condicaoPagamentoId])
     return result.rows
 }
