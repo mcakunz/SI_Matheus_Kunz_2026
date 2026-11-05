@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
+import { useAvisarAlteracoes } from "@/lib/cadastroModal/CadastroModalProvider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarEstado, salvarEstadoComRetorno } from "../actions"
@@ -50,7 +51,7 @@ export function EstadoForm({ estado, listaPaises: listaPaisesProp, onSuccess, on
             .finally(() => setCarregandoPaises(false))
     }, [listaPaisesProp])
 
-    const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, control, setValue, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             estado:  estado?.estado              ?? '',
@@ -59,6 +60,9 @@ export function EstadoForm({ estado, listaPaises: listaPaisesProp, onSuccess, on
             ativo:   estado ? estado.ativo        : true,
         }
     })
+
+    // Em modal: o "Fechar sem salvar?" só aparece se algum campo foi alterado.
+    useAvisarAlteracoes(isDirty)
 
     const handlePaisCriado = useCallback((novoPais: PaisSelect) => {
         setListaPaises(prev =>

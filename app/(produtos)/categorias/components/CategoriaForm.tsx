@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
+import { useAvisarAlteracoes } from "@/lib/cadastroModal/CadastroModalProvider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarCategoria, salvarCategoriaComRetorno } from "../actions"
@@ -30,13 +31,16 @@ export function CategoriaForm({ categoria, onSuccess, onCancel }: CategoriaFormP
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
-    const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             categoria: categoria?.categoria ?? '',
             ativo:          categoria ? categoria.ativo : true,
         },
     })
+
+    // Em modal: o "Fechar sem salvar?" só aparece se algum campo foi alterado.
+    useAvisarAlteracoes(isDirty)
 
     const onSubmit = async (data: FormData) => {
         setLoading(true)

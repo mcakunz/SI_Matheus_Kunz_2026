@@ -4,6 +4,7 @@ import { DBErrorLabels, tratarErroDB } from "@/lib/utils/errors"
 import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { listarFormasPagamentoAtivas } from "@/app/(financeiro)/formas-pagamento/actions"
 import { ParcelaCondicao } from "@/lib/types"
 
 
@@ -258,4 +259,27 @@ export async function listarParcelasPorCondicao(condicaoPagamentoId: number): Pr
         ORDER BY pc.numero ASC
     `, [condicaoPagamentoId])
     return result.rows
+}
+
+// ---------------------------------------------------------------------------
+// EDIÇÃO EM MODAL
+// Carrega o registro e tudo o que o formulário precisa, já no formato das props do Form
+// (as mesmas que a página [id] passa). Usado por lib/cadastroModal/registry.tsx para abrir
+// a edição num modal (ex.: lápis do modal de pesquisa da nota de entrada).
+// ---------------------------------------------------------------------------
+export async function carregarCondicaoPagamentoParaEdicao(id: number) {
+    const [condicaoResult, parcelasResult, listaFormasPagamento] = await Promise.all([
+        pool.query(`SELECT * FROM tb_condicoes_pagamento WHERE id = $1`, [id]),
+        pool.query(
+            `SELECT p.*, fp."formaPagamento"
+             FROM tb_parcelas_condicao_pagamento p
+             JOIN tb_formas_pagamento fp ON fp.id = p."formaPagamentoId"
+             WHERE p."condicaoPagamentoId" = $1
+             ORDER BY p.numero ASC`,
+            [id]
+        ),
+        listarFormasPagamentoAtivas(),
+    ])
+    if (!condicaoResult.rows[0]) return null
+    return { condicao: condicaoResult.rows[0], parcelas: parcelasResult.rows, listaFormasPagamento }
 }

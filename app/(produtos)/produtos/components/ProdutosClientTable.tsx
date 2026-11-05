@@ -20,6 +20,14 @@ const columns: GridColDef[] = [
     { field: 'marca', headerName: 'Marca', width: 130 },
     { field: 'unidadeMedida', headerName: 'UN', width: 70 },
     {
+        field: 'custoMedio', headerName: 'Custo Médio', width: 130,
+        renderCell: (params) => (
+            <span title="Custo médio ponderado, atualizado pelas notas de entrada">
+                {Number(params.value ?? 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', minimumFractionDigits: 2, maximumFractionDigits: 6 })}
+            </span>
+        ),
+    },
+    {
         field: 'valorVenda', headerName: 'Vl. Venda', width: 120,
         renderCell: (params) => (
             <span>

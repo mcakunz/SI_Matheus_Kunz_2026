@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect }                       from "react"
 import { useRouter }                                              from "next/navigation"
 import { useForm, useFieldArray, Controller }                     from "react-hook-form"
+import { useAvisarAlteracoes } from "@/lib/cadastroModal/CadastroModalProvider"
 import { zodResolver }                                            from "@hookform/resolvers/zod"
 import { z }                                                      from "zod"
 import { salvarTransportadora, salvarTransportadoraComRetorno }   from "../actions"
@@ -171,7 +172,7 @@ export function TransportadoraForm({
     const cidadeInicial = cidades.find(c => c.id === transportadora?.cidadeId)
     const estadoInicial = estados.find(e => e.id === cidadeInicial?.estadoId)
 
-    const { register, handleSubmit, watch, setValue, getValues, control, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, watch, setValue, getValues, control, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             tipo:                  (transportadora?.tipo as 'F' | 'J') ?? 'J',
@@ -202,6 +203,9 @@ export function TransportadoraForm({
             veiculos: veiculosIniciais.map(v => ({ veiculoId: String(v.id) })),
         },
     })
+
+    // Em modal: o "Fechar sem salvar?" só aparece se algum campo foi alterado.
+    useAvisarAlteracoes(isDirty)
 
     const {
         paisSelecionado,
@@ -271,7 +275,12 @@ export function TransportadoraForm({
         formData.append('veiculos',  JSON.stringify(veiculos))
 
         try {
-            if (onSuccess) {
+            // Em modal: registro existente = edição (atualiza e devolve id + nome); senão, cadastro rápido.
+            if (onSuccess && transportadora?.id) {
+                await salvarTransportadora(formData)
+                toast.success("Transportadora atualizada com sucesso!")
+                onSuccess({ id: transportadora.id, razaoSocialNome: data.razaoSocialNome })
+            } else if (onSuccess) {
                 const resultado = await salvarTransportadoraComRetorno(formData)
                 toast.success("Transportadora cadastrada com sucesso!")
                 onSuccess(resultado)

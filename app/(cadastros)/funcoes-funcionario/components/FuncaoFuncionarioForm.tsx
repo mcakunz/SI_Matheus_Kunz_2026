@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
+import { useAvisarAlteracoes } from "@/lib/cadastroModal/CadastroModalProvider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarFuncaoFuncionario, salvarFuncaoFuncionarioComRetorno } from "../actions"
@@ -35,7 +36,7 @@ export function FuncaoFuncionarioForm({ funcao, onSuccess, onCancel }: FuncaoFun
     const router  = useRouter()
     const [loading, setLoading] = useState(false)
 
-    const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             funcaoFuncionario: funcao?.funcaoFuncionario ?? '',
@@ -47,6 +48,9 @@ export function FuncaoFuncionarioForm({ funcao, onSuccess, onCancel }: FuncaoFun
             ativo:             funcao ? funcao.ativo : true,
         },
     })
+
+    // Em modal: o "Fechar sem salvar?" só aparece se algum campo foi alterado.
+    useAvisarAlteracoes(isDirty)
 
     const onSubmit = async (data: FormData) => {
         setLoading(true)

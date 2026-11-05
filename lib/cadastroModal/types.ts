@@ -45,4 +45,19 @@ export interface QuickCreateFormProps<T = any> {
 export interface CadastroModalConfig {
     titulo: string
     Componente: ComponentType<QuickCreateFormProps<any>>
+    /**
+     * Largura máxima do modal (classe Tailwind, ex.: "max-w-6xl"). Formulários grandes (endereço,
+     * contatos...) precisam de mais espaço horizontal; sem isso o modal usa o padrão "max-w-2xl".
+     */
+    largura?: string
+    /**
+     * Edição em modal (opcional). Quando existe, `abrirEdicao(tipo, id, ...)` abre o mesmo Form já
+     * preenchido. O Form entende que é edição porque recebe o registro (ex.: `produto`) junto com
+     * `onSuccess`: aí ele atualiza o registro e devolve `{ id, nome }` em vez de cadastrar um novo.
+     */
+    edicao?: {
+        titulo: string
+        /** Server action: busca o registro e tudo que o Form precisa, já no formato das props do Form. */
+        carregar: (id: number) => Promise<Record<string, unknown> | null>
+    }
 }

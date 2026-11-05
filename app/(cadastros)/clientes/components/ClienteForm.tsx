@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
+import { useAvisarAlteracoes } from "@/lib/cadastroModal/CadastroModalProvider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarCliente, salvarClienteComRetorno } from "../actions"
@@ -169,7 +170,7 @@ export function ClienteForm({
     const cidadeInicial = listaCidades.find(c => c.id === cliente?.cidadeId)
     const estadoInicial = listaEstados.find(e => e.id === cidadeInicial?.estadoId)
 
-    const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, watch, setValue, control, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             tipo:                (cliente?.tipo as 'F' | 'J') ?? 'F',
@@ -201,6 +202,9 @@ export function ClienteForm({
             limiteCredito:       cliente?.limiteCredito?.toString() ?? '0',
         }
     })
+
+    // Em modal: o "Fechar sem salvar?" só aparece se algum campo foi alterado.
+    useAvisarAlteracoes(isDirty)
 
     const {
         paisSelecionado,

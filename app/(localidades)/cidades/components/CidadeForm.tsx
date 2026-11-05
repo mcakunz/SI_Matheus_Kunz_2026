@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
+import { useAvisarAlteracoes } from "@/lib/cadastroModal/CadastroModalProvider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarCidade, salvarCidadeComRetorno } from "../actions"
@@ -45,7 +46,7 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosProp, onSuccess, 
             .finally(() => setCarregandoEstados(false))
     }, [listaEstadosProp])
 
-    const { register, handleSubmit, control, setValue, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, control, setValue, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             cidade:      cidade?.cidade                ?? '',
@@ -54,6 +55,9 @@ export function CidadeForm({ cidade, listaEstados: listaEstadosProp, onSuccess, 
             ativo:       cidade ? cidade.ativo          : true,
         }
     })
+
+    // Em modal: o "Fechar sem salvar?" só aparece se algum campo foi alterado.
+    useAvisarAlteracoes(isDirty)
 
     const onSubmit = async (data: FormData) => {
         setLoading(true)

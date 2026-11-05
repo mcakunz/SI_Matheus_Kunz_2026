@@ -19,6 +19,7 @@ export default async function ProdutoPage() {
                 p."quantidade",
                 p."quantidadeMinima",
                 p."percentualLucro",
+                p."custoMedio",
                 p."descricao",
                 p."observacoes",
                 p."ativo",

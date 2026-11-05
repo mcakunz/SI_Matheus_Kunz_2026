@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Controller, useFieldArray, useForm } from "react-hook-form"
+import { useAvisarAlteracoes } from "@/lib/cadastroModal/CadastroModalProvider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarFuncionario, salvarFuncionarioComRetorno } from "../actions"
@@ -156,7 +157,7 @@ export function FuncionarioForm({
     const cidadeInicial = cidades.find(c => c.id === funcionario?.cidadeId)
     const estadoInicial = estados.find(e => e.id === cidadeInicial?.estadoId)
 
-    const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, watch, setValue, control, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             funcionario:         funcionario?.funcionario ?? '',
@@ -190,6 +191,9 @@ export function FuncionarioForm({
             ativo:               funcionario ? funcionario.ativo : true,
         }
     })
+
+    // Em modal: o "Fechar sem salvar?" só aparece se algum campo foi alterado.
+    useAvisarAlteracoes(isDirty)
 
     const {
         paisSelecionado,

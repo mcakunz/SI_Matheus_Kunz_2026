@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { useForm } from "react-hook-form"
+import { useAvisarAlteracoes } from "@/lib/cadastroModal/CadastroModalProvider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarFormaPagamento, salvarFormaPagamentoComRetorno } from "../actions"
@@ -31,7 +32,7 @@ export function FormaPagamentoForm({ forma, onSuccess, onCancel }: FormaPagament
     const router = useRouter()
     const [loading, setLoading] = useState(false)
 
-    const { register, handleSubmit, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             formaPagamento: forma?.formaPagamento ?? '',
@@ -39,6 +40,9 @@ export function FormaPagamentoForm({ forma, onSuccess, onCancel }: FormaPagament
             ativo:          forma ? forma.ativo : true,
         },
     })
+
+    // Em modal: o "Fechar sem salvar?" só aparece se algum campo foi alterado.
+    useAvisarAlteracoes(isDirty)
 
     const onSubmit = async (data: FormData) => {
         setLoading(true)

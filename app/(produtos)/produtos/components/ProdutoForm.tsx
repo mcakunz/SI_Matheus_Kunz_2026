@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Controller, useForm } from "react-hook-form"
+import { useAvisarAlteracoes } from "@/lib/cadastroModal/CadastroModalProvider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarProduto, salvarProdutoComRetorno } from "../actions"
@@ -74,7 +75,7 @@ export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategori
             .finally(() => setCarregandoListas(false))
     }, [listaMarcas, listaUnidades, listaCategorias])
 
-    const { register, handleSubmit, setValue, watch, control, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, setValue, watch, control, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             produto:          produto?.produto          ?? '',
@@ -93,6 +94,9 @@ export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategori
             ativo:            produto ? produto.ativo   : true,
         },
     })
+
+    // Em modal: o "Fechar sem salvar?" só aparece se algum campo foi alterado.
+    useAvisarAlteracoes(isDirty)
 
     const valorCompra = watch('valorCompra')
     const valorVenda  = watch('valorVenda')
@@ -140,7 +144,12 @@ export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategori
         formData.append('ativo',            String(data.ativo))
 
         try {
-            if (onSuccess) { 
+            // Em modal: registro existente = edição (atualiza e devolve id + nome); senão, cadastro rápido.
+            if (onSuccess && produto?.id) {
+                await salvarProduto(formData)
+                toast.success("Produto atualizado com sucesso!")
+                onSuccess({ id: produto.id, produto: data.produto })
+            } else if (onSuccess) {
                 const resultado = await salvarProdutoComRetorno(formData)
                 toast.success("Produto cadastrado com sucesso!")
                 onSuccess(resultado)
@@ -333,6 +342,24 @@ export function ProdutoForm({ produto, listaMarcas, listaUnidades, listaCategori
                             placeholder="1"
                         />
                         <Erro campo="quantidadeMinima" />
+                    </div>
+                    {/* Custo médio ponderado: só leitura. É recalculado a cada nota de entrada lançada,
+                        cancelada ou editada: ((saldo x custo médio atual) + (qtd. da nota x custo final da nota))
+                        ÷ (saldo + qtd. da nota). */}
+                    <div>
+                        <FormLabel>Custo Médio</FormLabel>
+                        <FormInput
+                            value={produto
+                                ? (Number(produto.custoMedio) || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 6 })
+                                : '—'}
+                            className="bg-slate-50"
+                            readOnly
+                            tabIndex={-1}
+                            title="Calculado automaticamente a cada nota de entrada: ((saldo × custo médio atual) + (qtd. da nota × custo final da nota)) ÷ (saldo + qtd. da nota)"
+                        />
+                        <p className="text-xs text-slate-400 mt-1">
+                            {produto ? "Atualizado pelas notas de entrada." : "Começa igual ao valor de compra."}
+                        </p>
                     </div>
                 </div>
             </div>

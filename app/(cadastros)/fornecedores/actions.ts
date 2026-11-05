@@ -3,6 +3,11 @@
 import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { listarPaisesAtivos } from "@/app/(localidades)/paises/actions"
+import { listarEstadosAtivos } from "@/app/(localidades)/estados/actions"
+import { listarCidadesAtivas } from "@/app/(localidades)/cidades/actions"
+import { listarCondicoesPagamentoAtivas } from "@/app/(financeiro)/condicoes-pagamento/actions"
+import { listarTransportadorasAtivas } from "@/app/(cadastros)/transportadoras/actions"
 
 import { validarRG, validarIE } from "@/lib/utils/validacoes"
 import { nullableString,parseJsonField } from "@/lib/utils/helpers"
@@ -314,4 +319,46 @@ export async function listarFornecedoresAtivos(): Promise<{ id: number; forneced
         `SELECT id, "fornecedor" FROM tb_fornecedores WHERE ativo = true ORDER BY "fornecedor" ASC`
     )
     return result.rows
+}
+
+// ---------------------------------------------------------------------------
+// EDIÇÃO EM MODAL
+// Carrega o registro e tudo o que o formulário precisa, já no formato das props do Form
+// (as mesmas que a página [id] passa). Usado por lib/cadastroModal/registry.tsx para abrir
+// a edição num modal (ex.: lápis do modal de pesquisa da nota de entrada).
+// ---------------------------------------------------------------------------
+export async function carregarFornecedorParaEdicao(id: number) {
+    const [fornecedorResult, emailsResult, telefonesResult, listaPaises, listaEstados, listaCidades, listaCondicoes, listaTransportadoras] = await Promise.all([
+        pool.query(
+            `SELECT
+                f.*,
+                ci.cidade,
+                cp."condicaoPagamento",
+                tr."razaoSocialNome"   AS transportadora,
+                NULL::text         AS "emailPrincipal",
+                0                  AS "totalEmails",
+                NULL::text         AS "telefonePrincipal",
+                0                  AS "totalTelefones"
+             FROM tb_fornecedores f
+             LEFT JOIN tb_cidades             ci ON ci.id = f."cidadeId"
+             LEFT JOIN tb_condicoes_pagamento cp ON cp.id = f."condicaoPagamentoId"
+             LEFT JOIN tb_transportadoras     tr ON tr.id = f."transportadoraId"
+             WHERE f.id = $1`,
+            [id]
+        ),
+        pool.query(`SELECT * FROM tb_fornecedor_email WHERE "fornecedorId" = $1 ORDER BY principal DESC, id ASC`, [id]),
+        pool.query(`SELECT * FROM tb_fornecedor_telefone WHERE "fornecedorId" = $1 ORDER BY principal DESC, id ASC`, [id]),
+        listarPaisesAtivos(),
+        listarEstadosAtivos(),
+        listarCidadesAtivas(),
+        listarCondicoesPagamentoAtivas(),
+        listarTransportadorasAtivas(),
+    ])
+    if (!fornecedorResult.rows[0]) return null
+    return {
+        fornecedor: fornecedorResult.rows[0],
+        emailsIniciais: emailsResult.rows,
+        telefonesIniciais: telefonesResult.rows,
+        listaPaises, listaEstados, listaCidades, listaCondicoes, listaTransportadoras,
+    }
 }

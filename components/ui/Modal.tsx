@@ -1,7 +1,11 @@
 "use client"
 
-import { useEffect } from "react"
+import { useEffect, useRef } from "react"
 import { X } from "lucide-react"
+
+// Quantos modais estão abertos agora. A rolagem da página só volta quando o ÚLTIMO fecha
+// (com modais empilhados, fechar o de cima não pode destravar a página atrás do de baixo).
+let modaisAbertos = 0
 interface ModalProps {
     isOpen: boolean
     title: string
@@ -13,10 +17,28 @@ interface ModalProps {
 }
 
 export function Modal({ isOpen, title, onClose, children, nivel = 0, maxWidth = "max-w-2xl", escFecha = true }: ModalProps) {
+    const painelRef = useRef<HTMLDivElement>(null)
+
     useEffect(() => {
         if (!isOpen) return
+        modaisAbertos++
         document.body.style.overflow = "hidden"
-        return () => { document.body.style.overflow = "" }
+        return () => {
+            modaisAbertos = Math.max(0, modaisAbertos - 1)
+            if (modaisAbertos === 0) document.body.style.overflow = ""
+        }
+    }, [isOpen])
+
+    // Foco: ao abrir, vai para este modal (assim o Esc e o teclado não chegam no modal de baixo,
+    // como o campo de busca da pesquisa); ao fechar, volta para onde estava antes.
+    useEffect(() => {
+        if (!isOpen) return
+        const anterior = document.activeElement as HTMLElement | null
+        const painel = painelRef.current
+        if (painel && !painel.contains(document.activeElement)) painel.focus({ preventScroll: true })
+        return () => {
+            if (anterior && document.contains(anterior)) anterior.focus({ preventScroll: true })
+        }
     }, [isOpen])
 
     useEffect(() => {
@@ -40,7 +62,12 @@ export function Modal({ isOpen, title, onClose, children, nivel = 0, maxWidth = 
                 onClick={onClose}
             />
             <div
-                className={`relative w-full ${maxWidth} bg-white border-2 border-slate-300 rounded-xl shadow-2xl`}
+                ref={painelRef}
+                tabIndex={-1}
+                role="dialog"
+                aria-modal="true"
+                aria-label={title}
+                className={`relative w-full ${maxWidth} bg-white border-2 border-slate-300 rounded-xl shadow-2xl outline-none`}
                 style={{ zIndex: zBase + 1 }}
             >
                 <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">

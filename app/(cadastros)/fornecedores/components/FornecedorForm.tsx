@@ -3,6 +3,7 @@
 import { useCallback, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
+import { useAvisarAlteracoes } from "@/lib/cadastroModal/CadastroModalProvider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarFornecedor, salvarFornecedorComRetorno } from "../actions"
@@ -179,7 +180,7 @@ export function FornecedorForm({
     const cidadeInicial = cidades.find(c => c.id === fornecedor?.cidadeId)
     const estadoInicial = estados.find(e => e.id === cidadeInicial?.estadoId)
 
-    const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, watch, setValue, control, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             tipo:                (fornecedor?.tipo as 'F' | 'J') ?? 'J',
@@ -218,6 +219,9 @@ export function FornecedorForm({
             })),
         },
     })
+
+    // Em modal: o "Fechar sem salvar?" só aparece se algum campo foi alterado.
+    useAvisarAlteracoes(isDirty)
 
     const {
         paisSelecionado,
@@ -302,7 +306,12 @@ export function FornecedorForm({
         formData.append('telefones', JSON.stringify(payload.telefones))
 
         try {
-            if (onSuccess) {
+            // Em modal: registro existente = edição (atualiza e devolve id + nome); senão, cadastro rápido.
+            if (onSuccess && fornecedor?.id) {
+                await salvarFornecedor(formData)
+                toast.success("Fornecedor atualizado com sucesso!")
+                onSuccess({ id: fornecedor.id, fornecedor: data.fornecedor })
+            } else if (onSuccess) {
                 const resultado = await salvarFornecedorComRetorno(formData)
                 toast.success("Fornecedor cadastrado com sucesso!")
                 onSuccess(resultado)

@@ -3,6 +3,7 @@
 import { useCallback, useRef, useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useForm, useFieldArray, Controller } from "react-hook-form"
+import { useAvisarAlteracoes } from "@/lib/cadastroModal/CadastroModalProvider"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
 import { salvarCondicaoPagamento, salvarCondicaoPagamentoComRetorno } from "../actions"
@@ -80,7 +81,7 @@ export function CondicaoPagamentoForm({
             .finally(() => setCarregandoFormas(false))
     }, [listaFormasPagamentoProp])
 
-    const { register, handleSubmit, watch, setValue, control, formState: { errors } } = useForm<FormData>({
+    const { register, handleSubmit, watch, setValue, control, formState: { errors, isDirty } } = useForm<FormData>({
         resolver: zodResolver(schema),
         defaultValues: {
             condicaoPagamento:   condicao?.condicaoPagamento ?? '',
@@ -100,6 +101,9 @@ export function CondicaoPagamentoForm({
                 : [{ numero: 1, dias: 0, percentual: 100, formaPagamentoId: '' }],
         },
     })
+
+    // Em modal: o "Fechar sem salvar?" só aparece se algum campo foi alterado.
+    useAvisarAlteracoes(isDirty)
 
     const { fields, append, remove } = useFieldArray({ control, name: 'parcelas' })
 
@@ -146,7 +150,12 @@ export function CondicaoPagamentoForm({
         })
         
         try {
-            if (onSuccess) {
+            // Em modal: registro existente = edição (atualiza e devolve id + nome); senão, cadastro rápido.
+            if (onSuccess && condicao?.id) {
+                await salvarCondicaoPagamento(formData)
+                toast.success("Condição atualizada com sucesso!")
+                onSuccess({ id: condicao.id, condicaoPagamento: data.condicaoPagamento })
+            } else if (onSuccess) {
                 const resultado = await salvarCondicaoPagamentoComRetorno(formData)
                 toast.success("Condição de pagamento cadastrada com sucesso!")
                 onSuccess(resultado)

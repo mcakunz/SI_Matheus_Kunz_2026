@@ -4,6 +4,9 @@ import { DBErrorLabels, tratarErroDB } from "@/lib/utils/errors"
 import { pool } from "@/lib/db"
 import { revalidatePath } from "next/cache"
 import { z } from "zod"
+import { listarMarcasAtivas } from "@/app/(produtos)/marcas/actions"
+import { listarUnidadesMedidaAtivas } from "@/app/(produtos)/unidades-medida/actions"
+import { listarCategoriasAtivas } from "@/app/(produtos)/categorias/actions"
 
 
 const PRODUTO_ERROR_LABELS: DBErrorLabels = {
@@ -92,14 +95,16 @@ export async function salvarProduto(formData: FormData) {
                 ]
             )
         } else {
+            // Produto novo: o custo médio nasce igual ao valor de compra informado (custo do saldo
+            // inicial). Depois disso ele só muda pelas notas de entrada (ver notas-entrada/actions).
             await pool.query(
                 `INSERT INTO tb_produtos
                     ("produto", "codigoBarras", "referencia",
                      "marcaId", "unidadeMedidaId", "categoriaId",
                      "valorCompra", "valorVenda",
                      "quantidade", "quantidadeMinima", "percentualLucro",
-                     "descricao", "observacoes", "ativo")
-                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+                     "descricao", "observacoes", "ativo", "custoMedio")
+                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$7)`,
                 [
                     v.produto, v.codigoBarras, v.referencia,
                     v.marcaId, v.unidadeMedidaId, v.categoriaId,
@@ -138,8 +143,8 @@ export async function salvarProdutoComRetorno(
                      "marcaId", "unidadeMedidaId", "categoriaId",
                      "valorCompra", "valorVenda",
                      "quantidade", "quantidadeMinima", "percentualLucro",
-                     "descricao", "observacoes", "ativo")
-                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+                     "descricao", "observacoes", "ativo", "custoMedio")
+                 VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$7)
                  RETURNING id, "produto", "valorCompra", "unidadeMedidaId"
             )
             SELECT novo.id, novo."produto", novo."valorCompra", u."unidadeMedida"
@@ -205,4 +210,21 @@ export async function listarProdutosAtivos(): Promise<{ id: number; produto: str
         valorCompra: Number(r.valorCompra),
         unidadeMedida: r.unidadeMedida,
     }))
+}
+
+// ---------------------------------------------------------------------------
+// EDIÇÃO EM MODAL
+// Carrega o registro e tudo o que o formulário precisa, já no formato das props do Form
+// (as mesmas que a página [id] passa). Usado por lib/cadastroModal/registry.tsx para abrir
+// a edição num modal (ex.: lápis do modal de pesquisa da nota de entrada).
+// ---------------------------------------------------------------------------
+export async function carregarProdutoParaEdicao(id: number) {
+    const [produtoResult, listaMarcas, listaUnidades, listaCategorias] = await Promise.all([
+        pool.query(`SELECT * FROM tb_produtos WHERE id = $1`, [id]),
+        listarMarcasAtivas(),
+        listarUnidadesMedidaAtivas(),
+        listarCategoriasAtivas(),
+    ])
+    if (!produtoResult.rows[0]) return null
+    return { produto: produtoResult.rows[0], listaMarcas, listaUnidades, listaCategorias }
 }

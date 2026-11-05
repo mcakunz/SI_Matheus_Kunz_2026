@@ -3,6 +3,11 @@
 import { pool }            from "@/lib/db"
 import { revalidatePath }  from "next/cache"
 import { z }               from "zod"
+import { listarPaisesAtivos } from "@/app/(localidades)/paises/actions"
+import { listarEstadosAtivos } from "@/app/(localidades)/estados/actions"
+import { listarCidadesAtivas } from "@/app/(localidades)/cidades/actions"
+import { listarCondicoesPagamentoAtivas } from "@/app/(financeiro)/condicoes-pagamento/actions"
+import { listarVeiculosAtivos } from "@/app/(cadastros)/veiculos/actions"
 
 import { validarCNPJ, validarRG, validarIE } from "@/lib/utils/validacoes"
 import { nullableString, parseJsonField }     from "@/lib/utils/helpers"
@@ -317,4 +322,53 @@ export async function listarTransportadorasAtivas(): Promise<{ id: number; razao
         `SELECT id, "razaoSocialNome" FROM tb_transportadoras WHERE ativo = true ORDER BY "razaoSocialNome" ASC`
     )
     return result.rows
+}
+
+// ---------------------------------------------------------------------------
+// EDIÇÃO EM MODAL
+// Carrega o registro e tudo o que o formulário precisa, já no formato das props do Form
+// (as mesmas que a página [id] passa). Usado por lib/cadastroModal/registry.tsx para abrir
+// a edição num modal (ex.: lápis do modal de pesquisa da nota de entrada).
+// ---------------------------------------------------------------------------
+export async function carregarTransportadoraParaEdicao(id: number) {
+    const [transportadoraResult, emailsResult, telefonesResult, veiculosResult, listaPaises, listaEstados, listaCidades, listaCondicoes, listaVeiculos] = await Promise.all([
+        pool.query(
+            `SELECT
+                t.*,
+                ci.cidade,
+                cp."condicaoPagamento",
+                NULL::text AS "emailPrincipal",
+                0          AS "totalEmails",
+                NULL::text AS "telefonePrincipal",
+                0          AS "totalTelefones"
+             FROM tb_transportadoras t
+             LEFT JOIN tb_cidades             ci ON ci.id = t."cidadeId"
+             LEFT JOIN tb_condicoes_pagamento cp ON cp.id = t."condicaoPagamentoId"
+             WHERE t.id = $1`,
+            [id]
+        ),
+        pool.query(`SELECT * FROM tb_transportadora_email WHERE "transportadoraId" = $1 ORDER BY principal DESC, id ASC`, [id]),
+        pool.query(`SELECT * FROM tb_transportadora_telefone WHERE "transportadoraId" = $1 ORDER BY principal DESC, id ASC`, [id]),
+        pool.query(
+            `SELECT v.id, v.placa, v.modelo, v.marca
+             FROM tb_transportadora_veiculo tv
+             JOIN tb_veiculos v ON v.id = tv."veiculoId"
+             WHERE tv."transportadoraId" = $1
+             ORDER BY v.placa ASC`,
+            [id]
+        ),
+        listarPaisesAtivos(),
+        listarEstadosAtivos(),
+        listarCidadesAtivas(),
+        listarCondicoesPagamentoAtivas(),
+        listarVeiculosAtivos(),
+    ])
+    if (!transportadoraResult.rows[0]) return null
+    return {
+        transportadora: transportadoraResult.rows[0],
+        emailsIniciais: emailsResult.rows,
+        telefonesIniciais: telefonesResult.rows,
+        veiculosIniciais: veiculosResult.rows,
+        listaPaises, listaEstados, listaCidades, listaCondicoes, listaVeiculos,
+    }
 }
