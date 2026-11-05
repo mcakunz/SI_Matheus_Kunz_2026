@@ -1,4 +1,4 @@
-import Sidebar from "./components/Sidebar"
+import Topbar from "./components/Topbar"
 import ToasterProvider from "./providers/ToasterProvider"
 import "./globals.css"
 import { NuqsAdapter } from "nuqs/adapters/next/app"
@@ -30,9 +30,9 @@ export default function RootLayout({
         <NuqsAdapter>
           <ToasterProvider />
           <CadastroModalProvider>
-            <Sidebar sessao={SESSAO_DEV}>
+            <Topbar sessao={SESSAO_DEV}>
               {children}
-            </Sidebar>
+            </Topbar>
           </CadastroModalProvider>
         </NuqsAdapter>
       </body>

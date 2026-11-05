@@ -1,6 +1,6 @@
 import { obterSessao } from '@/lib/auth/session'
 import { redirect } from 'next/navigation'
-import Sidebar from '@/app/components/Sidebar'
+import Topbar from '@/app/components/Topbar'
 
 // export default async function AppLayout({ children }: { children: React.ReactNode }) {
 //     const sessao = await obterSessao()
@@ -10,7 +10,7 @@ import Sidebar from '@/app/components/Sidebar'
 
 
 
-//     return <Sidebar sessao={SESSAO_DEV}>{children}</Sidebar>
+//     return <Topbar sessao={SESSAO_DEV}>{children}</Topbar>
 
 // }
 
@@ -25,5 +25,5 @@ const SESSAO_DEV = {
     fotoPerfil: null,
 }
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-    return <Sidebar sessao={SESSAO_DEV}>{children}</Sidebar>
+    return <Topbar sessao={SESSAO_DEV}>{children}</Topbar>
 }
