@@ -110,13 +110,13 @@ export async function excluirEstado(id: number) {
 }
 
 /**
- * Lista simplificada (id + estado) usada em selects/lookups.
- * Reaproveitada tanto pela página /estados quanto pelo EstadoForm quando
- * ele é aberto dentro do modal de cadastro rápido (sem SSR disponível).
+ * Lista simplificada (id + estado + paisId) usada em selects/lookups.
+ * O paisId é necessário para filtrar os estados pelo país escolhido
+ * (ver useEndereco) quando o form é aberto no modal de cadastro rápido.
  */
 export async function listarEstadosAtivos(): Promise<EstadoSelect[]> {
     const result = await pool.query<EstadoSelect>(
-        `SELECT id, estado FROM tb_estados WHERE ativo = true ORDER BY estado ASC`
+        `SELECT id, estado, "paisId" FROM tb_estados WHERE ativo = true ORDER BY estado ASC`
     )
     return result.rows
 }
