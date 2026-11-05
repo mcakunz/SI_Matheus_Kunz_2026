@@ -3,6 +3,17 @@ CREATE SCHEMA public AUTHORIZATION postgres;
 
 CREATE SCHEMA IF NOT EXISTS public AUTHORIZATION postgres;
 
+CREATE OR REPLACE FUNCTION public.fn_atualiza_data_alteracao()
+    RETURNS trigger
+    LANGUAGE plpgsql
+AS $$
+BEGIN
+    NEW."dataAlteracao" = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$;
+
+
 CREATE TABLE public.tb_paises (
     "id"                 smallserial NOT NULL,
     "pais"               varchar(54) NOT NULL,
@@ -107,7 +118,7 @@ CREATE TABLE public.tb_parcelas_condicao_pagamento (
 
 CREATE TABLE public.tb_veiculos (
     "id"            serial        NOT NULL,
-    "placa"         varchar(7)    NOT NULL,
+    "placa"         varchar(8)    NOT NULL,
     "modelo"        varchar(50)   NOT NULL,
     "marca"         varchar(50)   NOT NULL,
     "ano"           int2          NOT NULL,
@@ -289,9 +300,11 @@ CREATE TABLE public.tb_produtos (
     "dataAlteracao"      timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "usuarioCadastroId"  int4        NULL,
     "usuarioAlteracaoId" int4        NULL,
+    "custoMedio"         numeric(18,6) DEFAULT 0 NOT NULL,
     CONSTRAINT tb_produtos_pkey              PRIMARY KEY ("id"),
     CONSTRAINT tb_produtos_valorCompra_check CHECK ("valorCompra" >= 0),
     CONSTRAINT tb_produtos_valorVenda_check  CHECK ("valorVenda"  >= 0),
+    CONSTRAINT tb_produtos_custoMedio_check  CHECK ("custoMedio"  >= 0),
     CONSTRAINT tb_produtos_categoriaId_fkey
         FOREIGN KEY ("categoriaId")    REFERENCES public.tb_categorias("id"),
     CONSTRAINT tb_produtos_marcaId_fkey
@@ -341,7 +354,7 @@ CREATE TABLE public.tb_cliente_email (
     "id"         serial      NOT NULL,
     "clienteId"  int4        NOT NULL,
     "email"      varchar(80) NOT NULL,
-    "tipo"       varchar(20) DEFAULT 'COMERCIAL' NOT NULL,
+    "tipo"       varchar(20) DEFAULT 'COMERCIAL' NULL,
     "principal"  bool        DEFAULT false NOT NULL,
     "ativo"      bool        DEFAULT true  NOT NULL,
     "dataCadastro"       timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -362,7 +375,7 @@ CREATE TABLE public.tb_cliente_telefone (
     "id"         serial      NOT NULL,
     "clienteId"  int4        NOT NULL,
     "telefone"   varchar(15) NOT NULL,
-    "tipo"       varchar(20) DEFAULT 'COMERCIAL' NOT NULL,
+    "tipo"       varchar(20) DEFAULT 'COMERCIAL' NULL,
     "principal"  bool        DEFAULT false NOT NULL,
     "ativo"      bool        DEFAULT true  NOT NULL,
     "dataCadastro"       timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -418,7 +431,7 @@ CREATE TABLE public.tb_fornecedor_email (
     "id"           serial      NOT NULL,
     "fornecedorId" int4        NOT NULL,
     "email"        varchar(80) NOT NULL,
-    "tipo"         varchar(20) DEFAULT 'COMERCIAL' NOT NULL,
+    "tipo"         varchar(20) DEFAULT 'COMERCIAL' NULL,
     "principal"    bool        DEFAULT false NOT NULL,
     "ativo"        bool        DEFAULT true  NOT NULL,
     "dataCadastro"       timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -440,7 +453,7 @@ CREATE TABLE public.tb_fornecedor_telefone (
     "id"           serial      NOT NULL,
     "fornecedorId" int4        NOT NULL,
     "telefone"     varchar(15) NOT NULL,
-    "tipo"         varchar(20) DEFAULT 'COMERCIAL' NOT NULL,
+    "tipo"         varchar(20) DEFAULT 'COMERCIAL' NULL,
     "principal"    bool        DEFAULT false NOT NULL,
     "ativo"        bool        DEFAULT true  NOT NULL,
     "dataCadastro"       timestamptz DEFAULT CURRENT_TIMESTAMP NOT NULL,
@@ -470,9 +483,7 @@ CREATE TABLE public.tb_funcoes_funcionario (
     "dataAlteracao"      timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
     "usuarioCadastroId"  int4          NULL,
     "usuarioAlteracaoId" int4          NULL,
-    CONSTRAINT tb_funcoes_funcionario_pkey PRIMARY KEY ("id"),
-    CONSTRAINT tb_funcoes_funcionario_funcaoFuncionario_key
-        UNIQUE ("funcaoFuncionario")
+    CONSTRAINT tb_funcoes_funcionario_pkey PRIMARY KEY ("id")
 );
  
 CREATE TABLE public.tb_funcionarios (
@@ -511,9 +522,6 @@ CREATE TABLE public.tb_funcionarios (
  
     CONSTRAINT tb_funcionarios_sexo_check
         CHECK ("sexo" IN ('M','F','O')),
- 
-    CONSTRAINT tb_funcionarios_datas_check
-        CHECK ("dataDemissao" IS NULL OR "dataDemissao" >= "dataAdmissao"),
  
     CONSTRAINT tb_funcionarios_cidadeId_fkey
         FOREIGN KEY ("cidadeId") REFERENCES public.tb_cidades("id"),
@@ -578,6 +586,7 @@ CREATE TABLE public.tb_auditoria (
     "dadosAntes"   jsonb         NULL,
     "dadosDepois"  jsonb         NULL,
     "usuarioId"    int4          NULL,
+    "ip"           varchar(45)   NULL,
     "dataOperacao" timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
     CONSTRAINT tb_auditoria_pkey PRIMARY KEY ("id")
 );
@@ -607,6 +616,8 @@ CREATE TABLE public.tb_usuarios (
     "situacao"        situacao_usuario DEFAULT 'ATIVO' NOT NULL,
     "tentativasLogin" int2             DEFAULT 0    NOT NULL,
     "ultimoLogin"     timestamptz      NULL,
+    "tokenResetSenha" varchar(255)     NULL,
+    "expiracaoToken"  timestamptz      NULL,
     "fotoPerfil"      varchar(255)     NULL,
     "observacao"      varchar(150)     NULL,
     "ativo"           bool             DEFAULT true NOT NULL,
@@ -619,10 +630,360 @@ CREATE TABLE public.tb_usuarios (
         FOREIGN KEY ("perfilId") REFERENCES public.tb_perfis("id")
 );
 
+CREATE TABLE public.tb_modalidades_nfe (
+    "id"            smallserial     NOT NULL,
+    "codigo"        varchar(10)     NOT NULL,
+    "descricao"     varchar(50)     NOT NULL,
+    "ativo"         bool            DEFAULT true NOT NULL,
+    "dataCadastro"  timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_modalidades_nfe_codigo_key UNIQUE ("codigo"),
+    CONSTRAINT tb_modalidades_nfe_pkey PRIMARY KEY ("id")
+);
+CREATE TRIGGER trg_modalidades_nfe_alt BEFORE UPDATE ON public.tb_modalidades_nfe
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
+CREATE TABLE public.tb_notas_entrada (
+    "numero"              varchar(20)     NOT NULL,
+    "modelo"              varchar(2)      DEFAULT '55' NOT NULL,
+    "serie"               varchar(3)      DEFAULT '1' NOT NULL,
+    "fornecedorId"        int4            NOT NULL,
+    "condicaoPagamentoId" int2            NOT NULL,
+    "formaPagamentoId"    int2            NOT NULL,
+    "transportadoraId"    int4            NULL,
+    "dataEmissao"         date            DEFAULT CURRENT_DATE NOT NULL,
+    "dataChegada"         date            NULL,
+    "tipoFrete"           varchar(3)      DEFAULT 'CIF' NOT NULL,
+    "valorProdutos"       numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "valorFrete"          numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "valorSeguro"         numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "outrasDespesas"      numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "valorDesconto"       numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "valorTotal"          numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "placaVeiculo"        varchar(8)      NULL,
+    "observacoes"         text            NULL,
+    "situacao"            varchar(20)     DEFAULT 'LANCADA' NOT NULL,
+    "dataCadastro"        timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_notas_entrada_pkey PRIMARY KEY ("numero", "modelo", "serie", "fornecedorId"),
+    CONSTRAINT tb_notas_entrada_situacao_check
+        CHECK ("situacao" IN ('LANCADA','CANCELADA')),
+    CONSTRAINT tb_notas_entrada_tipoFrete_check
+        CHECK ("tipoFrete" IN ('CIF','FOB','SEM')),
+    CONSTRAINT check_data_chegada
+        CHECK ("dataChegada" IS NULL OR "dataChegada" >= "dataEmissao"),
+    CONSTRAINT tb_notas_entrada_valorProdutos_check   CHECK ("valorProdutos"   >= 0),
+    CONSTRAINT tb_notas_entrada_valorFrete_check      CHECK ("valorFrete"      >= 0),
+    CONSTRAINT tb_notas_entrada_valorSeguro_check     CHECK ("valorSeguro"     >= 0),
+    CONSTRAINT tb_notas_entrada_outrasDespesas_check  CHECK ("outrasDespesas"  >= 0),
+    CONSTRAINT tb_notas_entrada_valorDesconto_check   CHECK ("valorDesconto"   >= 0),
+    CONSTRAINT tb_notas_entrada_valorTotal_check      CHECK ("valorTotal"      >= 0),
+    CONSTRAINT tb_notas_entrada_condicaoPagamentoId_fkey
+        FOREIGN KEY ("condicaoPagamentoId") REFERENCES public.tb_condicoes_pagamento("id"),
+    CONSTRAINT tb_notas_entrada_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
+    CONSTRAINT tb_notas_entrada_fornecedorId_fkey
+        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id"),
+    CONSTRAINT tb_notas_entrada_transportadoraId_fkey
+        FOREIGN KEY ("transportadoraId") REFERENCES public.tb_transportadoras("id")
+);
+CREATE TRIGGER trg_notas_entrada_alt BEFORE UPDATE ON public.tb_notas_entrada
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
+-- public.tb_notas_saida
+CREATE TABLE public.tb_notas_saida (
+    "numero"              varchar(20)     NOT NULL,
+    "modelo"              varchar(2)      DEFAULT '55' NOT NULL,
+    "serie"               varchar(3)      DEFAULT '1' NOT NULL,
+    "clienteId"           int4            NOT NULL,
+    "condicaoPagamentoId" int2            NOT NULL,
+    "formaPagamentoId"    int2            NOT NULL,
+    "transportadoraId"    int4            NULL,
+    "dataEmissao"         date            DEFAULT CURRENT_DATE NOT NULL,
+    "dataSaida"           date            NULL,
+    "tipoFrete"           varchar(3)      DEFAULT 'CIF' NOT NULL,
+    "valorProdutos"       numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "valorFrete"          numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "valorSeguro"         numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "outrasDespesas"      numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "valorDesconto"       numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "valorTotal"          numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "placaVeiculo"        varchar(8)      NULL,
+    "observacoes"         text            NULL,
+    "situacao"            varchar(20)     DEFAULT 'PENDENTE' NOT NULL,
+    "dataCadastro"        timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_notas_saida_pkey PRIMARY KEY ("numero", "modelo", "serie", "clienteId"),
+    CONSTRAINT tb_notas_saida_situacao_check
+        CHECK ("situacao" IN ('PENDENTE','CONFIRMADA','CANCELADA')),
+    CONSTRAINT tb_notas_saida_tipoFrete_check
+        CHECK ("tipoFrete" IN ('CIF','FOB','SEM')),
+    CONSTRAINT check_data_saida
+        CHECK ("dataSaida" IS NULL OR "dataSaida" >= "dataEmissao"),
+    CONSTRAINT tb_notas_saida_valorProdutos_check       CHECK ("valorProdutos"   >= 0),
+    CONSTRAINT tb_notas_saida_valorFrete_check          CHECK ("valorFrete"      >= 0),
+    CONSTRAINT tb_notas_saida_valorSeguro_check         CHECK ("valorSeguro"     >= 0),
+    CONSTRAINT tb_notas_saida_outrasDespesas_check      CHECK ("outrasDespesas"  >= 0),
+    CONSTRAINT tb_notas_saida_valorDesconto_check       CHECK ("valorDesconto"   >= 0),
+    CONSTRAINT tb_notas_saida_valorTotal_check          CHECK ("valorTotal"      >= 0),
+    CONSTRAINT tb_notas_saida_clienteId_fkey
+        FOREIGN KEY ("clienteId") REFERENCES public.tb_clientes("id"),
+    CONSTRAINT tb_notas_saida_condicaoPagamentoId_fkey
+        FOREIGN KEY ("condicaoPagamentoId") REFERENCES public.tb_condicoes_pagamento("id"),
+    CONSTRAINT tb_notas_saida_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
+    CONSTRAINT tb_notas_saida_transportadoraId_fkey
+        FOREIGN KEY ("transportadoraId") REFERENCES public.tb_transportadoras("id")
+);
+CREATE TRIGGER trg_notas_saida_alt BEFORE UPDATE ON public.tb_notas_saida
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
+-- public.tb_produtos_nota_saida
+CREATE TABLE public.tb_produtos_nota_saida (
+    "notaNumero"         varchar(20)     NOT NULL,
+    "notaModelo"         varchar(2)      NOT NULL,
+    "notaSerie"          varchar(3)      NOT NULL,
+    "clienteId"          int4            NOT NULL,
+    "produtoId"          int4            NOT NULL,
+    "sequencia"          int2            NOT NULL,
+    "quantidade"         numeric(15,4)   NOT NULL,
+    "valorUnitario"      numeric(15,4)   NOT NULL,
+    "valorDesconto"      numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "percentualDesconto" numeric(5,2)    DEFAULT 0.00 NOT NULL,
+    "valorTotal"         numeric(15,4)   NOT NULL,
+    "rateioFrete"        numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "rateioSeguro"       numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "rateioOutras"       numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "custoPrecoFinal"    numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "dataCadastro"       timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"      timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_produtos_nota_saida_pkey
+        PRIMARY KEY ("notaNumero", "notaModelo", "notaSerie", "clienteId", "produtoId", "sequencia"),
+    CONSTRAINT tb_produtos_nota_saida_quantidade_check      CHECK ("quantidade" > 0),
+    CONSTRAINT tb_produtos_nota_saida_valorUnitario_check   CHECK ("valorUnitario" >= 0),
+    CONSTRAINT tb_produtos_nota_saida_valorDesconto_check   CHECK ("valorDesconto" >= 0),
+    CONSTRAINT tb_produtos_nota_saida_percentualDesconto_check
+        CHECK ("percentualDesconto" >= 0 AND "percentualDesconto" <= 100),
+    CONSTRAINT tb_produtos_nota_saida_nota_fkey
+        FOREIGN KEY ("notaNumero", "notaModelo", "notaSerie", "clienteId")
+        REFERENCES public.tb_notas_saida("numero", "modelo", "serie", "clienteId") ON DELETE CASCADE,
+    CONSTRAINT tb_produtos_nota_saida_produtoId_fkey
+        FOREIGN KEY ("produtoId") REFERENCES public.tb_produtos("id")
+);
+CREATE TRIGGER trg_produtos_nota_saida_alt BEFORE UPDATE ON public.tb_produtos_nota_saida
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
+CREATE TABLE public.tb_produtos_nota_entrada (
+    "notaNumero"         varchar(20)     NOT NULL,
+    "notaModelo"         varchar(2)      NOT NULL,
+    "notaSerie"          varchar(3)      NOT NULL,
+    "fornecedorId"       int4            NOT NULL,
+    "produtoId"          int4            NOT NULL,
+    "sequencia"          int2            DEFAULT 1 NOT NULL,
+    "quantidade"         numeric(15,4)   NOT NULL,
+    "valorUnitario"      numeric(18,6)   NOT NULL,
+    "valorDesconto"      numeric(15,4)   DEFAULT 0.0000 NOT NULL,
+    "percentualDesconto" numeric(18,6)   DEFAULT 0.00 NOT NULL,
+    "valorTotal"         numeric(15,4)   NOT NULL,
+    "rateioFrete"        numeric(18,6)   DEFAULT 0.0000 NOT NULL,
+    "rateioSeguro"       numeric(18,6)   DEFAULT 0.0000 NOT NULL,
+    "rateioOutras"       numeric(18,6)   DEFAULT 0.0000 NOT NULL,
+    "custoPrecoFinal"    numeric(18,6)   NULL,
+    "dataCadastro"       timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"      timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_produtos_nota_entrada_pkey
+        PRIMARY KEY ("notaNumero", "notaModelo", "notaSerie", "fornecedorId", "produtoId", "sequencia"),
+    CONSTRAINT tb_produtos_nota_entrada_quantidade_check      CHECK ("quantidade" > 0),
+    CONSTRAINT tb_produtos_nota_entrada_sequencia_check       CHECK ("sequencia" > 0),
+    CONSTRAINT tb_produtos_nota_entrada_valorTotal_check      CHECK ("valorTotal" >= 0),
+    CONSTRAINT tb_produtos_nota_entrada_valorUnitario_check   CHECK ("valorUnitario" >= 0),
+    CONSTRAINT tb_produtos_nota_entrada_valorDesconto_check   CHECK ("valorDesconto" >= 0),
+    CONSTRAINT tb_produtos_nota_entrada_percentualDesconto_check
+        CHECK ("percentualDesconto" >= 0 AND "percentualDesconto" <= 100),
+    CONSTRAINT tb_produtos_nota_entrada_nota_fkey
+        FOREIGN KEY ("notaNumero", "notaModelo", "notaSerie", "fornecedorId")
+        REFERENCES public.tb_notas_entrada("numero", "modelo", "serie", "fornecedorId") ON DELETE CASCADE,
+    CONSTRAINT tb_produtos_nota_entrada_produtoId_fkey
+        FOREIGN KEY ("produtoId") REFERENCES public.tb_produtos("id")
+);
+CREATE TRIGGER trg_produtos_nota_entrada_alt BEFORE UPDATE ON public.tb_produtos_nota_entrada
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+-- public.tb_nfe
+CREATE TABLE public.tb_nfe (
+    "id"                  bigserial       NOT NULL,
+    "numero"              varchar(50)     NOT NULL,
+    "serie"               varchar(3)      NOT NULL,
+    "chaveAcesso"         varchar(44)     NULL,
+    "dataEmissao"         timestamptz     NOT NULL,
+    "clienteId"           int4            NOT NULL,
+    "formaPagamentoId"    int2            NOT NULL,
+    "condicaoPagamentoId" int2            NOT NULL,
+    "transportadoraId"    int4            NULL,
+    "veiculoId"           int4            NULL,
+    "modalidadeId"        int2            NOT NULL,
+    "valorTotal"          numeric(10,2)   NOT NULL,
+    "cancelada"           bool            DEFAULT false NOT NULL,
+    "dataCadastro"        timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"       timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_nfe_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_nfe_clienteId_fkey
+        FOREIGN KEY ("clienteId") REFERENCES public.tb_clientes("id"),
+    CONSTRAINT tb_nfe_condicaoPagamentoId_fkey
+        FOREIGN KEY ("condicaoPagamentoId") REFERENCES public.tb_condicoes_pagamento("id"),
+    CONSTRAINT tb_nfe_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
+    CONSTRAINT tb_nfe_modalidadeId_fkey
+        FOREIGN KEY ("modalidadeId") REFERENCES public.tb_modalidades_nfe("id"),
+    CONSTRAINT tb_nfe_transportadoraId_fkey
+        FOREIGN KEY ("transportadoraId") REFERENCES public.tb_transportadoras("id"),
+    CONSTRAINT tb_nfe_veiculoId_fkey
+        FOREIGN KEY ("veiculoId") REFERENCES public.tb_veiculos("id")
+);
+CREATE TRIGGER trg_nfe_alt BEFORE UPDATE ON public.tb_nfe
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+-- public.tb_itens_nfe
+CREATE TABLE public.tb_itens_nfe (
+    "id"            bigserial       NOT NULL,
+    "nfeId"         int8            NOT NULL,
+    "produtoId"     int4            NOT NULL,
+    "quantidade"    numeric(10,3)   NOT NULL,
+    "valorUnitario" numeric(10,2)   NOT NULL,
+    "valorTotal"    numeric(10,2)   NOT NULL,
+    "dataCadastro"  timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao" timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_itens_nfe_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_itens_nfe_nfeId_fkey
+        FOREIGN KEY ("nfeId") REFERENCES public.tb_nfe("id") ON DELETE CASCADE,
+    CONSTRAINT tb_itens_nfe_produtoId_fkey
+        FOREIGN KEY ("produtoId") REFERENCES public.tb_produtos("id")
+);
+CREATE TRIGGER trg_itens_nfe_alt BEFORE UPDATE ON public.tb_itens_nfe
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+-- public.tb_movimentacoes_nfe
+CREATE TABLE public.tb_movimentacoes_nfe (
+    "id"               bigserial       NOT NULL,
+    "nfeId"            int8            NOT NULL,
+    "dataMovimentacao" timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "status"           varchar(30)     NOT NULL,
+    "descricao"        text            NULL,
+    "dataCadastro"     timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"    timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_movimentacoes_nfe_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_movimentacoes_nfe_nfeId_fkey
+        FOREIGN KEY ("nfeId") REFERENCES public.tb_nfe("id") ON DELETE CASCADE
+);
+CREATE TRIGGER trg_movimentacoes_nfe_alt BEFORE UPDATE ON public.tb_movimentacoes_nfe
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+-- =============================================================
+-- FINANCEIRO
+-- =============================================================
+
+-- public.tb_contas_receber
+CREATE TABLE public.tb_contas_receber (
+    "id"               bigserial       NOT NULL,
+    "notaNumero"       varchar(20)     NOT NULL,
+    "notaModelo"       varchar(2)      NOT NULL,
+    "notaSerie"        varchar(3)      NOT NULL,
+    "clienteId"        int4            NOT NULL,
+    "formaPagamentoId" int2            NOT NULL,
+    "numeroParcela"    int2            NOT NULL,
+    "totalParcelas"    int2            NOT NULL,
+    "valorOriginal"    numeric(15,2)   NOT NULL,
+    "valorRecebido"    numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "valorDesconto"    numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "valorJuros"       numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "valorMulta"       numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "valorTotal"       numeric(15,2)   NOT NULL,
+    "dataEmissao"      date            NOT NULL,
+    "dataVencimento"   date            NOT NULL,
+    "dataRecebimento"  date            NULL,
+    "situacao"         varchar(20)     DEFAULT 'PENDENTE' NOT NULL,
+    "observacoes"      text            NULL,
+    "dataCadastro"     timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"    timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_contas_receber_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_contas_receber_situacao_check
+        CHECK ("situacao" IN ('PENDENTE','RECEBIDO','PARCIAL','CANCELADO')),
+    CONSTRAINT tb_contas_receber_clienteId_fkey
+        FOREIGN KEY ("clienteId") REFERENCES public.tb_clientes("id"),
+    CONSTRAINT tb_contas_receber_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id")
+);
+CREATE INDEX idx_contas_receber_venc ON public.tb_contas_receber USING btree ("dataVencimento");
+CREATE TRIGGER trg_contas_receber_alt BEFORE UPDATE ON public.tb_contas_receber
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+-- public.tb_contas_pagar
+CREATE TABLE public.tb_contas_pagar (
+    "id"               bigserial       NOT NULL,
+    "notaNumero"       varchar(20)     NOT NULL,
+    "notaModelo"       varchar(2)      NOT NULL,
+    "notaSerie"        varchar(3)      NOT NULL,
+    "fornecedorId"     int4            NOT NULL,
+    "formaPagamentoId" int2            NOT NULL,
+    "numeroParcela"    int2            NOT NULL,
+    "totalParcelas"    int2            NOT NULL,
+    "valorOriginal"    numeric(15,2)   NOT NULL,
+    "valorPago"        numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "valorDesconto"    numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "valorJuros"       numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "valorMulta"       numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "valorTotal"       numeric(15,2)   NOT NULL,
+    "dataEmissao"      date            NOT NULL,
+    "dataVencimento"   date            NOT NULL,
+    "dataPagamento"    date            NULL,
+    "situacao"         varchar(20)     DEFAULT 'PENDENTE' NOT NULL,
+    "observacoes"      text            NULL,
+    "dataCadastro"     timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"    timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_contas_pagar_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_contas_pagar_situacao_check
+        CHECK ("situacao" IN ('PENDENTE','PAGO','PARCIAL','CANCELADO')),
+    CONSTRAINT tb_contas_pagar_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
+    CONSTRAINT tb_contas_pagar_fornecedorId_fkey
+        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id")
+);
+CREATE INDEX idx_contas_pagar_venc ON public.tb_contas_pagar USING btree ("dataVencimento");
+CREATE TRIGGER trg_contas_pagar_alt BEFORE UPDATE ON public.tb_contas_pagar
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+-- public.tb_contas_pagar_avulsa
+CREATE TABLE public.tb_contas_pagar_avulsa (
+    "id"               bigserial       NOT NULL,
+    "numeroNota"       varchar(50)     NULL,
+    "modelo"           varchar(2)      NULL,
+    "serie"            varchar(3)      NULL,
+    "fornecedorId"     int4            NOT NULL,
+    "formaPagamentoId" int2            NOT NULL,
+    "numParcela"       int2            DEFAULT 1 NOT NULL,
+    "valorParcela"     numeric(15,2)   NOT NULL,
+    "dataEmissao"      date            NOT NULL,
+    "dataVencimento"   date            NOT NULL,
+    "dataPagamento"    date            NULL,
+    "valorPago"        numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "juros"            numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "multa"            numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "desconto"         numeric(15,2)   DEFAULT 0.00 NOT NULL,
+    "situacao"         varchar(20)     DEFAULT 'PENDENTE' NOT NULL,
+    "observacao"       text            NULL,
+    "dataCadastro"     timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"    timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    CONSTRAINT tb_contas_pagar_avulsa_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_contas_pagar_avulsa_situacao_check
+        CHECK ("situacao" IN ('PENDENTE','PAGO','PARCIAL','CANCELADO')),
+    CONSTRAINT tb_contas_pagar_avulsa_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
+    CONSTRAINT tb_contas_pagar_avulsa_fornecedorId_fkey
+        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id")
+);
+CREATE INDEX idx_contas_pagar_avulsa_venc ON public.tb_contas_pagar_avulsa USING btree ("dataVencimento");
+CREATE TRIGGER trg_contas_pagar_avulsa_alt BEFORE UPDATE ON public.tb_contas_pagar_avulsa
+    FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
 
 
@@ -814,73 +1175,73 @@ INSERT INTO public.tb_veiculos ("placa","modelo","marca","ano","capacidade","ati
 -- ============================================================
 -- TRANSPORTADORAS
 -- ============================================================
-INSERT INTO public.tb_transportadora_telefone
-    ("transportadoraId","telefone","tipo","principal","ativo",
-     "usuarioCadastroId","usuarioAlteracaoId") VALUES
-(1, '(45) 3284-1100', 'COMERCIAL',  true,  true, NULL, NULL),
-(1, '(45) 3284-1199', 'FINANCEIRO', false, true, NULL, NULL),
-(2, '(45) 3321-4400', 'COMERCIAL',  true,  true, NULL, NULL),
-(3, '(45) 3055-7700', 'COMERCIAL',  true,  true, NULL, NULL),
-(4, '(45) 3523-8800', 'COMERCIAL',  true,  true, NULL, NULL),
-(5, '(43) 3322-5500', 'COMERCIAL',  true,  true, NULL, NULL),
-(5, '(43) 99988-5501','COMERCIAL',  false, true, NULL, NULL);
+-- INSERT INTO public.tb_transportadora_telefone
+--     ("transportadoraId","telefone","tipo","principal","ativo",
+--      "usuarioCadastroId","usuarioAlteracaoId") VALUES
+-- (1, '(45) 3284-1100', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (1, '(45) 3284-1199', 'FINANCEIRO', false, true, NULL, NULL),
+-- (2, '(45) 3321-4400', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (3, '(45) 3055-7700', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (4, '(45) 3523-8800', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (5, '(43) 3322-5500', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (5, '(43) 99988-5501','COMERCIAL',  false, true, NULL, NULL);
 
 
 -- ============================================================
 -- EMAILS DE TRANSPORTADORAS
 -- ============================================================
-INSERT INTO public.tb_transportadora_email
-    ("transportadoraId","email","tipo","principal","ativo",
-     "usuarioCadastroId","usuarioAlteracaoId") VALUES
-(1, 'comercial@rapidooeste.com.br',  'COMERCIAL',  true,  true, NULL, NULL),
-(1, 'financeiro@rapidooeste.com.br', 'FINANCEIRO', false, true, NULL, NULL),
-(2, 'contato@transsul.com.br',       'COMERCIAL',  true,  true, NULL, NULL),
-(2, 'fiscal@transsul.com.br',        'FISCAL',     false, true, NULL, NULL),
-(3, 'velozlog@gmail.com',            'COMERCIAL',  true,  true, NULL, NULL),
-(4, 'fronteira@transportes.com.br',  'COMERCIAL',  true,  true, NULL, NULL),
-(5, 'contato@nortesul.com.br',       'COMERCIAL',  true,  true, NULL, NULL),
-(5, 'financeiro@nortesul.com.br',    'FINANCEIRO', false, true, NULL, NULL);
+-- INSERT INTO public.tb_transportadora_email
+--     ("transportadoraId","email","tipo","principal","ativo",
+--      "usuarioCadastroId","usuarioAlteracaoId") VALUES
+-- (1, 'comercial@rapidooeste.com.br',  'COMERCIAL',  true,  true, NULL, NULL),
+-- (1, 'financeiro@rapidooeste.com.br', 'FINANCEIRO', false, true, NULL, NULL),
+-- (2, 'contato@transsul.com.br',       'COMERCIAL',  true,  true, NULL, NULL),
+-- (2, 'fiscal@transsul.com.br',        'FISCAL',     false, true, NULL, NULL),
+-- (3, 'velozlog@gmail.com',            'COMERCIAL',  true,  true, NULL, NULL),
+-- (4, 'fronteira@transportes.com.br',  'COMERCIAL',  true,  true, NULL, NULL),
+-- (5, 'contato@nortesul.com.br',       'COMERCIAL',  true,  true, NULL, NULL),
+-- (5, 'financeiro@nortesul.com.br',    'FINANCEIRO', false, true, NULL, NULL);
 
 
 -- ============================================================
 -- TELEFONES DE TRANSPORTADORAS
 -- ============================================================
-INSERT INTO public.tb_transportadora_telefone
-    ("transportadoraId","telefone","tipo","principal","ativo",
-     "usuarioCadastroId","usuarioAlteracaoId") VALUES
-(1, '(45) 3284-1100', 'COMERCIAL',  true,  true, NULL, NULL),
-(1, '(45) 3284-1199', 'FINANCEIRO', false, true, NULL, NULL),
-(2, '(45) 3321-4400', 'COMERCIAL',  true,  true, NULL, NULL),
-(3, '(45) 3055-7700', 'COMERCIAL',  true,  true, NULL, NULL),
-(4, '(45) 3523-8800', 'COMERCIAL',  true,  true, NULL, NULL),
-(5, '(43) 3322-5500', 'COMERCIAL',  true,  true, NULL, NULL),
-(5, '(43) 99988-5501','CELULAR',    false, true, NULL, NULL);
+-- INSERT INTO public.tb_transportadora_telefone
+--     ("transportadoraId","telefone","tipo","principal","ativo",
+--      "usuarioCadastroId","usuarioAlteracaoId") VALUES
+-- (1, '(45) 3284-1100', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (1, '(45) 3284-1199', 'FINANCEIRO', false, true, NULL, NULL),
+-- (2, '(45) 3321-4400', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (3, '(45) 3055-7700', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (4, '(45) 3523-8800', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (5, '(43) 3322-5500', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (5, '(43) 99988-5501','CELULAR',    false, true, NULL, NULL);
 
 
 -- ============================================================
 -- TRANSPORTADORA × VEÍCULO
 -- ============================================================
-INSERT INTO public.tb_transportadora_veiculo ("transportadoraId","veiculoId") VALUES
-(1, 1), (1, 2),
-(2, 3), (2, 4),
-(3, 5),
-(4, 6),
-(5, 7);
+-- INSERT INTO public.tb_transportadora_veiculo ("transportadoraId","veiculoId") VALUES
+-- (1, 1), (1, 2),
+-- (2, 3), (2, 4),
+-- (3, 5),
+-- (4, 6),
+-- (5, 7);
 
 
 -- ============================================================
 -- ITENS DE TRANSPORTADORAS
 -- ============================================================
-INSERT INTO public.tb_transportadora_itens
-    ("codigo","descricao","transportadoraId","codigoTransp","ativo") VALUES
-('FRETE-001', 'Frete fracionado',     1, 'RO-FF01', true),
-('FRETE-002', 'Frete dedicado',       1, 'RO-FD02', true),
-('FRETE-001', 'Frete fracionado',     2, 'TS-FR01', true),
-('SEGURO-001','Seguro de carga',      2, 'TS-SG01', true),
-('FRETE-001', 'Frete normal',         3, 'VL-FN01', true),
-('FRETE-001', 'Frete padrão',         4, 'FR-FP01', true),
-('FRETE-001', 'Frete nacional',       5, 'NS-FN01', true),
-('FRETE-002', 'Frete expresso',       5, 'NS-FE02', true);
+-- INSERT INTO public.tb_transportadora_itens
+--     ("codigo","descricao","transportadoraId","codigoTransp","ativo") VALUES
+-- ('FRETE-001', 'Frete fracionado',     1, 'RO-FF01', true),
+-- ('FRETE-002', 'Frete dedicado',       1, 'RO-FD02', true),
+-- ('FRETE-001', 'Frete fracionado',     2, 'TS-FR01', true),
+-- ('SEGURO-001','Seguro de carga',      2, 'TS-SG01', true),
+-- ('FRETE-001', 'Frete normal',         3, 'VL-FN01', true),
+-- ('FRETE-001', 'Frete padrão',         4, 'FR-FP01', true),
+-- ('FRETE-001', 'Frete nacional',       5, 'NS-FN01', true),
+-- ('FRETE-002', 'Frete expresso',       5, 'NS-FE02', true);
 
 
 -- ============================================================
@@ -952,6 +1313,9 @@ INSERT INTO public.tb_produtos (
 ('Monitor 24" Full HD',       NULL,            'SAM-MON24',   6, 1, 5, 780.00,1249.90,   10,   2, 60.24, 'Monitor Samsung 24" Full HD IPS',  NULL, true, NULL, NULL),
 ('Joelho PVC 50mm',          '7891234560017', 'HID-JLH50',  10, 1, 4,   1.20,   2.90,  400,  50, 141.67,'Joelho PVC 50mm soldável',         NULL, true, NULL, NULL),
 ('Tubo PVC 50mm 6mt',        '7891234560018', 'HID-TUB50',  10, 4, 4,  18.00,  32.90,  100,  20, 82.78, 'Tubo PVC esgoto 50mm 6 metros',    NULL, true, NULL, NULL);
+
+-- Custo médio inicial = valor de compra (depois disso só muda pelas notas de entrada)
+UPDATE public.tb_produtos SET "custoMedio" = "valorCompra";
 
 
 -- ============================================================
@@ -1075,51 +1439,51 @@ INSERT INTO public.tb_cliente_telefone
 -- ============================================================
 -- FORNECEDORES
 -- ============================================================
-INSERT INTO public.tb_fornecedores (
-    "fornecedor","apelido","cpfCnpj","rgInscricaoEstadual","cep","endereco","numero",
-    "complemento","bairro","cidadeId","condicaoPagamentoId","transportadoraId","tipo",
-    "limiteCredito","observacoes","ativo","usuarioCadastroId","usuarioAlteracaoId") VALUES
-('Schneider Electric Brasil Ltda',  'Schneider',    '60501445000160','SP-605014450', '04795000','Av. das Nações Unidas','17891',NULL,      'Vargem Grande', 8, 4, 2, 'J', 500000.00, NULL, true, NULL, NULL),
-('WEG S/A',                         'WEG',          '84429695000111','SC-844296950', '89256900','Av. Prefeito Waldemar', '299', NULL,     'Bom Retiro',   12, 5, 3, 'J', 800000.00, NULL, true, NULL, NULL),
-('Bosch Ferramentas Ltda',          'Bosch',        '59104862000150','SP-591048620', '04795000','Rod. Régis Bittencourt','3800',NULL,     'Jardim Santa', 8,  4, 1, 'J', 300000.00, NULL, true, NULL, NULL),
-('Intelbras S/A',                   'Intelbras',    '82901000000145','SC-829010000', '88050000','Rodovia SC 281',        '4600',NULL,     'Distrito Ind.',11, 3, 3, 'J', 250000.00, NULL, true, NULL, NULL),
-('Samsung Eletrônica da Amazônia',  'Samsung',      '24269238000128','AM-242692380', '69075351','Av. Torquato Tapajós',  '7200',NULL,     'Colônia Terra',8,  5, 2, 'J', 600000.00, NULL, true, NULL, NULL),
-('Distribuidora Elétrica Sul Ltda', 'Dist. Elet.',  '91234567000199','RS-912345670', '90030080','Av. Borges de Medeiros','222', 'Sala 3', 'Centro',      13, 3, 4, 'J', 150000.00, NULL, true, NULL, NULL),
-('Dell Computadores do Brasil Ltda','Dell',         '72381189000110','SP-723811890', '06460040','Al. Xingu',            '350', NULL,     'Alphaville',   8,  6, 1, 'J', 400000.00, NULL, true, NULL, NULL);
+-- INSERT INTO public.tb_fornecedores (
+--     "fornecedor","apelido","cpfCnpj","rgInscricaoEstadual","cep","endereco","numero",
+--     "complemento","bairro","cidadeId","condicaoPagamentoId","transportadoraId","tipo",
+--     "limiteCredito","observacoes","ativo","usuarioCadastroId","usuarioAlteracaoId") VALUES
+-- ('Schneider Electric Brasil Ltda',  'Schneider',    '60501445000160','SP-605014450', '04795000','Av. das Nações Unidas','17891',NULL,      'Vargem Grande', 8, 4, 2, 'J', 500000.00, NULL, true, NULL, NULL),
+-- ('WEG S/A',                         'WEG',          '84429695000111','SC-844296950', '89256900','Av. Prefeito Waldemar', '299', NULL,     'Bom Retiro',   12, 5, 3, 'J', 800000.00, NULL, true, NULL, NULL),
+-- ('Bosch Ferramentas Ltda',          'Bosch',        '59104862000150','SP-591048620', '04795000','Rod. Régis Bittencourt','3800',NULL,     'Jardim Santa', 8,  4, 1, 'J', 300000.00, NULL, true, NULL, NULL),
+-- ('Intelbras S/A',                   'Intelbras',    '82901000000145','SC-829010000', '88050000','Rodovia SC 281',        '4600',NULL,     'Distrito Ind.',11, 3, 3, 'J', 250000.00, NULL, true, NULL, NULL),
+-- ('Samsung Eletrônica da Amazônia',  'Samsung',      '24269238000128','AM-242692380', '69075351','Av. Torquato Tapajós',  '7200',NULL,     'Colônia Terra',8,  5, 2, 'J', 600000.00, NULL, true, NULL, NULL),
+-- ('Distribuidora Elétrica Sul Ltda', 'Dist. Elet.',  '91234567000199','RS-912345670', '90030080','Av. Borges de Medeiros','222', 'Sala 3', 'Centro',      13, 3, 4, 'J', 150000.00, NULL, true, NULL, NULL),
+-- ('Dell Computadores do Brasil Ltda','Dell',         '72381189000110','SP-723811890', '06460040','Al. Xingu',            '350', NULL,     'Alphaville',   8,  6, 1, 'J', 400000.00, NULL, true, NULL, NULL);
 
 
 -- ============================================================
 -- EMAILS DE FORNECEDORES
 -- ============================================================
-INSERT INTO public.tb_fornecedor_email
-    ("fornecedorId","email","tipo","principal","ativo","usuarioCadastroId","usuarioAlteracaoId") VALUES
-(1, 'comercial@schneider.com.br',  'COMERCIAL',  true,  true, NULL, NULL),
-(1, 'financeiro@schneider.com.br', 'FINANCEIRO', false, true, NULL, NULL),
-(2, 'vendas@weg.net',              'COMERCIAL',  true,  true, NULL, NULL),
-(2, 'fiscal@weg.net',              'FISCAL',     false, true, NULL, NULL),
-(3, 'vendas@bosch.com.br',         'COMERCIAL',  true,  true, NULL, NULL),
-(4, 'comercial@intelbras.com.br',  'COMERCIAL',  true,  true, NULL, NULL),
-(4, 'financeiro@intelbras.com.br', 'FINANCEIRO', false, true, NULL, NULL),
-(5, 'vendas@samsung.com.br',       'COMERCIAL',  true,  true, NULL, NULL),
-(6, 'contato@disteletsul.com.br',  'COMERCIAL',  true,  true, NULL, NULL),
-(7, 'vendas@dell.com.br',          'COMERCIAL',  true,  true, NULL, NULL),
-(7, 'financeiro@dell.com.br',      'FINANCEIRO', false, true, NULL, NULL);
+-- INSERT INTO public.tb_fornecedor_email
+--     ("fornecedorId","email","tipo","principal","ativo","usuarioCadastroId","usuarioAlteracaoId") VALUES
+-- (1, 'comercial@schneider.com.br',  'COMERCIAL',  true,  true, NULL, NULL),
+-- (1, 'financeiro@schneider.com.br', 'FINANCEIRO', false, true, NULL, NULL),
+-- (2, 'vendas@weg.net',              'COMERCIAL',  true,  true, NULL, NULL),
+-- (2, 'fiscal@weg.net',              'FISCAL',     false, true, NULL, NULL),
+-- (3, 'vendas@bosch.com.br',         'COMERCIAL',  true,  true, NULL, NULL),
+-- (4, 'comercial@intelbras.com.br',  'COMERCIAL',  true,  true, NULL, NULL),
+-- (4, 'financeiro@intelbras.com.br', 'FINANCEIRO', false, true, NULL, NULL),
+-- (5, 'vendas@samsung.com.br',       'COMERCIAL',  true,  true, NULL, NULL),
+-- (6, 'contato@disteletsul.com.br',  'COMERCIAL',  true,  true, NULL, NULL),
+-- (7, 'vendas@dell.com.br',          'COMERCIAL',  true,  true, NULL, NULL),
+-- (7, 'financeiro@dell.com.br',      'FINANCEIRO', false, true, NULL, NULL);
 
 
 -- ============================================================
 -- TELEFONES DE FORNECEDORES
 -- ============================================================
-INSERT INTO public.tb_fornecedor_telefone
-    ("fornecedorId","telefone","tipo","principal","ativo","usuarioCadastroId","usuarioAlteracaoId") VALUES
-(1, '(11) 3030-1000', 'COMERCIAL',  true,  true, NULL, NULL),
-(1, '(11) 3030-1001', 'FINANCEIRO', false, true, NULL, NULL),
-(2, '(47) 3276-4000', 'COMERCIAL',  true,  true, NULL, NULL),
-(3, '(11) 4591-1800', 'COMERCIAL',  true,  true, NULL, NULL),
-(4, '(48) 2106-0006', 'COMERCIAL',  true,  true, NULL, NULL),
-(5, '(11) 5853-5000', 'COMERCIAL',  true,  true, NULL, NULL),
-(6, '(51) 3322-4100', 'COMERCIAL',  true,  true, NULL, NULL),
-(7, '(11) 2112-4000', 'COMERCIAL',  true,  true, NULL, NULL),
-(7, '(11) 2112-4001', 'FINANCEIRO', false, true, NULL, NULL);
+-- INSERT INTO public.tb_fornecedor_telefone
+--     ("fornecedorId","telefone","tipo","principal","ativo","usuarioCadastroId","usuarioAlteracaoId") VALUES
+-- (1, '(11) 3030-1000', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (1, '(11) 3030-1001', 'FINANCEIRO', false, true, NULL, NULL),
+-- (2, '(47) 3276-4000', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (3, '(11) 4591-1800', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (4, '(48) 2106-0006', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (5, '(11) 5853-5000', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (6, '(51) 3322-4100', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (7, '(11) 2112-4000', 'COMERCIAL',  true,  true, NULL, NULL),
+-- (7, '(11) 2112-4001', 'FINANCEIRO', false, true, NULL, NULL);
 
 
 -- ============================================================
@@ -1134,4 +1498,36 @@ INSERT INTO public.tb_usuarios (
 ('carlos.mendes',  'Carlos Eduardo Mendes',      'carlos@empresa.com.br',   '$2b$12$placeholderHashCarlos',   4, 1, 'ATIVO', 0, true),
 ('fernanda.lima',  'Fernanda Lima Souza',         'fernanda@empresa.com.br', '$2b$12$placeholderHashFernanda', 4, 2, 'ATIVO', 0, true),
 ('admin',          'Administrador do Sistema',    'admin@empresa.com.br',    '$2b$12$placeholderHashAdmin',    1, NULL,'ATIVO', 0, true);
+
+
+
+
+
+
+
+
+
+
+
+
+BEGIN;
+ 
+TRUNCATE TABLE public.tb_notas_entrada CASCADE;
+ 
+ALTER TABLE public.tb_notas_entrada
+    DROP CONSTRAINT IF EXISTS tb_notas_entrada_situacao_check;
+ 
+ALTER TABLE public.tb_notas_entrada
+    ADD CONSTRAINT tb_notas_entrada_situacao_check
+    CHECK ("situacao" IN ('LANCADA', 'CANCELADA'));
+ 
+ALTER TABLE public.tb_notas_entrada
+    ALTER COLUMN "situacao" SET DEFAULT 'LANCADA';
+ 
+COMMIT;
+ 
+
+
+
+ 
 
