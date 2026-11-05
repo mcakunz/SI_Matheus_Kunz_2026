@@ -298,6 +298,9 @@ export interface Produto {
     quantidade:       number
     quantidadeMinima: number
     percentualLucro:  number
+    // Custo médio ponderado, atualizado a cada nota de entrada (não é editado à mão).
+    // Pode chegar como string do Postgres (numeric) — converter com Number() antes de usar.
+    custoMedio:       number
     descricao:        string | null
     observacoes:      string | null
     ativo:            boolean
