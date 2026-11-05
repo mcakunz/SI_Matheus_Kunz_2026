@@ -15,6 +15,11 @@ export function mascaraCNPJ(valor: string): string {
     return `${d.slice(0, 2)}.${d.slice(2, 5)}.${d.slice(5, 8)}/${d.slice(8, 12)}-${d.slice(12)}`
 }
 
+export function mascaraCpfCnpj(valor: string | null | undefined): string {
+    const d = (valor ?? '').replace(/\D/g, '')
+    return d.length <= 11 ? mascaraCPF(d) : mascaraCNPJ(d)
+}
+
 export function mascaraTelefone(valor: string): string {
     const d = valor.replace(/\D/g, '').slice(0, 11)
     if (d.length <= 2) return d.length ? `(${d}` : ''

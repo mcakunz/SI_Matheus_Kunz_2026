@@ -29,6 +29,15 @@ interface BaseLookupProps {
     onCriado?: (novo: any) => void
     /** Trava o lookup: não deixa abrir o dropdown, criar novo item nem limpar a seleção atual. */
     disabled?: boolean
+    /**
+     * Quando informado, aparece um botão de lupa ao lado do campo que chama esta função
+     * (normalmente abre um modal de pesquisa). Nesse modo o "+" de cadastro direto some do
+     * campo e do rodapé do dropdown — o cadastro passa a ser feito de dentro do modal de pesquisa.
+     * Nesse modo o campo ganha a mesma altura de um FormInput (42px) e a lupa acompanha essa altura.
+     * Também some o ícone de "editar" do item selecionado (sobra mais espaço para o nome): a edição
+     * passa a ser feita pelo botão de lápis de cada linha do modal de pesquisa.
+     */
+    onPesquisar?: () => void
 }
 
 export function BaseLookup({
@@ -45,6 +54,7 @@ export function BaseLookup({
     tipoCadastro,
     onCriado,
     disabled = false,
+    onPesquisar,
 }: BaseLookupProps) {
     const [aberto, setAberto] = useState(false)
     const [busca, setBusca] = useState('')
@@ -116,8 +126,9 @@ export function BaseLookup({
 
     return (
         <div ref={containerRef} className="relative">
+        <div className="flex items-stretch gap-2">
             <div
-                className={`flex items-center gap-2 w-full px-2 py-2 border rounded transition-all
+                className={`flex items-center gap-2 flex-1 min-w-0 px-2 py-2 border rounded transition-all
                     ${disabled
                         ? 'bg-slate-100 cursor-not-allowed'
                         : aberto
@@ -128,12 +139,14 @@ export function BaseLookup({
                     }`}
                 onClick={!aberto && !disabled ? abrir : undefined}
                 aria-disabled={disabled}
+                style={onPesquisar ? { minHeight: 42 } : undefined}
             >
-                <Search size={15} className="text-slate-400 shrink-0" />
+                {/* Lupa só decorativa: some quando já existe a lupa funcional ao lado (onPesquisar). */}
+                {!onPesquisar && <Search size={15} className="text-slate-400 shrink-0" />}
 
                 {!aberto && (
                     itemAtual
-                    ? <span className={`flex-1 text-sm truncate ${disabled ? 'text-slate-500' : 'text-slate-800'}`}>{itemAtual.label}</span>
+                    ? <span title={itemAtual.label} className={`flex-1 text-sm truncate ${disabled ? 'text-slate-500' : 'text-slate-800'}`}>{itemAtual.label}</span>
                     : <span className="flex-1 text-sm text-slate-400">{placeholder}</span>
                 )}
 
@@ -149,7 +162,7 @@ export function BaseLookup({
                 )}
 
                 <div className="flex items-center gap-1 shrink-0" onClick={e => e.stopPropagation()}>
-                    {!aberto && itemAtual && (
+                    {!aberto && itemAtual && !onPesquisar && (
                         <a
                             href={`${pathCadastro}/${itemAtual.id}`}
                             target="_blank"
@@ -161,7 +174,7 @@ export function BaseLookup({
                         </a>
                     )}
 
-                    {!disabled && (
+                    {!disabled && !onPesquisar && (
                         <button
                             type="button"
                             onClick={abrirCadastroRapido}
@@ -192,6 +205,25 @@ export function BaseLookup({
                     )}
                 </div>
             </div>
+
+            {onPesquisar && (
+                <button
+                    type="button"
+                    onClick={() => { fechar(); onPesquisar() }}
+                    disabled={disabled}
+                    title="Pesquisar"
+                    aria-label="Pesquisar"
+                    style={{ width: 42 }}
+                    className={`shrink-0 flex items-center justify-center border rounded transition-colors
+                        ${disabled
+                            ? 'bg-slate-100 border-slate-300 text-slate-400 cursor-not-allowed'
+                            : 'bg-white border-slate-300 text-slate-500 hover:text-emerald-600 hover:border-emerald-500 hover:bg-emerald-50'
+                        }`}
+                >
+                    <Search size={20} />
+                </button>
+            )}
+        </div>
 
             {aberto && !disabled && (
                 <div className="absolute z-50 mt-1 w-full min-w-[260px] bg-white border border-slate-200 rounded-lg shadow-lg overflow-hidden">
@@ -230,14 +262,25 @@ export function BaseLookup({
                     </ul>
 
                     <div className="px-2 py-1.5 border-t border-slate-100 bg-slate-50">
-                        <button
-                            type="button"
-                            onClick={abrirCadastroRapido}
-                            className="w-full flex items-center justify-center gap-1.5 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
-                        >
-                            <Plus size={13} />
-                            {pathLabel}
-                        </button>
+                        {onPesquisar ? (
+                            <button
+                                type="button"
+                                onClick={() => { fechar(); onPesquisar() }}
+                                className="w-full flex items-center justify-center gap-1.5 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
+                            >
+                                <Search size={13} />
+                                Pesquisa avançada
+                            </button>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={abrirCadastroRapido}
+                                className="w-full flex items-center justify-center gap-1.5 py-1 text-xs font-medium text-emerald-600 hover:bg-emerald-50 rounded transition-colors"
+                            >
+                                <Plus size={13} />
+                                {pathLabel}
+                            </button>
+                        )}
                     </div>
                 </div>
             )}

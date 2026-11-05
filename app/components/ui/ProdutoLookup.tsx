@@ -10,9 +10,12 @@ interface ProdutoLookupProps {
     required?: boolean
     error?: string
     onCriado?: (novo: ProdutoSelect) => void
+    disabled?: boolean
+    /** Mostra o botão de lupa ao lado do campo (e troca o "+" de cadastro direto por ele). */
+    onPesquisar?: () => void
 }
 
-export function ProdutoLookup({ produtos, value, onChange, required, error, onCriado }: ProdutoLookupProps) {
+export function ProdutoLookup({ produtos, value, onChange, required, error, onCriado, disabled, onPesquisar }: ProdutoLookupProps) {
     const items = produtos.map(p => ({ id: p.id, label: p.produto }))
 
     return (
@@ -30,6 +33,8 @@ export function ProdutoLookup({ produtos, value, onChange, required, error, onCr
             editTitle={label => `Editar ${label}`}
             tipoCadastro="produto"
             onCriado={onCriado}
+            disabled={disabled}
+            onPesquisar={onPesquisar}
         />
     )
 }
