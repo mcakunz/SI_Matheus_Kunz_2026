@@ -9,6 +9,8 @@ import { nullableString, parseJsonField } from "@/lib/utils/helpers"
 import { NotaEntradaView } from "@/lib/types"
 import { mulDiv, r4, r6 } from "@/lib/utils/arredondamento"
 import { recalcularCustoMedio } from "@/lib/utils/custoMedio"
+import { ErroNegocio } from "@/lib/utils/erroNegocio"
+import { calcularParcelasDaNota, inserirTitulosDaNota, cancelarTitulosDaNota } from "@/lib/contasPagar/servico"
 
 // ---------------------------------------------------------------------------
 // ESTOQUE
@@ -22,11 +24,12 @@ import { recalcularCustoMedio } from "@/lib/utils/custoMedio"
 // desconto e rateios) são do item da nota. Estornos fazem a conta inversa. Ver "@/lib/utils/custoMedio".
 // Tudo roda dentro da mesma transação da nota: se o estoque não puder ser ajustado, a nota também
 // não é gravada/cancelada.
+//
+// CONTAS A PAGAR (ver "@/lib/contasPagar/servico")
+//   • lançar a nota   -> gera um título por parcela da condição, na mesma transação
+//   • cancelar a nota -> só se nenhuma parcela tiver pagamento ativo; os títulos viram CANCELADO
+// ErroNegocio (regra de negócio, mensagem pronta) vem de "@/lib/utils/erroNegocio".
 // ---------------------------------------------------------------------------
-
-// Erros de regra de negócio (mensagem já pronta para o usuário). Passam direto, sem
-// serem reescritos pelo tratarErroDB, que é pensado para erros do banco.
-class ErroNegocio extends Error {}
 
 interface MovimentoEstoque {
     produtoId: number
@@ -235,6 +238,11 @@ export async function salvarNotaEntrada(formData: FormData) {
     try {
         await client.query('BEGIN')
 
+        // Parcelas calculadas no servidor, a partir da condição gravada no banco (o que a tela
+        // mostrou sai da mesma conta). A forma de pagamento da nota é a da 1ª parcela.
+        const parcelas = await calcularParcelasDaNota(client, v.condicaoPagamentoId, v.dataEmissao, v.valorTotal)
+        const formaPagamentoNota = parcelas.parcelas[0].formaPagamentoId
+
         // Cabeçalho da nota
         await client.query(
             `INSERT INTO tb_notas_entrada (
@@ -249,7 +257,7 @@ export async function salvarNotaEntrada(formData: FormData) {
             )`,
             [
                 v.numero, v.modelo, v.serie, v.fornecedorId,
-                v.condicaoPagamentoId, v.formaPagamentoId, v.transportadoraId ?? null,
+                v.condicaoPagamentoId, formaPagamentoNota, v.transportadoraId ?? null,
                 v.dataEmissao, v.dataChegada ?? null, v.tipoFrete,
                 v.valorProdutos, v.valorFrete, v.valorSeguro,
                 v.outrasDespesas, v.valorDesconto, v.valorTotal,
@@ -283,13 +291,19 @@ export async function salvarNotaEntrada(formData: FormData) {
             seq++
         }
 
-        // Estoque e custo médio: só notas LANCADA entram.
+        // Estoque, custo médio e contas a pagar: só notas LANCADA entram.
         if (v.situacao === 'LANCADA') {
             await ajustarEstoque(client, v.itens.map(i => ({
                 produtoId: Number(i.produtoId),
                 quantidade: Number(i.quantidade),
                 custoUnitario: Number(i.custoPrecoFinal),
             })))
+            await inserirTitulosDaNota(
+                client,
+                { numero: v.numero, modelo: v.modelo, serie: v.serie, fornecedorId: v.fornecedorId },
+                v.dataEmissao,
+                parcelas
+            )
         }
 
         await client.query('COMMIT')
@@ -303,14 +317,9 @@ export async function salvarNotaEntrada(formData: FormData) {
 
     revalidatePath('/notas-entrada')
     revalidatePath('/produtos')
+    revalidatePath('/contas-pagar')
 }
 
-// Única transição de situação permitida hoje: LANCADA -> CANCELADA. Não existe mais um
-// "atualizarSituacao" genérico que aceita qualquer string — isso deixava a porta aberta pra
-// setar um status inválido (ou pior, "reabrir" uma nota cancelada) direto pelo código do
-// client sem passar por nenhuma regra. A nota nunca é editada nem excluída depois de lançada,
-// só cancelada.
-//
 // Cancelar também desfaz a entrada no estoque. Se parte do que entrou já foi vendida/baixada e o
 // estoque atual não cobre a devolução, o cancelamento é recusado (e a nota continua LANCADA).
 export async function cancelarNotaEntrada(numero: string, modelo: string, serie: string, fornecedorId: number) {
@@ -326,6 +335,9 @@ export async function cancelarNotaEntrada(numero: string, modelo: string, serie:
         )
 
         if ((res.rowCount ?? 0) > 0) {
+            // Financeiro primeiro: com parcela paga (pagamento ativo) o cancelamento é recusado
+            // e o ROLLBACK desfaz o UPDATE acima.
+            await cancelarTitulosDaNota(client, { numero, modelo, serie, fornecedorId })
             const itens = await carregarItensDaNota(client, numero, modelo, serie, fornecedorId)
             await ajustarEstoque(client, inverter(itens))
         }
@@ -340,6 +352,7 @@ export async function cancelarNotaEntrada(numero: string, modelo: string, serie:
     }
     revalidatePath('/notas-entrada')
     revalidatePath('/produtos')
+    revalidatePath('/contas-pagar')
 }
 
 export async function verificarChaveNotaEntradaExiste(numero: string, modelo: string, serie: string, fornecedorId: number): Promise<boolean> {

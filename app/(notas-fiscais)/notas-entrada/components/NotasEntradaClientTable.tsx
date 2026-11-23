@@ -20,7 +20,6 @@ const SITUACAO_LABELS: Record<string, string> = {
     CANCELADA: "Cancelada",
 }
 
-// Mesmo visual do StatusBadge das outras listagens.
 const SITUACAO_ESTILOS: Record<string, string> = {
     LANCADA: "bg-emerald-50 text-emerald-700 border-emerald-200",
     CANCELADA: "bg-rose-50 text-rose-700 border-rose-200",
@@ -88,8 +87,6 @@ export function NotasEntradaClientTable({ notas }: { notas: NotaEntradaView[] })
         [notas]
     )
 
-    // Uma nota lançada nunca é editada nem excluída — só cancelada. Por isso a barra de ações tem
-    // "Adicionar" e "Cancelar Nota" (este só fica habilitado para uma nota selecionada ainda LANCADA).
     const podeCancelar = selecionada?.situacao === "LANCADA"
 
     const handleCancelar = async () => {
@@ -134,7 +131,7 @@ export function NotasEntradaClientTable({ notas }: { notas: NotaEntradaView[] })
                 onConfirm={handleCancelar}
                 loading={loading}
                 title="Cancelar Nota de Entrada"
-                message={`Tem certeza que deseja cancelar a nota ${selecionada?.numero ?? ""} de "${selecionada?.fornecedor ?? ""}"? O estoque e o custo médio dos produtos serão estornados. Esta ação não pode ser desfeita.`}
+                message={`Tem certeza que deseja cancelar a nota ${selecionada?.numero ?? ""} de "${selecionada?.fornecedor ?? ""}"? O estoque e o custo médio dos produtos serão estornados e as parcelas em Contas a Pagar serão canceladas (só é possível se nenhuma parcela tiver pagamento). Esta ação não pode ser desfeita.`}
                 variant="danger"
                 confirmText="Cancelar Nota"
             />

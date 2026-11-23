@@ -455,8 +455,6 @@ export function NotaEntradaForm() {
     const serieAtual        = useWatch({ control, name: 'serie' })
     const fornecedorIdAtual = useWatch({ control, name: 'fornecedorId' })
 
-    // Assim que existir pelo menos 1 produto na lista, a chave fica travada — só volta a ficar
-    // editável se todos os produtos forem removidos da lista.
     const chaveBloqueada = fields.length > 0
 
     const chaveCompleta = Boolean(numeroAtual && modeloAtual && serieAtual && fornecedorIdAtual)
@@ -528,21 +526,9 @@ export function NotaEntradaForm() {
 
     const restoLiberado = outrasSecoesLiberadas && datasCompletas && !erroDatas
 
-    // --- PARCELAS GERADAS (travam produtos e despesas) ---
-    // As parcelas deixaram de ser automáticas: o usuário clica em "Gerar parcelas" e, a partir
-    // daí, produtos, desconto, frete, seguro e outras despesas ficam travados — qualquer um deles
-    // mudaria o total da nota e deixaria as parcelas desatualizadas. "Desfazer parcelas" destrava.
     const [parcelasGeradas, setParcelasGeradas] = useState<ParcelaGerada[] | null>(null)
     const travado = parcelasGeradas !== null
 
-    // --- MOTOR DE CÁLCULO ---
-    // Por item: total sem desconto = qtd x unitário; o desconto é UNITÁRIO (R$ por unidade <->
-    // percentual do valor unitário, sincronizados, mandando o campo editado por último);
-    // desconto total = desconto unitário x qtd; total com desconto = total sem desconto - desconto total.
-    // Frete, seguro e outras despesas são rateados entre os itens proporcionalmente ao total com
-    // desconto (a diferença de centavos vai para o último item com valor). Custo final =
-    // (total com desconto + rateios) / quantidade.
-    // Todos os arredondamentos seguem a ABNT NBR 5891 (ver "@/lib/utils/arredondamento").
     const calcularTotais = useCallback(() => {
         const itensAtuais = getValues('itens') || []
         const frete  = Number(getValues('valorFrete')) || 0
@@ -580,8 +566,6 @@ export function NotaEntradaForm() {
 
         const ratear = (total: number): number[] => {
             if (total <= 0 || totProd <= 0) return liquidos.map(() => 0)
-            // Rateio com 6 casas (a precisão das colunas rateio* do banco): arredondar em centavos
-            // aqui deslocava o custo final na 3ª/4ª casa em relação ao cálculo exato.
             const partes = liquidos.map(l => mulDiv(total, l, totProd, 6))
             const diferenca = r6(total - partes.reduce((acc, v) => acc + v, 0))
             if (diferenca !== 0) {
@@ -812,10 +796,9 @@ export function NotaEntradaForm() {
         })
 
         formPayload.append('itens', JSON.stringify(itens))
-        // Forma de pagamento da nota = a da primeira parcela (antes era fixa em 1).
+        // Forma de pagamento da nota = a da primeira parcela. As parcelas em si não são enviadas: o
+        // servidor recalcula a partir da condição gravada no banco e gera os títulos de contas a pagar.
         formPayload.append('formaPagamentoId', String(parcelasGeradas[0].formaPagamentoId))
-        // As parcelas já seguem no envio; a action ainda não as grava (ver observações da entrega).
-        formPayload.append('parcelas', JSON.stringify(parcelasGeradas))
 
         try {
             await salvarNotaEntrada(formPayload)

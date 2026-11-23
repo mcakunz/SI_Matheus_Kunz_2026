@@ -690,7 +690,6 @@ CREATE TABLE public.tb_notas_entrada (
 CREATE TRIGGER trg_notas_entrada_alt BEFORE UPDATE ON public.tb_notas_entrada
     FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
--- public.tb_notas_saida
 CREATE TABLE public.tb_notas_saida (
     "numero"              varchar(20)     NOT NULL,
     "modelo"              varchar(2)      DEFAULT '55' NOT NULL,
@@ -738,7 +737,6 @@ CREATE TABLE public.tb_notas_saida (
 CREATE TRIGGER trg_notas_saida_alt BEFORE UPDATE ON public.tb_notas_saida
     FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
--- public.tb_produtos_nota_saida
 CREATE TABLE public.tb_produtos_nota_saida (
     "notaNumero"         varchar(20)     NOT NULL,
     "notaModelo"         varchar(2)      NOT NULL,
@@ -809,7 +807,6 @@ CREATE TABLE public.tb_produtos_nota_entrada (
 CREATE TRIGGER trg_produtos_nota_entrada_alt BEFORE UPDATE ON public.tb_produtos_nota_entrada
     FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
--- public.tb_nfe
 CREATE TABLE public.tb_nfe (
     "id"                  bigserial       NOT NULL,
     "numero"              varchar(50)     NOT NULL,
@@ -843,7 +840,6 @@ CREATE TABLE public.tb_nfe (
 CREATE TRIGGER trg_nfe_alt BEFORE UPDATE ON public.tb_nfe
     FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
--- public.tb_itens_nfe
 CREATE TABLE public.tb_itens_nfe (
     "id"            bigserial       NOT NULL,
     "nfeId"         int8            NOT NULL,
@@ -862,7 +858,6 @@ CREATE TABLE public.tb_itens_nfe (
 CREATE TRIGGER trg_itens_nfe_alt BEFORE UPDATE ON public.tb_itens_nfe
     FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
--- public.tb_movimentacoes_nfe
 CREATE TABLE public.tb_movimentacoes_nfe (
     "id"               bigserial       NOT NULL,
     "nfeId"            int8            NOT NULL,
@@ -917,73 +912,140 @@ CREATE INDEX idx_contas_receber_venc ON public.tb_contas_receber USING btree ("d
 CREATE TRIGGER trg_contas_receber_alt BEFORE UPDATE ON public.tb_contas_receber
     FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
--- public.tb_contas_pagar
 CREATE TABLE public.tb_contas_pagar (
-    "id"               bigserial       NOT NULL,
-    "notaNumero"       varchar(20)     NOT NULL,
-    "notaModelo"       varchar(2)      NOT NULL,
-    "notaSerie"        varchar(3)      NOT NULL,
-    "fornecedorId"     int4            NOT NULL,
-    "formaPagamentoId" int2            NOT NULL,
-    "numeroParcela"    int2            NOT NULL,
-    "totalParcelas"    int2            NOT NULL,
-    "valorOriginal"    numeric(15,2)   NOT NULL,
-    "valorPago"        numeric(15,2)   DEFAULT 0.00 NOT NULL,
-    "valorDesconto"    numeric(15,2)   DEFAULT 0.00 NOT NULL,
-    "valorJuros"       numeric(15,2)   DEFAULT 0.00 NOT NULL,
-    "valorMulta"       numeric(15,2)   DEFAULT 0.00 NOT NULL,
-    "valorTotal"       numeric(15,2)   NOT NULL,
-    "dataEmissao"      date            NOT NULL,
-    "dataVencimento"   date            NOT NULL,
-    "dataPagamento"    date            NULL,
-    "situacao"         varchar(20)     DEFAULT 'PENDENTE' NOT NULL,
-    "observacoes"      text            NULL,
-    "dataCadastro"     timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "dataAlteracao"    timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "id"                 bigserial     NOT NULL,
+    "origem"             varchar(10)   DEFAULT 'NOTA' NOT NULL,
+    "notaNumero"         varchar(20)   NULL,
+    "notaModelo"         varchar(2)    NULL,
+    "notaSerie"          varchar(3)    NULL,
+    "fornecedorId"       int4          NOT NULL,
+    "descricao"          varchar(150)  NULL,
+    "formaPagamentoId"   int2          NOT NULL,
+    "numeroParcela"      int2          DEFAULT 1 NOT NULL,
+    "totalParcelas"      int2          DEFAULT 1 NOT NULL,
+    "valorOriginal"      numeric(15,2) NOT NULL,
+    "percentualJuros"    numeric(5,2)  DEFAULT 0.00 NOT NULL,
+    "percentualMulta"    numeric(5,2)  DEFAULT 0.00 NOT NULL,
+    "percentualDesconto" numeric(5,2)  DEFAULT 0.00 NOT NULL,
+    "dataEmissao"        date          NOT NULL,
+    "dataVencimento"     date          NOT NULL,
+    "dataQuitacao"       date          NULL,
+    "situacao"           varchar(20)   DEFAULT 'PENDENTE' NOT NULL,
+    "dataCancelamento"   timestamptz   NULL,
+    "motivoCancelamento" varchar(150)  NULL,
+    "observacoes"        text          NULL,
+    "dataCadastro"       timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"      timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "usuarioCadastroId"  int4          NULL,
+    "usuarioAlteracaoId" int4          NULL,
     CONSTRAINT tb_contas_pagar_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_contas_pagar_origem_check
+        CHECK ("origem" IN ('NOTA','AVULSA')),
+    -- título de nota precisa da chave completa da nota; avulso não tem nota e precisa de descrição
+    CONSTRAINT tb_contas_pagar_origem_dados_check CHECK (
+        ("origem" = 'NOTA'   AND "notaNumero" IS NOT NULL AND "notaModelo" IS NOT NULL AND "notaSerie" IS NOT NULL)
+     OR ("origem" = 'AVULSA' AND "notaNumero" IS NULL AND "notaModelo" IS NULL AND "notaSerie" IS NULL
+                             AND "descricao" IS NOT NULL)
+    ),
     CONSTRAINT tb_contas_pagar_situacao_check
-        CHECK ("situacao" IN ('PENDENTE','PAGO','PARCIAL','CANCELADO')),
-    CONSTRAINT tb_contas_pagar_formaPagamentoId_fkey
-        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
+        CHECK ("situacao" IN ('PENDENTE','PARCIAL','PAGO','CANCELADO')),
+    -- data de quitação só existe (e sempre existe) quando o título está PAGO
+    CONSTRAINT tb_contas_pagar_quitacao_check
+        CHECK (("situacao" = 'PAGO') = ("dataQuitacao" IS NOT NULL)),
+    -- cancelamento sempre registra quando e por quê
+    CONSTRAINT tb_contas_pagar_cancelamento_check
+        CHECK (("situacao" = 'CANCELADO') = ("dataCancelamento" IS NOT NULL AND "motivoCancelamento" IS NOT NULL)),
+    CONSTRAINT tb_contas_pagar_parcela_check
+        CHECK ("numeroParcela" >= 1 AND "numeroParcela" <= "totalParcelas"),
+    CONSTRAINT tb_contas_pagar_valorOriginal_check      CHECK ("valorOriginal" > 0),
+    CONSTRAINT tb_contas_pagar_percentualJuros_check    CHECK ("percentualJuros"    >= 0 AND "percentualJuros"    <= 100),
+    CONSTRAINT tb_contas_pagar_percentualMulta_check    CHECK ("percentualMulta"    >= 0 AND "percentualMulta"    <= 100),
+    CONSTRAINT tb_contas_pagar_percentualDesconto_check CHECK ("percentualDesconto" >= 0 AND "percentualDesconto" <= 100),
+    CONSTRAINT tb_contas_pagar_datas_check
+        CHECK ("dataVencimento" >= "dataEmissao" AND ("dataQuitacao" IS NULL OR "dataQuitacao" >= "dataEmissao")),
+    -- FK composta: só é verificada quando as colunas da nota estão preenchidas (títulos de NOTA)
+    CONSTRAINT tb_contas_pagar_nota_fkey
+        FOREIGN KEY ("notaNumero", "notaModelo", "notaSerie", "fornecedorId")
+        REFERENCES public.tb_notas_entrada("numero", "modelo", "serie", "fornecedorId"),
     CONSTRAINT tb_contas_pagar_fornecedorId_fkey
-        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id")
+        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id"),
+    CONSTRAINT tb_contas_pagar_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id")
 );
+-- uma linha por parcela de cada nota (o índice parcial ignora os títulos avulsos)
+CREATE UNIQUE INDEX idx_contas_pagar_nota_parcela
+    ON public.tb_contas_pagar ("notaNumero", "notaModelo", "notaSerie", "fornecedorId", "numeroParcela")
+    WHERE "origem" = 'NOTA';
 CREATE INDEX idx_contas_pagar_venc ON public.tb_contas_pagar USING btree ("dataVencimento");
+CREATE INDEX idx_contas_pagar_fornecedor ON public.tb_contas_pagar USING btree ("fornecedorId");
+CREATE INDEX idx_contas_pagar_situacao ON public.tb_contas_pagar USING btree ("situacao");
 CREATE TRIGGER trg_contas_pagar_alt BEFORE UPDATE ON public.tb_contas_pagar
     FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
 
--- public.tb_contas_pagar_avulsa
-CREATE TABLE public.tb_contas_pagar_avulsa (
-    "id"               bigserial       NOT NULL,
-    "numeroNota"       varchar(50)     NULL,
-    "modelo"           varchar(2)      NULL,
-    "serie"            varchar(3)      NULL,
-    "fornecedorId"     int4            NOT NULL,
-    "formaPagamentoId" int2            NOT NULL,
-    "numParcela"       int2            DEFAULT 1 NOT NULL,
-    "valorParcela"     numeric(15,2)   NOT NULL,
-    "dataEmissao"      date            NOT NULL,
-    "dataVencimento"   date            NOT NULL,
-    "dataPagamento"    date            NULL,
-    "valorPago"        numeric(15,2)   DEFAULT 0.00 NOT NULL,
-    "juros"            numeric(15,2)   DEFAULT 0.00 NOT NULL,
-    "multa"            numeric(15,2)   DEFAULT 0.00 NOT NULL,
-    "desconto"         numeric(15,2)   DEFAULT 0.00 NOT NULL,
-    "situacao"         varchar(20)     DEFAULT 'PENDENTE' NOT NULL,
-    "observacao"       text            NULL,
-    "dataCadastro"     timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    "dataAlteracao"    timestamptz     DEFAULT CURRENT_TIMESTAMP NOT NULL,
-    CONSTRAINT tb_contas_pagar_avulsa_pkey PRIMARY KEY ("id"),
-    CONSTRAINT tb_contas_pagar_avulsa_situacao_check
-        CHECK ("situacao" IN ('PENDENTE','PAGO','PARCIAL','CANCELADO')),
-    CONSTRAINT tb_contas_pagar_avulsa_formaPagamentoId_fkey
-        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id"),
-    CONSTRAINT tb_contas_pagar_avulsa_fornecedorId_fkey
-        FOREIGN KEY ("fornecedorId") REFERENCES public.tb_fornecedores("id")
+CREATE TABLE public.tb_pagamentos_contas_pagar (
+    "id"                 bigserial     NOT NULL,
+    "contaPagarId"       int8          NOT NULL,
+    "formaPagamentoId"   int2          NOT NULL,
+    "dataPagamento"      date          NOT NULL,
+    "valorPrincipal"     numeric(15,2) NOT NULL,
+    "valorJuros"         numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorMulta"         numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorDesconto"      numeric(15,2) DEFAULT 0.00 NOT NULL,
+    "valorPago"          numeric(15,2) NOT NULL,
+    "situacao"           varchar(20)   DEFAULT 'ATIVO' NOT NULL,
+    "dataEstorno"        timestamptz   NULL,
+    "motivoEstorno"      varchar(150)  NULL,
+    "observacoes"        text          NULL,
+    "dataCadastro"       timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "dataAlteracao"      timestamptz   DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "usuarioCadastroId"  int4          NULL,
+    "usuarioAlteracaoId" int4          NULL,
+    CONSTRAINT tb_pagamentos_contas_pagar_pkey PRIMARY KEY ("id"),
+    CONSTRAINT tb_pagamentos_contas_pagar_situacao_check
+        CHECK ("situacao" IN ('ATIVO','ESTORNADO')),
+    CONSTRAINT tb_pagamentos_contas_pagar_estorno_check
+        CHECK (("situacao" = 'ESTORNADO') = ("dataEstorno" IS NOT NULL AND "motivoEstorno" IS NOT NULL)),
+    CONSTRAINT tb_pagamentos_contas_pagar_valores_check
+        CHECK ("valorPrincipal" >= 0 AND "valorJuros" >= 0 AND "valorMulta" >= 0
+               AND "valorDesconto" >= 0 AND "valorDesconto" <= "valorPrincipal"),
+    CONSTRAINT tb_pagamentos_contas_pagar_valorPago_check
+        CHECK ("valorPago" > 0 AND "valorPago" = "valorPrincipal" + "valorJuros" + "valorMulta" - "valorDesconto"),
+    CONSTRAINT tb_pagamentos_contas_pagar_contaPagarId_fkey
+        FOREIGN KEY ("contaPagarId") REFERENCES public.tb_contas_pagar("id"),
+    CONSTRAINT tb_pagamentos_contas_pagar_formaPagamentoId_fkey
+        FOREIGN KEY ("formaPagamentoId") REFERENCES public.tb_formas_pagamento("id")
 );
-CREATE INDEX idx_contas_pagar_avulsa_venc ON public.tb_contas_pagar_avulsa USING btree ("dataVencimento");
-CREATE TRIGGER trg_contas_pagar_avulsa_alt BEFORE UPDATE ON public.tb_contas_pagar_avulsa
+CREATE INDEX idx_pagamentos_contas_pagar_conta ON public.tb_pagamentos_contas_pagar USING btree ("contaPagarId");
+CREATE TRIGGER trg_pagamentos_contas_pagar_alt BEFORE UPDATE ON public.tb_pagamentos_contas_pagar
     FOR EACH ROW EXECUTE FUNCTION fn_atualiza_data_alteracao();
+
+-- public.vw_contas_pagar
+-- Título + totais dos pagamentos ATIVOS (estornados não contam) + saldo. Fonte única dos totais:
+-- a listagem e a tela de pagamento leem daqui, nada de total duplicado gravado no título.
+CREATE VIEW public.vw_contas_pagar AS
+SELECT
+    cp.*,
+    COALESCE(pg."valorPrincipalPago", 0)                    AS "valorPrincipalPago",
+    COALESCE(pg."valorJurosPago", 0)                        AS "valorJurosPago",
+    COALESCE(pg."valorMultaPaga", 0)                        AS "valorMultaPaga",
+    COALESCE(pg."valorDescontoObtido", 0)                   AS "valorDescontoObtido",
+    COALESCE(pg."valorTotalPago", 0)                        AS "valorTotalPago",
+    cp."valorOriginal" - COALESCE(pg."valorPrincipalPago", 0) AS "saldo",
+    pg."dataUltimoPagamento"
+FROM public.tb_contas_pagar cp
+LEFT JOIN (
+    SELECT
+        "contaPagarId",
+        SUM("valorPrincipal") AS "valorPrincipalPago",
+        SUM("valorJuros")     AS "valorJurosPago",
+        SUM("valorMulta")     AS "valorMultaPaga",
+        SUM("valorDesconto")  AS "valorDescontoObtido",
+        SUM("valorPago")      AS "valorTotalPago",
+        MAX("dataPagamento")  AS "dataUltimoPagamento"
+    FROM public.tb_pagamentos_contas_pagar
+    WHERE "situacao" = 'ATIVO'
+    GROUP BY "contaPagarId"
+) pg ON pg."contaPagarId" = cp.id;
 
 
 
